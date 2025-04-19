@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block title %}About FDQ | Field-Driven Quality{% endblock %}
+{% load static %}
+{% block content %}
+
+<!-- Hero Section -->
+<section class="py-5 text-center text-white" style="background: linear-gradient(to right, var(--fdq-dark), #1f1f1f);">
+  <div class="container py-5">
+    <h1 class="display-4 fw-bold text-uppercase mb-3">Field-Driven Quality</h1>
+    <p class="lead fst-italic mb-0">Built for the field. Backed by results. Guided by eight proven pillars.</p>
+  </div>
+</section>
+
+
+<section class="container py-5">
+  <h1 class="text-uppercase fw-bold text-center mb-4">The Pillars of Field-Driven Quality</h1>
+  <p class="lead text-center text-muted mb-5">
+    Field Driven Quality (FDQ) is built for pipeline and station construction. It’s not theory — it’s a framework grounded in real projects, real constraints, and real results.
+  </p>
+
+  {% comment %} Start Pillars Grid {% endcomment %}
+  <div class="row row-cols-1 row-cols-md-2 g-5 mt-5">
+
+  <!-- Pillar 1 -->
+  <div class="col">
+    <div class="p-4 bg-white shadow-sm rounded h-100">
+      <div class="d-flex align-items-center mb-3">
+        <i class="bi bi-compass fs-2 text-orange me-3"></i>
+        <h5 class="fw-bold text-uppercase mb-0">1. Field First</h5>
+      </div>
+      <p class="small text-muted">Quality begins where the work is built. FDQ puts the field in the driver’s seat—ensuring every tool, form, and standard works in the mud, wind, and chaos of real work. It’s designed for boots, not binders.</p>
+    </div>
+  </div>
+
+  <!-- Pillar 2 -->
+  <div class="col">
+    <div class="p-4 bg-white shadow-sm rounded h-100">
+      <div class="d-flex align-items-center mb-3">
+        <i class="bi bi-exclamation-triangle fs-2 text-warning me-3"></i>
+        <h5 class="fw-bold text-uppercase mb-0">2. Risk-Based Everything</h5>
+      </div>
+      <p class="small text-muted">Not all work carries the same risk—neither should the quality effort. FDQ aligns oversight, inspection, and documentation with actual field risk so the most critical scopes get the most attention.</p>
+    </div>
+  </div>
+
+  <!-- Pillar 3 -->
+  <div class="col">
+    <div class="p-4 bg-white shadow-sm rounded h-100">
+      <div class="d-flex align-items-center mb-3">
+        <i class="bi bi-clipboard-check fs-2 text-success me-3"></i>
+        <h5 class="fw-bold text-uppercase mb-0">3. Fit-for-Service</h5>
+      </div>
+      <p class="small text-muted">If it’s safe, functional, and compliant—it’s good enough. FDQ doesn’t chase cosmetic rework or perfection for its own sake. We judge quality by how the system performs, not how it looks under a flashlight.</p>
+    </div>
+  </div>
+
+  <!-- Pillar 4 -->
+  <div class="col">
+    <div class="p-4 bg-white shadow-sm rounded h-100">
+      <div class="d-flex align-items-center mb-3">
+        <i class="bi bi-currency-dollar fs-2 text-info me-3"></i>
+        <h5 class="fw-bold text-uppercase mb-0">4. Cost-Conscious Control</h5>
+      </div>
+      <p class="small text-muted">We fix what costs us and stop what wastes us. FDQ doesn’t track issues just to check a box. It uses quality as a tool to protect budgets, reduce delay, and eliminate cost-causing mistakes.</p>
+    </div>
+  </div>
+
+  <!-- Pillar 5 -->
+  <div class="col">
+    <div class="p-4 bg-white shadow-sm rounded h-100">
+      <div class="d-flex align-items-center mb-3">
+        <i class="bi bi-lightning-charge fs-2 text-orange me-3"></i>
+        <h5 class="fw-bold text-uppercase mb-0">5. Proactive by Default</h5>
+      </div>
+      <p class="small text-muted">Good quality doesn’t wait for mistakes. FDQ tools are built to find and fix problems early — with first-install checks, field walks, and toolbox talks that highlight risk before it hits inspection.</p>
+    </div>
+  </div>
+
+  <!-- Pillar 6 -->
+  <div class="col">
+    <div class="p-4 bg-white shadow-sm rounded h-100">
+      <div class="d-flex align-items-center mb-3">
+        <i class="bi bi-list-check fs-2 text-blue me-3"></i>
+        <h5 class="fw-bold text-uppercase mb-0">6. Simple Systems That Stick</h5>
+      </div>
+      <p class="small text-muted">If it doesn’t work on a tailgate, it doesn’t work. FDQ systems are built for the field: one-page checklists, fast forms, and simple logs — nothing that needs a laptop and a signal to function.</p>
+    </div>
+  </div>
+
+  <!-- Pillar 7 -->
+  <div class="col">
+    <div class="p-4 bg-white shadow-sm rounded h-100">
+      <div class="d-flex align-items-center mb-3">
+        <i class="bi bi-shield-check fs-2 text-dark me-3"></i>
+        <h5 class="fw-bold text-uppercase mb-0">7. Compliance Without Bureaucracy</h5>
+      </div>
+      <p class="small text-muted">We meet code — not create it. FDQ meets every requirement without layers of bureaucracy. Inspections are purposeful, documentation is lean, and workflows are efficient, not administrative.</p>
+    </div>
+  </div>
+
+  <!-- Pillar 8 -->
+  <div class="col">
+    <div class="p-4 bg-white shadow-sm rounded h-100">
+      <div class="d-flex align-items-center mb-3">
+        <i class="bi bi-graph-up-arrow fs-2 text-success me-3"></i>
+        <h5 class="fw-bold text-uppercase mb-0">8. Learning Without Theater</h5>
+      </div>
+      <p class="small text-muted">We improve what matters — not what’s already working. FDQ avoids change for change’s sake. It tracks what costs us, fixes it in real workflows, and makes sure the lessons actually stick.</p>
+    </div>
+  </div>
+
+</div>
+
+
+</section>
+{% endblock %}

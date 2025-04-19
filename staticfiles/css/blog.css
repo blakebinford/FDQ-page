@@ -1,0 +1,10 @@
+.blog-content ul,
+.blog-content li {
+  padding-left: 1rem;
+  margin-left: 1.5rem;
+}
+
+.blog-content p {
+  margin-left: 0;
+  padding-left: 0;
+}

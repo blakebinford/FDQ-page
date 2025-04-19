@@ -1,0 +1,15 @@
+.ck-editor__editable_inline {
+  color: #1a1a1a !important;
+  background-color: #fff !important;
+}
+/* Align bullets properly inside the editor */
+.ck-editor__editable ul,
+.ck-editor__editable ol {
+  padding-left: 1.5rem !important;
+  margin-left: 0 !important;
+}
+
+.ck-editor__editable p {
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+}

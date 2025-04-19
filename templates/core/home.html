@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}FDQ | Built for the Field{% endblock %}
+{% block extra_styles %}
+/* --- Animations --- */
+.fade-slide-up {
+  opacity: 0;
+  transform: translateY(30px);
+  animation: fadeUp 0.7s ease-out forwards;
+}
+
+.fade-slide-delay-1 { animation-delay: 0.2s; }
+.fade-slide-delay-2 { animation-delay: 0.4s; }
+.fade-slide-delay-3 { animation-delay: 0.6s; }
+
+@keyframes fadeUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.btn-animate {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.btn-animate:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.2);
+}
+
+.img-zoom-hover {
+  transition: transform 0.4s ease;
+}
+.img-zoom-hover:hover {
+  transform: scale(1.05);
+}
+{% endblock %}
+{% block content %}
+<!-- HERO SECTION with Background Image -->
+<section class="hero-section text-white text-center d-flex align-items-center justify-content-center" style="
+  background: linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.7)),
+              url('{% static 'images/90.png' %}') center center / cover no-repeat;
+  max-height: 500px;
+  height: 100vh;
+  overflow: hidden;
+">
+
+
+  <div class="container py-5">
+    <h1 class="display-3 fw-bold text-uppercase mb-3 fade-slide-up" style="letter-spacing: 2px;">Field-Driven Quality</h1>
+    <p class="lead fst-italic mb-4 fade-slide-up fade-slide-delay-1">
+      Quality as high as necessary — but never unnecessarily high.
+    </p>
+
+  </div>
+</section>
+
+
+
+<!-- VALUE CARDS -->
+<section class="py-5 bg-white text-center border-top border-5" style="border-color: var(--fdq-orange);">
+  <div class="container">
+    <h2 class="fw-bold text-uppercase mb-5" style="color: var(--fdq-dark);">Built for the Jobsite</h2>
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+
+      <!-- Clarity -->
+      <div class="col fade-slide-up fade-slide-delay-1">
+        <div class="card h-100 shadow-sm border-0 px-2 py-3">
+          <div class="card-body">
+            <div class="d-flex flex-column align-items-center mb-3">
+              <i class="bi bi-eye fs-1 text-orange" style="color: var(--fdq-orange);"></i>
+              <h5 class="text-uppercase fw-bold mt-3">Clarity</h5>
+            </div>
+            <p class="card-text text-muted">No fluff. No binders. FDQ uses tools you can actually use in the field.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ownership -->
+      <div class="col fade-slide-up fade-slide-delay-2">
+        <div class="card h-100 shadow-sm border-0 px-2 py-3">
+          <div class="card-body">
+            <div class="d-flex flex-column align-items-center mb-3">
+              <i class="bi bi-tools fs-1 text-orange" style="color: var(--fdq-orange);"></i>
+              <h5 class="text-uppercase fw-bold mt-3">Ownership</h5>
+            </div>
+            <p class="card-text text-muted">FDQ puts quality into the hands of the crews — not just the QC office.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Effectiveness -->
+      <div class="col fade-slide-up fade-slide-delay-3">
+        <div class="card h-100 shadow-sm border-0 px-2 py-3">
+          <div class="card-body">
+            <div class="d-flex flex-column align-items-center mb-3">
+              <i class="bi bi-check-circle fs-1 text-orange" style="color: var(--fdq-orange);"></i>
+              <h5 class="text-uppercase fw-bold mt-3">Effectiveness</h5>
+            </div>
+            <p class="card-text text-muted">We don’t chase perfection. We prevent rework and protect the budget.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- LEVEL OVERVIEW -->
+<section class="py-5 bg-light">
+  <div class="container">
+    <div class="row align-items-center g-5">
+
+      <!-- Badge image -->
+      <div class="col-md-6 text-center fade-slide-up fade-slide-delay-1">
+        <div class="p-4 shadow rounded bg-dark">
+          <img src="{% static 'images/fdqLevels1.png' %}" class="img-fluid img-zoom-hover" style="max-height: 250px;">
+        </div>
+      </div>
+
+      <!-- Level Descriptions -->
+      <div class="col-md-6 fade-slide-up fade-slide-delay-2">
+        <h2 class="fw-bold text-uppercase mb-3" style="color: var(--fdq-dark);">Two Levels. One Mission.</h2>
+        <p class="mb-4 text-muted">Whether you're tightening bolts or setting up entire systems — FDQ meets you where you work:</p>
+
+        <!-- FDQ Level 1 -->
+        <div class="d-flex align-items-start mb-4 p-3 bg-white border-start border-4 shadow-sm rounded" style="border-color: var(--fdq-orange);">
+          <i class="bi bi-person-workspace fs-2 text-orange me-3"></i>
+          <div>
+            <h5 class="fw-bold mb-1 text-uppercase">FDQ Level 1</h5>
+            <p class="mb-0 text-muted small">For field personnel practicing FDQ principles day-to-day.</p>
+          </div>
+        </div>
+
+        <!-- FDQ Level 2 -->
+        <div class="d-flex align-items-start p-3 bg-white border-start border-4 shadow-sm rounded" style="border-color: var(--fdq-blue);">
+          <i class="bi bi-diagram-3 fs-2 text-primary me-3"></i>
+          <div>
+            <h5 class="fw-bold mb-1 text-uppercase">FDQ Level 2</h5>
+            <p class="mb-0 text-muted small">For leads implementing FDQ across teams, trades, and projects.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
