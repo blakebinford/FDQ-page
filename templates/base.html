@@ -87,22 +87,26 @@
   <nav class="navbar navbar-expand-lg">
     <div class="container">
       <a class="navbar-brand" href="{% url 'home' %}">FDQ</a>
-      <div class="collapse navbar-collapse">
-        <ul class="navbar-nav ms-auto">
-            <li class="nav-item"><a class="nav-link" href="{% url 'home' %}">Home</a></li>
-          <li class="nav-item"><a class="nav-link" href="{% url 'about' %}">What is FDQ</a></li>
-          <li class="nav-item"><a class="nav-link" href="{% url 'blog_list' %}">Blog</a></li>
-            {% if user.is_authenticated %}
-          <li class="nav-item"><a class="nav-link" href="#">Tools</a></li>
-            {% endif %}
-        {% if user.is_authenticated %}
-          <li class="nav-item"><a class="nav-link" href="#">Dashboard</a></li>
-            {% endif %}
-        {% if user.is_authenticated %}
-          <li class="nav-item"><a class="nav-link" href="#">Login</a></li>
-            {% endif %}
-        </ul>
-      </div>
+<button class="navbar-toggler text-white border-white" type="button" data-bs-toggle="collapse" data-bs-target="#fdqNavbar" aria-controls="fdqNavbar" aria-expanded="false" aria-label="Toggle navigation">
+  <span class="navbar-toggler-icon"></span>
+</button>
+
+<div class="collapse navbar-collapse" id="fdqNavbar">
+  <ul class="navbar-nav ms-auto">
+    <li class="nav-item"><a class="nav-link" href="{% url 'home' %}">Home</a></li>
+    <li class="nav-item"><a class="nav-link" href="{% url 'about' %}">What is FDQ</a></li>
+    <li class="nav-item"><a class="nav-link" href="{% url 'blog_list' %}">Blog</a></li>
+
+    {% if user.is_authenticated %}
+      <li class="nav-item"><a class="nav-link" href="#">Tools</a></li>
+      <li class="nav-item"><a class="nav-link" href="#">Dashboard</a></li>
+      <li class="nav-item"><a class="nav-link" href="#">Logout</a></li>
+    {% else %}
+      <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">Login</a></li>
+    {% endif %}
+  </ul>
+</div>
+
     </div>
   </nav>
 
@@ -115,6 +119,7 @@
       <p class="mb-0">&copy; 2025 Field-Driven Quality. Built for the field, by the field.</p>
     </div>
   </footer>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 </html>
