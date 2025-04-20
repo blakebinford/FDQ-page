@@ -3,7 +3,7 @@ import dj_database_url
 
 DEBUG = config("DEBUG", cast=bool, default=False)
 
-
+OPENAI_API_KEY = config("OPENAI_API_KEY")
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 STORAGES = {
