@@ -2,7 +2,7 @@ from .base import *
 
 DEBUG = config("DEBUG", cast=bool, default=False)
 
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 STORAGES = {
@@ -10,10 +10,12 @@ STORAGES = {
         "BACKEND": "storages.backends.s3boto3.S3Boto3Storage"
     },
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"
+        "BACKEND": "core.storage_backends.StaticStorage"
     },
 }
 
+AWS_S3_CUSTOM_DOMAIN = f"{config("AWS_STORAGE_BUCKET_NAME")}.s3.amazonaws.com"
+STATIC_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/static/"
 MEDIA_URL = f"https://{config('AWS_STORAGE_BUCKET_NAME')}.s3.amazonaws.com/"
 
 AWS_ACCESS_KEY_ID = config("AWS_ACCESS_KEY_ID")
