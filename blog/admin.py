@@ -10,6 +10,7 @@ from .models import BlogPost, Tag
 from django_ckeditor_5.widgets import CKEditor5Widget
 from django import forms
 
+
 class BlogPostForm(forms.ModelForm):
     content = forms.CharField(widget=CKEditor5Widget(config_name='default'))
     summary = forms.CharField(widget=CKEditor5Widget(config_name='default'), required=False)

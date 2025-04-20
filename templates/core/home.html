@@ -35,6 +35,22 @@
 .img-zoom-hover:hover {
   transform: scale(1.05);
 }
+/* Reuse hover scale */
+.hover-scale {
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+.hover-scale:hover {
+  transform: scale(1.02);
+  box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.1);
+}
+
+/* Optional: animate border color specifically */
+.hover-scale.border-orange:hover {
+  border-color: #cc5500; /* deeper orange */
+}
+.hover-scale.border-blue:hover {
+  border-color: #005f73; /* deeper blue */
+}
 {% endblock %}
 {% block content %}
 <!-- HERO SECTION with Background Image -->
@@ -62,14 +78,14 @@
 <section class="py-5 bg-white text-center border-top border-5" style="border-color: var(--fdq-orange);">
   <div class="container">
     <h2 class="fw-bold text-uppercase mb-5" style="color: var(--fdq-dark);">Built for the Jobsite</h2>
-    <div class="row row-cols-1 row-cols-md-3 g-4">
+    <div class="row g-4 justify-content-center">
 
       <!-- Clarity -->
-      <div class="col fade-slide-up fade-slide-delay-1">
-        <div class="card h-100 shadow-sm border-0 px-2 py-3">
+      <div class="col-12  col-md-12  col-lg-3 fade-slide-up fade-slide-delay-1">
+        <div class="card h-100 shadow-sm border-0 px-2 py-3 hover-scale border-blue">
           <div class="card-body">
             <div class="d-flex flex-column align-items-center mb-3">
-              <i class="bi bi-eye fs-1 text-orange" style="color: var(--fdq-orange);"></i>
+              <i class="bi bi-eye fs-1 text-orange"></i>
               <h5 class="text-uppercase fw-bold mt-3">Clarity</h5>
             </div>
             <p class="card-text text-muted">No fluff. No binders. FDQ uses tools you can actually use in the field.</p>
@@ -77,28 +93,28 @@
         </div>
       </div>
 
-      <!-- Ownership -->
-      <div class="col fade-slide-up fade-slide-delay-2">
-        <div class="card h-100 shadow-sm border-0 px-2 py-3">
+      <!-- Ownership (Featured) -->
+      <div class="col-12 col-md-12 col-lg-5 fade-slide-up fade-slide-delay-2">
+        <div class="card h-100 shadow border-0 px-3 py-4 hover-scale bg-light border-orange" style="border-left: 6px solid var(--fdq-orange);">
           <div class="card-body">
             <div class="d-flex flex-column align-items-center mb-3">
-              <i class="bi bi-tools fs-1 text-orange" style="color: var(--fdq-orange);"></i>
-              <h5 class="text-uppercase fw-bold mt-3">Ownership</h5>
+              <i class="bi bi-tools fs-1 text-orange"></i>
+              <h4 class="text-uppercase fw-bold mt-3">Ownership</h4>
             </div>
-            <p class="card-text text-muted">FDQ puts quality into the hands of the crews — not just the QC office.</p>
+            <p class="card-text text-muted">FDQ puts quality into the hands of the crews — not just the QC office. Ownership means crews know why quality matters, how to spot issues early, and how to fix problems before they become rework. FDQ Level 1 teaches this from day one.</p>
           </div>
         </div>
       </div>
 
       <!-- Effectiveness -->
-      <div class="col fade-slide-up fade-slide-delay-3">
-        <div class="card h-100 shadow-sm border-0 px-2 py-3">
+      <div class="col-12  col-md-12  col-lg-3 fade-slide-up fade-slide-delay-3">
+        <div class="card h-100 shadow-sm border-0 px-2 py-3 hover-scale border-blue">
           <div class="card-body">
             <div class="d-flex flex-column align-items-center mb-3">
-              <i class="bi bi-check-circle fs-1 text-orange" style="color: var(--fdq-orange);"></i>
+              <i class="bi bi-check-circle fs-1 text-orange"></i>
               <h5 class="text-uppercase fw-bold mt-3">Effectiveness</h5>
             </div>
-            <p class="card-text text-muted">We don’t chase perfection. We prevent rework and protect the budget.</p>
+            <p class="card-text text-muted">We don’t chase perfection. We prevent rework and protect the budget. Quality is a business tool, not a burden.</p>
           </div>
         </div>
       </div>
@@ -107,44 +123,60 @@
   </div>
 </section>
 
-<!-- LEVEL OVERVIEW -->
-<section class="py-5 bg-light">
+
+    <!-- FDQ LEVELS OVERVIEW -->
+<section class="py-5 bg-white border-top border-5" style="border-color: var(--fdq-orange);">
   <div class="container">
-    <div class="row align-items-center g-5">
+    <!-- Section Header -->
+    <div class="text-center mb-5 fade-slide-up">
+      <h2 class="fw-bold text-uppercase" style="color: var(--fdq-dark);">Two Levels. One Mission.</h2>
+      <p class="text-muted mx-auto" style="max-width: 800px;">
+        FDQ fills a critical gap in the world of construction quality. While most systems focus on compliance from the top down, Field-Driven Quality starts where the work actually happens — in the dirt, on the pipe, and on the pad. We give crews clarity and control, and we give leadership a system that sticks. FDQ is where practicality meets performance.
+      </p>
+    </div>
 
-      <!-- Badge image -->
-      <div class="col-md-6 text-center fade-slide-up fade-slide-delay-1">
-        <div class="p-4 shadow rounded bg-dark">
-          <img src="{% static 'images/fdqLevels1.png' %}" class="img-fluid img-zoom-hover" style="max-height: 250px;">
+    <!-- Levels Grid -->
+    <div class="row g-4">
+      <!-- FDQ Level 1 -->
+      <div class="col-md-6 fade-slide-up fade-slide-delay-1">
+        <div class="p-4 bg-light rounded shadow-sm h-100 border-start border-4 hover-scale" style="border-color: var(--fdq-orange); transition: transform 0.2s ease;">
+          <div class="text-center mb-3">
+            <img src="{% static 'images/fdqlevel1.png' %}" alt="FDQ Level 1 Badge" style="height: 125px;" class="mb-2">
+            <h4 class="fw-bold text-uppercase mb-1" style="color: var(--fdq-dark);">FDQ Level 1</h4>
+          </div>
+          <p class="text-muted mb-3">
+            For field personnel practicing FDQ principles in real jobsite conditions — foremen, inspectors, welders, and operators.
+          </p>
+          <ul class="text-muted small ps-3"  style="list-style-type: none;">
+            <li>✔️ Learn to read and apply FDQ-tailored documentation</li>
+            <li>✔️ Complete checklists, logs, and forms with confidence</li>
+            <li>✔️ Identify and reduce field-level risks before they hit inspection</li>
+            <li>✔️ Use FDQ tools during setup, task prep, and walkdowns</li>
+          </ul>
         </div>
       </div>
 
-      <!-- Level Descriptions -->
+      <!-- FDQ Level 2 -->
       <div class="col-md-6 fade-slide-up fade-slide-delay-2">
-        <h2 class="fw-bold text-uppercase mb-3" style="color: var(--fdq-dark);">Two Levels. One Mission.</h2>
-        <p class="mb-4 text-muted">Whether you're tightening bolts or setting up entire systems — FDQ meets you where you work:</p>
-
-        <!-- FDQ Level 1 -->
-        <div class="d-flex align-items-start mb-4 p-3 bg-white border-start border-4 shadow-sm rounded" style="border-color: var(--fdq-orange);">
-          <i class="bi bi-person-workspace fs-2 text-orange me-3"></i>
-          <div>
-            <h5 class="fw-bold mb-1 text-uppercase">FDQ Level 1</h5>
-            <p class="mb-0 text-muted small">For field personnel practicing FDQ principles day-to-day.</p>
+        <div class="p-4 bg-light rounded shadow-sm h-100 border-start border-4 hover-scale" style="border-color: var(--fdq-blue); transition: transform 0.2s ease;">
+          <div class="text-center mb-3">
+            <img src="{% static 'images/fdqlevel2.png' %}" alt="FDQ Level 2 Badge" style="height: 125px;" class="mb-2">
+            <h4 class="fw-bold text-uppercase mb-1" style="color: var(--fdq-dark);">FDQ Level 2</h4>
           </div>
+          <p class="text-muted mb-3">
+            For leaders implementing FDQ at scale — superintendents, QA leads, project managers, and discipline coordinators.
+          </p>
+          <ul class="text-muted small ps-3"  style="list-style-type: none;">
+            <li>✔️ Use and adapt tools like the Risk Profile Template and Field Info Sheet</li>
+            <li>✔️ Lead pre-task quality talks and systemize field ownership</li>
+            <li>✔️ Train Level 1 crews and build FDQ into project workflows</li>
+            <li>✔️ Access editable documents, rollout guides, and dashboard support</li>
+          </ul>
         </div>
-
-        <!-- FDQ Level 2 -->
-        <div class="d-flex align-items-start p-3 bg-white border-start border-4 shadow-sm rounded" style="border-color: var(--fdq-blue);">
-          <i class="bi bi-diagram-3 fs-2 text-primary me-3"></i>
-          <div>
-            <h5 class="fw-bold mb-1 text-uppercase">FDQ Level 2</h5>
-            <p class="mb-0 text-muted small">For leads implementing FDQ across teams, trades, and projects.</p>
-          </div>
-        </div>
-
       </div>
     </div>
   </div>
 </section>
+
 
 {% endblock %}

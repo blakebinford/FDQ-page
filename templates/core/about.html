@@ -1,6 +1,110 @@
 {% extends "base.html" %}
 {% block title %}About FDQ | Field-Driven Quality{% endblock %}
 {% load static %}
+
+{% block extra_styles %}
+<style>
+  .pillars-section {
+    background: linear-gradient(to right, #2b2b2b, #1f1f1f);
+    padding: 5rem 0;
+    color: #fff;
+    position: relative;
+  }
+
+  .pillars-header {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  .pillars-header h2 {
+    text-transform: uppercase;
+    font-weight: 700;
+    font-size: 2.5rem;
+    color: var(--fdq-orange);
+    letter-spacing: 1px;
+  }
+
+  .pillars-scroll {
+    display: flex;
+    overflow-x: auto;
+    gap: 2rem;
+    scroll-snap-type: x mandatory;
+    padding: 2rem 1rem;
+    scroll-padding-inline: 1rem;
+  }
+
+  .pillar-panel {
+    scroll-snap-align: center;
+    flex: 0 0 320px;
+    background: linear-gradient(145deg, #3a3a3a, #2a2a2a);
+    border-radius: 12px;
+    padding: 1.75rem;
+    color: #fff;
+    box-shadow: 0 0 0 3px #111 inset, 0 6px 14px rgba(0,0,0,0.4);
+    position: relative;
+    transition: transform 0.3s ease;
+    border: 1px solid #555;
+  }
+
+  .pillar-panel:hover {
+    transform: scale(1.03);
+  }
+
+  .pillar-panel::before {
+    content: "";
+    position: absolute;
+    top: 12px; left: 12px;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: #999;
+    box-shadow: 0 0 0 2px #222;
+  }
+
+  .pillar-panel::after {
+    content: "";
+    position: absolute;
+    bottom: 12px; right: 12px;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: #999;
+    box-shadow: 0 0 0 2px #222;
+  }
+
+  .pillar-icon {
+    font-size: 2rem;
+    color: var(--fdq-orange);
+    margin-bottom: 0.5rem;
+
+
+  }
+
+  .pillar-title {
+    text-transform: uppercase;
+    font-weight: 600;
+    font-size: 1.1rem;
+    color: var(--fdq-white);
+  }
+
+  .pillar-desc {
+    font-size: 0.95rem;
+    color: #ccc;
+    margin-top: 0.5rem;
+    line-height: 1.6;
+  }
+
+  @media (max-width: 768px) {
+    .pillars-scroll {
+      flex-direction: column;
+    }
+    .pillar-panel {
+      width: 100%;
+      max-width: 95%;
+      margin: 0 auto;
+    }
+  }
+</style>
+{% endblock %}
+
 {% block content %}
 
 <!-- Hero Section -->
@@ -11,106 +115,113 @@
   </div>
 </section>
 
+<section class="pillars-section position-relative">
+  <div class="container">
+    <div class="pillars-header">
+      <h2>The 8 Pillars of FDQ</h2>
+      <p class="text-muted lead">These aren’t buzzwords. They’re a framework shaped by crews, tested on jobsites, and tuned to the realities of midstream construction.</p>
+    </div>
 
-<section class="container py-5">
-  <h1 class="text-uppercase fw-bold text-center mb-4">The Pillars of Field-Driven Quality</h1>
-  <p class="lead text-center text-muted mb-5">
-    Field Driven Quality (FDQ) is built for pipeline and station construction. It’s not theory — it’s a framework grounded in real projects, real constraints, and real results.
-  </p>
+    <!-- Scrollable Row with Arrows -->
+    <div class="position-relative">
+      <!-- Scroll Left Button -->
+      <button id="scrollLeft" class="btn btn-dark position-absolute top-50 start-0 translate-middle-y z-1" style="z-index: 2;">
+        <i class="bi bi-chevron-left fs-4"></i>
+      </button>
 
-  {% comment %} Start Pillars Grid {% endcomment %}
-  <div class="row row-cols-1 row-cols-md-2 g-5 mt-5">
+      <!-- Scroll Right Button -->
+      <button id="scrollRight" class="btn btn-dark position-absolute top-50 end-0 translate-middle-y z-1" style="z-index: 2;">
+        <i class="bi bi-chevron-right fs-4"></i>
+      </button>
 
-  <!-- Pillar 1 -->
-  <div class="col">
-    <div class="p-4 bg-white shadow-sm rounded h-100">
-      <div class="d-flex align-items-center mb-3">
-        <i class="bi bi-compass fs-2 text-orange me-3"></i>
-        <h5 class="fw-bold text-uppercase mb-0">1. Field First</h5>
+      <!-- Scroll Container -->
+      <div id="pillarsScroll" class="pillars-scroll px-5">
+      <div class="pillar-panel">
+        <div class="pillar-icon"><i class="bi bi-compass"></i></div>
+        <div class="pillar-title">1. Field First</div>
+        <div class="pillar-desc">FDQ starts where the work happens. If it doesn’t work in the mud, it doesn’t work at all.</div>
       </div>
-      <p class="small text-muted">Quality begins where the work is built. FDQ puts the field in the driver’s seat—ensuring every tool, form, and standard works in the mud, wind, and chaos of real work. It’s designed for boots, not binders.</p>
+
+      <!-- Pillar 2 -->
+      <div class="pillar-panel">
+        <div class="pillar-icon"><i class="bi bi-exclamation-triangle"></i></div>
+        <div class="pillar-title">2. Risk-Based Everything</div>
+        <div class="pillar-desc">Scales inspection to match real risk. Critical work gets the focus. Low-risk work gets out of the way.</div>
+      </div>
+
+      <!-- Pillar 3 -->
+      <div class="pillar-panel">
+        <div class="pillar-icon"><i class="bi bi-clipboard-check"></i></div>
+        <div class="pillar-title">3. Fit-for-Service</div>
+        <div class="pillar-desc">If it’s safe, functional, and to spec — it’s done. FDQ doesn't chase perfection for its own sake.</div>
+      </div>
+
+      <!-- Pillar 4 -->
+      <div class="pillar-panel">
+        <div class="pillar-icon"><i class="bi bi-currency-dollar"></i></div>
+        <div class="pillar-title">4. Cost-Conscious Control</div>
+        <div class="pillar-desc">Track what costs you. Stop what wastes you. FDQ protects the schedule and the bottom line.</div>
+      </div>
+
+      <!-- Pillar 5 -->
+      <div class="pillar-panel">
+        <div class="pillar-icon"><i class="bi bi-lightning-charge"></i></div>
+        <div class="pillar-title">5. Proactive by Default</div>
+        <div class="pillar-desc">Catch it before it breaks. FDQ encourages early checks, clear communication, and foresight.</div>
+      </div>
+
+      <!-- Pillar 6 -->
+      <div class="pillar-panel">
+        <div class="pillar-icon"><i class="bi bi-list-check"></i></div>
+        <div class="pillar-title">6. Simple Systems That Stick</div>
+        <div class="pillar-desc">Tailgate-tested. Crew-approved. FDQ tools are lean, visual, and built to last in the field.</div>
+      </div>
+
+      <!-- Pillar 7 -->
+      <div class="pillar-panel">
+        <div class="pillar-icon"><i class="bi bi-shield-check"></i></div>
+        <div class="pillar-title">7. Compliance Without Bureaucracy</div>
+        <div class="pillar-desc">Meet code, not clutter. FDQ hits the standard without drowning in admin.</div>
+      </div>
+
+      <!-- Pillar 8 -->
+      <div class="pillar-panel">
+        <div class="pillar-icon"><i class="bi bi-graph-up-arrow"></i></div>
+        <div class="pillar-title">8. Learning Without Theater</div>
+        <div class="pillar-desc">Fix what matters. Don’t change what’s working. Real lessons, real traction, real ROI.</div>
+      </div>
+      </div>
     </div>
   </div>
-
-  <!-- Pillar 2 -->
-  <div class="col">
-    <div class="p-4 bg-white shadow-sm rounded h-100">
-      <div class="d-flex align-items-center mb-3">
-        <i class="bi bi-exclamation-triangle fs-2 text-warning me-3"></i>
-        <h5 class="fw-bold text-uppercase mb-0">2. Risk-Based Everything</h5>
-      </div>
-      <p class="small text-muted">Not all work carries the same risk—neither should the quality effort. FDQ aligns oversight, inspection, and documentation with actual field risk so the most critical scopes get the most attention.</p>
-    </div>
-  </div>
-
-  <!-- Pillar 3 -->
-  <div class="col">
-    <div class="p-4 bg-white shadow-sm rounded h-100">
-      <div class="d-flex align-items-center mb-3">
-        <i class="bi bi-clipboard-check fs-2 text-success me-3"></i>
-        <h5 class="fw-bold text-uppercase mb-0">3. Fit-for-Service</h5>
-      </div>
-      <p class="small text-muted">If it’s safe, functional, and compliant—it’s good enough. FDQ doesn’t chase cosmetic rework or perfection for its own sake. We judge quality by how the system performs, not how it looks under a flashlight.</p>
-    </div>
-  </div>
-
-  <!-- Pillar 4 -->
-  <div class="col">
-    <div class="p-4 bg-white shadow-sm rounded h-100">
-      <div class="d-flex align-items-center mb-3">
-        <i class="bi bi-currency-dollar fs-2 text-info me-3"></i>
-        <h5 class="fw-bold text-uppercase mb-0">4. Cost-Conscious Control</h5>
-      </div>
-      <p class="small text-muted">We fix what costs us and stop what wastes us. FDQ doesn’t track issues just to check a box. It uses quality as a tool to protect budgets, reduce delay, and eliminate cost-causing mistakes.</p>
-    </div>
-  </div>
-
-  <!-- Pillar 5 -->
-  <div class="col">
-    <div class="p-4 bg-white shadow-sm rounded h-100">
-      <div class="d-flex align-items-center mb-3">
-        <i class="bi bi-lightning-charge fs-2 text-orange me-3"></i>
-        <h5 class="fw-bold text-uppercase mb-0">5. Proactive by Default</h5>
-      </div>
-      <p class="small text-muted">Good quality doesn’t wait for mistakes. FDQ tools are built to find and fix problems early — with first-install checks, field walks, and toolbox talks that highlight risk before it hits inspection.</p>
-    </div>
-  </div>
-
-  <!-- Pillar 6 -->
-  <div class="col">
-    <div class="p-4 bg-white shadow-sm rounded h-100">
-      <div class="d-flex align-items-center mb-3">
-        <i class="bi bi-list-check fs-2 text-blue me-3"></i>
-        <h5 class="fw-bold text-uppercase mb-0">6. Simple Systems That Stick</h5>
-      </div>
-      <p class="small text-muted">If it doesn’t work on a tailgate, it doesn’t work. FDQ systems are built for the field: one-page checklists, fast forms, and simple logs — nothing that needs a laptop and a signal to function.</p>
-    </div>
-  </div>
-
-  <!-- Pillar 7 -->
-  <div class="col">
-    <div class="p-4 bg-white shadow-sm rounded h-100">
-      <div class="d-flex align-items-center mb-3">
-        <i class="bi bi-shield-check fs-2 text-dark me-3"></i>
-        <h5 class="fw-bold text-uppercase mb-0">7. Compliance Without Bureaucracy</h5>
-      </div>
-      <p class="small text-muted">We meet code — not create it. FDQ meets every requirement without layers of bureaucracy. Inspections are purposeful, documentation is lean, and workflows are efficient, not administrative.</p>
-    </div>
-  </div>
-
-  <!-- Pillar 8 -->
-  <div class="col">
-    <div class="p-4 bg-white shadow-sm rounded h-100">
-      <div class="d-flex align-items-center mb-3">
-        <i class="bi bi-graph-up-arrow fs-2 text-success me-3"></i>
-        <h5 class="fw-bold text-uppercase mb-0">8. Learning Without Theater</h5>
-      </div>
-      <p class="small text-muted">We improve what matters — not what’s already working. FDQ avoids change for change’s sake. It tracks what costs us, fixes it in real workflows, and makes sure the lessons actually stick.</p>
-    </div>
-  </div>
-
-</div>
-
-
 </section>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const container = document.getElementById('pillarsScroll');
+    const scrollLeftBtn = document.getElementById('scrollLeft');
+    const scrollRightBtn = document.getElementById('scrollRight');
+
+    const scrollAmount = 320; // Adjust per panel width
+
+    scrollLeftBtn.onclick = () => {
+      container.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+    };
+
+    scrollRightBtn.onclick = () => {
+      container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    };
+
+    const toggleButtons = () => {
+      scrollLeftBtn.style.display = container.scrollLeft > 0 ? 'block' : 'none';
+      scrollRightBtn.style.display =
+        container.scrollLeft + container.clientWidth < container.scrollWidth
+          ? 'block'
+          : 'none';
+    };
+
+    container.addEventListener('scroll', toggleButtons);
+    window.addEventListener('resize', toggleButtons);
+    toggleButtons();
+  });
+</script>
+
 {% endblock %}

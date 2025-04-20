@@ -4,30 +4,41 @@
 {% block title %}FDQ Blog{% endblock %}
 
 {% block extra_styles %}
-<style>
   .blog-card {
-    border-radius: 1rem;
-    overflow: hidden;
-    background: #fff;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-  }
-  .blog-card:hover {
-    transform: scale(1.01);
-    box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.15);
-  }
-  .blog-card .banner {
-    max-height: 200px;
-    object-fit: cover;
-    width: 100%;
-  }
-  .blog-card-body {
-    padding: 1.25rem;
-  }
-  .blog-meta {
-    font-size: 0.85rem;
-    color: #6c757d;
-  }
-</style>
+  border-radius: 1rem;
+  overflow: hidden;
+  background: #fff;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.blog-card:hover {
+  transform: scale(1.01);
+  box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.15);
+}
+
+.blog-card .banner {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.blog-card-body {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+
+.text-truncate-multiline {
+  display: -webkit-box;
+  -webkit-line-clamp: 5; /* Show 5 lines max */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 {% endblock %}
 
 {% block content %}
@@ -67,36 +78,46 @@
   {% endif %}
 
   <!-- Regular Posts Grid -->
-  <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
-    {% for post in posts %}
-    <div class="col">
-      <a href="{% url 'blog_detail' slug=post.slug %}" class="text-decoration-none text-dark">
-  <div class="blog-card h-100 shadow-sm border border-light">
-    {% if post.banner_image %}
-      <img src="{{ post.banner_image.url }}" class="banner" alt="{{ post.title }}">
-    {% endif %}
-    <div class="blog-card-body d-flex flex-column justify-content-between h-100">
-      <div>
-        <h5 class="fw-bold mb-2">{{ post.title }}</h5>
-        <div class="blog-meta mb-1">
-          ⏱️ Read in about {{ post.reading_time }} min
-        </div>
-        <div class="mb-2">
-          {% for tag in post.tags.all %}
-            <span class="badge bg-light text-dark border me-1">{{ tag.name }}</span>
-          {% endfor %}
-        </div>
-        <p class="text-muted small mb-3">{{ post.summary|safe }}</p>
-      </div>
-      <span class="btn btn-sm btn-outline-dark mt-auto w-fit">Read More</span>
-    </div>
-  </div>
-</a>
+<div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+  {% for post in posts %}
+  <div class="col">
+    <a href="{% url 'blog_detail' slug=post.slug %}" class="text-decoration-none text-dark">
+      <div class="blog-card h-100 shadow-sm border border-light d-flex flex-column">
 
-    </div>
-    {% empty %}
-    <p class="text-center">No blog posts found for this tag.</p>
-    {% endfor %}
+        {% if post.banner_image %}
+          <div class="ratio ratio-16x9">
+            <img src="{{ post.banner_image.url }}" class="banner rounded-0" alt="{{ post.title }}" style="object-fit: cover;">
+          </div>
+        {% endif %}
+
+        <div class="blog-card-body d-flex flex-column flex-grow-1">
+          <h5 class="fw-bold mb-2">{{ post.title }}</h5>
+
+          <div class="blog-meta mb-2">
+            ⏱️ {{ post.reading_time }} min read
+          </div>
+
+          <div class="mb-2">
+            {% for tag in post.tags.all %}
+              <span class="badge bg-light text-dark border me-1">{{ tag.name }}</span>
+            {% endfor %}
+          </div>
+
+          <p class="text-muted small mb-3 text-truncate-multiline">
+            {{ post.summary|striptags }}
+          </p>
+
+          <div class="mt-auto">
+            <span class="btn btn-sm btn-outline-dark">Read More</span>
+          </div>
+        </div>
+      </div>
+    </a>
   </div>
+  {% empty %}
+    <p class="text-center">No blog posts found for this tag.</p>
+  {% endfor %}
+</div>
+
 </section>
 {% endblock %}
