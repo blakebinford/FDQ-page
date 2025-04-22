@@ -1,15 +1,12 @@
-from http.cookiejar import debug
-
 from django.contrib.sites import requests
 from django.shortcuts import render
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.core.mail import send_mail
 
-import FDQ
+from FDQ.settings import base
 from .forms import ContactForm
 
-from FDQ.settings import base
 
 def home(request):
     return render(request, 'core/home.html')
@@ -21,10 +18,11 @@ def contact_thanks(request):
     return render(request, 'core/contact_thanks.html')
 
 def contact_view(request):
-    turnstile_site_key = base.TURNSTILE_SITE_KEY  # passed to template
+    turnstile_site_key = base.TURNSTILE_SITE_KEY  # For rendering widget
     if request.method == 'POST':
         form = ContactForm(request.POST)
         if form.is_valid():
+            # Step 1: Validate Turnstile token
             token = form.cleaned_data.get('turnstile_token')
             ip = request.META.get('REMOTE_ADDR', '')
             verify_url = "https://challenges.cloudflare.com/turnstile/v0/siteverify"
@@ -37,12 +35,18 @@ def contact_view(request):
             result = response.json()
 
             if result.get("success"):
-                # ✅ Passed Turnstile check: process the form
+                # Step 2: Send email
                 name = form.cleaned_data['name']
                 email = form.cleaned_data['email']
                 message = form.cleaned_data['message']
-                # Send email or store message logic here...
-                return redirect('contact_success')
+
+                subject = f"New FDQ Contact Message from {name}"
+                body = f"From: {name} <{email}>\n\n{message}"
+
+                send_mail(subject, body, email, ['binford.blake@gmail.com'])
+
+                # Step 3: Redirect to thank-you page
+                return redirect('contact_thanks')
             else:
                 form.add_error(None, "Failed Turnstile verification. Please try again.")
     else:
