@@ -25,6 +25,7 @@
         <div class="mb-3">
           {{ form.message.label_tag }}{{ form.message }}
         </div>
+          {{ form.turnstile_token }}
           <div class="cf-turnstile" data-sitekey="{{ turnstile_site_key }}"></div>
         <button type="submit" class="btn btn-dark w-100">Send Message</button>
       </form>
@@ -32,4 +33,17 @@
   </div>
 </section>
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    <script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const form = document.querySelector("form");
+    form.addEventListener("submit", function (e) {
+      const turnstileResponse = document.querySelector('[name="cf-turnstile-response"]');
+      const hiddenField = document.querySelector('#id_turnstile_token');
+      if (turnstileResponse && hiddenField) {
+        hiddenField.value = turnstileResponse.value;
+      }
+    });
+  });
+</script>
+
 {% endblock %}

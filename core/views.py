@@ -21,6 +21,7 @@ def contact_view(request):
     turnstile_site_key = base.TURNSTILE_SITE_KEY  # For rendering widget
     if request.method == 'POST':
         form = ContactForm(request.POST)
+        print("Form errors:", form.errors)
         if form.is_valid():
             # Step 1: Validate Turnstile token
             token = form.cleaned_data.get('turnstile_token')
@@ -33,6 +34,8 @@ def contact_view(request):
             }
             response = requests.post(verify_url, data=payload)
             result = response.json()
+            print("Turnstile token received:", token)
+            print("Form errors:", form.errors)
 
             if result.get("success"):
                 # Step 2: Send email
