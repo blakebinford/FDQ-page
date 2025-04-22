@@ -14,3 +14,4 @@ class ContactForm(forms.Form):
         'placeholder': 'Your Message',
         'rows': 5
     }))
+    turnstile_token = forms.CharField(widget=forms.HiddenInput(), required=True)
