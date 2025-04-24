@@ -32,3 +32,5 @@ EMAIL_USE_TLS = True
 EMAIL_HOST_USER = config('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
 DEFAULT_FROM_EMAIL = config('EMAIL_HOST_USER')
+LOGIN_REDIRECT_URL = 'home'  # or wherever you want users sent after login
+LOGOUT_REDIRECT_URL = 'home'      # or wherever makes sense

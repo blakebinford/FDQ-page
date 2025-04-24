@@ -21,6 +21,7 @@ INSTALLED_APPS = [
     'accounts',
     'core',
     'blog',
+    'courses',
 
     'localflavor',
     'django_ckeditor_5',
