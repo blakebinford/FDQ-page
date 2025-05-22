@@ -68,6 +68,11 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / "static"]
 
+
+TURNSTILE_SITE_KEY = config('TURNSTILE_SITE_KEY')
+TURNSTILE_SECRET_KEY = config('TURNSTILE_SECRET_KEY')
+
+
 CKEDITOR_5_CONFIGS = {
     'default': {
         'toolbar': [
@@ -86,5 +91,11 @@ CKEDITOR_5_CONFIGS = {
     }
 }
 
-TURNSTILE_SITE_KEY = config('TURNSTILE_SITE_KEY')
-TURNSTILE_SECRET_KEY = config('TURNSTILE_SECRET_KEY')
+
+CKEDITOR_5_FILE_UPLOAD_PERMISSION = "staff"  # or "authenticated"
+CKEDITOR_5_ALLOW_ALL_FILE_TYPES = True
+CKEDITOR_5_UPLOAD_FILE_TYPES = ['pdf', 'jpeg', 'png', 'mp4']  # Customize as needed
+
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
