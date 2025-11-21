@@ -64,7 +64,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    def run(*args, **kwargs):
-        """Entrypoint for django-extensions runscript."""
-        main()
-
+    main()
