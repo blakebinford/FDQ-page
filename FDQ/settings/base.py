@@ -8,6 +8,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 SECRET_KEY = config('SECRET_KEY')
 DEBUG = config('DEBUG', cast=bool, default=False)
 
+SITE_URL = config("SITE_URL", default="http://localhost:8000")
+STRIPE_SECRET_KEY = config("STRIPE_SECRET_KEY", default="")
+STRIPE_WEBHOOK_SECRET = config("STRIPE_WEBHOOK_SECRET", default="")
+STRIPE_PRICE_ID_SMALL = config("STRIPE_PRICE_ID_SMALL", default="")
+STRIPE_PRICE_ID_MID = config("STRIPE_PRICE_ID_MID", default="")
+STRIPE_PRICE_ID_ENTERPRISE = config("STRIPE_PRICE_ID_ENTERPRISE", default="")
+
 ALLOWED_HOSTS = ['*']
 
 INSTALLED_APPS = [
@@ -24,6 +31,7 @@ INSTALLED_APPS = [
     'core',
     'blog',
     'courses',
+    'billing',
 
     'localflavor',
     'django_ckeditor_5',

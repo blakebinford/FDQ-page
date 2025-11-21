@@ -25,8 +25,8 @@ urlpatterns = [
     path('blog/', include('blog.urls')),
     path('ckeditor5/', include('django_ckeditor_5.urls')),
     path('accounts/', include('accounts.urls')),
-    path('ckeditor5/', include('django_ckeditor_5.urls')),
-
+    path('courses/', include('courses.urls')),
+    path('billing/', include('billing.urls')),
 ]
 
 if settings.DEBUG:

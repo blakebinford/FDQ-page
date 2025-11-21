@@ -62,3 +62,29 @@ class QandA(models.Model):
 
     def __str__(self):
         return f"Q from {self.user} at {self.timestamp} – {self.lesson.title}"
+
+# append to courses/models.py
+import uuid
+from django.db import models
+from django.conf import settings
+from django.utils import timezone
+
+class QuizAttempt(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    quiz = models.ForeignKey('Quiz', on_delete=models.CASCADE)
+    selected_answer = models.CharField(max_length=255)
+    correct = models.BooleanField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user} - {self.quiz} - {'OK' if self.correct else 'WRONG'}"
+
+class Certificate(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    course = models.ForeignKey('Course', on_delete=models.CASCADE)
+    cert_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    issued_at = models.DateTimeField(default=timezone.now)
+    pdf = models.FileField(upload_to='certificates/', null=True, blank=True)
+
+    def __str__(self):
+        return f"Cert {self.cert_id} for {self.user} - {self.course}"
