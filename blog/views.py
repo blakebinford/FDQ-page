@@ -20,6 +20,6 @@ def blog_detail(request, slug):
     post = get_object_or_404(BlogPost, slug=slug)
     post.view_count += 1
     post.save(update_fields=['view_count'])
-    return render(request, 'blog/blog_detail.html', {'post': post})
+    return render(request, 'blog/fdq_blog_detail.html', {'post': post})
 
 
