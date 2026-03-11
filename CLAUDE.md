@@ -56,7 +56,10 @@ Split settings in `FDQ/settings/`:
 
 - Rich text fields use `django-ckeditor-5` (`CKEditor5Field`)
 - PDF certificate generation in `courses/utils.py` using ReportLab + qrcode
-- Templates in project-level `templates/` directory (not per-app), with `base.html` as the layout
+- Templates in project-level `templates/` directory (not per-app)
+- Template naming convention: templates use `fdq_` prefix (e.g., `fdq_base.html`, `fdq_blog.html`, `fdq_blog_detail.html`)
+- `fdq_base.html` is the shared layout (Bootstrap-based) extended by blog and contact_thanks templates
+- Public-facing pages (`home.html`, `about.html`, `contact.html`, `login.html`) are standalone templates with their own inline dark-theme nav/footer — they do not extend `fdq_base.html`
 - Static files in project-level `static/` directory
 - Production uses S3 via `django-storages` with custom `core.storage_backends.StaticStorage`
 - Media uploads go to `media/` locally or S3 in production
