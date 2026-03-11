@@ -109,3 +109,5 @@ CKEDITOR_5_UPLOAD_FILE_TYPES = ['pdf', 'jpeg', 'png', 'mp4']  # Customize as nee
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+CONTACT_EMAIL = config('CONTACT_EMAIL', default='binford.blake@gmail.com')

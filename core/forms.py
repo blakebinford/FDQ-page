@@ -1,17 +1,8 @@
 from django import forms
 
 class ContactForm(forms.Form):
-    name = forms.CharField(max_length=100, widget=forms.TextInput(attrs={
-        'class': 'form-control',
-        'placeholder': 'Your Name'
-    }))
-    email = forms.EmailField(widget=forms.EmailInput(attrs={
-        'class': 'form-control',
-        'placeholder': 'Your Email'
-    }))
-    message = forms.CharField(widget=forms.Textarea(attrs={
-        'class': 'form-control',
-        'placeholder': 'Your Message',
-        'rows': 5
-    }))
-    turnstile_token = forms.CharField(widget=forms.HiddenInput(), required=True)
+    name = forms.CharField(max_length=100)
+    email = forms.EmailField()
+    company = forms.CharField(max_length=200, required=False)
+    interest = forms.CharField(max_length=200, required=False)
+    message = forms.CharField(widget=forms.Textarea())

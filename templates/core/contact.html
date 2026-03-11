@@ -961,7 +961,8 @@
   <div class="page-content">
     <div class="contact-grid">
       <div class="reveal">
-        <form class="contact-form" action="#" method="POST">
+        <form class="contact-form" action="/contact/" method="POST">
+          {% csrf_token %}
           <div class="form-group">
             <label>Full Name</label>
             <input type="text" name="name" placeholder="Your name" required />
