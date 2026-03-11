@@ -1,8 +1,13 @@
+import logging
+
 from django.shortcuts import render, redirect
 from django.core.mail import send_mail
 from django.conf import settings
+from django.contrib import messages
 
 from .forms import ContactForm
+
+logger = logging.getLogger(__name__)
 
 
 def home(request):
@@ -33,13 +38,18 @@ def contact_view(request):
                 f"Message:\n{message}"
             )
 
-            send_mail(
-                subject,
-                body,
-                settings.DEFAULT_FROM_EMAIL,
-                [settings.CONTACT_EMAIL],
-                fail_silently=False,
-            )
+            try:
+                send_mail(
+                    subject,
+                    body,
+                    settings.DEFAULT_FROM_EMAIL,
+                    [settings.CONTACT_EMAIL],
+                    fail_silently=False,
+                )
+            except Exception:
+                logger.exception("Failed to send contact form email")
+                messages.error(request, "Something went wrong sending your message. Please try again or email us directly at binford.blake@gmail.com.")
+                return render(request, 'core/contact.html', {'form': form})
 
             return redirect('contact_thanks')
     else:

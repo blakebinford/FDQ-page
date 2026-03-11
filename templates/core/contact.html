@@ -961,6 +961,13 @@
   <div class="page-content">
     <div class="contact-grid">
       <div class="reveal">
+        {% if messages %}
+          {% for message in messages %}
+            <div style="background: rgba(212, 50, 50, 0.15); border: 1px solid rgba(212, 50, 50, 0.4); border-left: 3px solid #d43232; padding: 1rem 1.2rem; margin-bottom: 1.5rem; color: var(--text); font-size: 0.92rem;">
+              {{ message }}
+            </div>
+          {% endfor %}
+        {% endif %}
         <form class="contact-form" action="/contact/" method="POST">
           {% csrf_token %}
           <div class="form-group">
