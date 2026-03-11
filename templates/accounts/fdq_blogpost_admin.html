@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>What is FDQ | Field-Driven Quality</title>
+  <title>Edit Blog Post | Field-Driven Quality</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
@@ -861,66 +861,126 @@
     .stagger.visible > *:nth-child(4) { opacity: 1; transform: none; transition-delay: 0.35s; }
   
 
-    /* PAGE HERO */
-    .page-hero {
-      padding: clamp(4rem, 10vw, 7rem) clamp(1.5rem, 5vw, 4rem) clamp(3rem, 6vw, 5rem);
-      max-width: 1200px;
+    .admin-wrap {
+      max-width: 900px;
       margin: 0 auto;
+      padding: clamp(3rem, 6vw, 5rem) clamp(1.5rem, 5vw, 4rem);
+    }
+    .admin-header {
+      margin-bottom: 2.5rem;
+      padding-bottom: 1.5rem;
       border-bottom: 1px solid var(--border);
     }
-    .page-label {
+    .admin-header .admin-label {
       font-family: 'IBM Plex Mono', monospace;
-      font-size: 0.72rem;
+      font-size: 0.68rem;
       letter-spacing: 0.18em;
       text-transform: uppercase;
       color: var(--amber);
-      margin-bottom: 1.5rem;
+      margin-bottom: 0.8rem;
       display: flex;
       align-items: center;
       gap: 0.75rem;
     }
-    .page-label::before {
+    .admin-header .admin-label::before {
       content: '';
       display: block;
-      width: 2rem;
+      width: 1.5rem;
       height: 1px;
       background: var(--amber);
     }
-    .page-hero h1 {
+    .admin-header h1 {
       font-family: 'Barlow Condensed', sans-serif;
       font-weight: 900;
-      font-size: clamp(2.8rem, 7vw, 5.5rem);
-      line-height: 0.95;
-      letter-spacing: -0.01em;
+      font-size: clamp(1.8rem, 4vw, 3rem);
       text-transform: uppercase;
       color: var(--white);
-      margin-bottom: 1.2rem;
+      line-height: 1;
     }
-    .page-hero h1 em { font-style: normal; color: var(--amber); }
-    .page-sub {
-      font-size: clamp(1rem, 2vw, 1.15rem);
+    .admin-form { display: flex; flex-direction: column; gap: 1.5rem; }
+    .admin-field { display: flex; flex-direction: column; gap: 0.5rem; }
+    .admin-field label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.68rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
       color: var(--muted);
-      max-width: 560px;
-      line-height: 1.7;
-      font-weight: 300;
     }
-    .page-content {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: clamp(3rem, 7vw, 5rem) clamp(1.5rem, 5vw, 4rem);
-    }
-    .prose p { color: var(--muted); font-size: 0.97rem; line-height: 1.8; margin-bottom: 1.2rem; }
-    .prose p strong { color: var(--text); font-weight: 500; }
-
-
-    .about-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: start; margin-bottom: 5rem; }
-    @media (max-width: 720px) { .about-two-col { grid-template-columns: 1fr; gap: 2rem; } }
-    .aside-box {
+    .admin-field input[type="text"],
+    .admin-field input[type="date"],
+    .admin-field select,
+    .admin-field textarea {
       background: var(--surface);
       border: 1px solid var(--border);
-      border-left: 3px solid var(--amber);
-      padding: clamp(2rem, 4vw, 3rem);
+      color: var(--text);
+      font-family: 'Barlow', sans-serif;
+      font-size: 0.95rem;
+      padding: 0.85rem 1rem;
+      outline: none;
+      width: 100%;
+      transition: border-color 0.2s;
     }
+    .admin-field input:focus,
+    .admin-field select:focus,
+    .admin-field textarea:focus { border-color: var(--amber); }
+    .admin-field textarea { resize: vertical; min-height: 420px; font-family: 'IBM Plex Mono', monospace; font-size: 0.85rem; line-height: 1.65; }
+    .admin-field select option { background: var(--surface); }
+    .admin-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    @media (max-width: 600px) { .admin-two-col { grid-template-columns: 1fr; } }
+    .admin-actions {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+      margin-top: 0.5rem;
+    }
+    .btn-danger {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.78rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      background: transparent;
+      color: #c0392b;
+      padding: 0.9rem 2rem;
+      border: 1px solid #c0392b;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+    }
+    .btn-danger:hover { background: #c0392b; color: var(--white); }
+    .admin-checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .admin-checkbox-row input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--amber);
+    }
+    .admin-checkbox-row label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin: 0;
+    }
+    .admin-back {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.68rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 2rem;
+      transition: color 0.2s;
+    }
+    .admin-back:hover { color: var(--white); }
 
   </style>
 </head>
@@ -938,67 +998,87 @@
       <span></span><span></span><span></span>
     </button>
   </nav>
+  <div class="admin-wrap">
 
+    <a href="/admin/" class="admin-back">
+      &larr; Back to Admin
+    </a>
 
-  <div class="page-hero reveal">
-    <p class="page-label">What is FDQ</p>
-    <h1>Quality built<br/>for the <em>field.</em></h1>
-    <p class="page-sub">I've reviewed more quality plans than I can count. Most of them were built to impress an auditor, not to help a crew do the work right. FDQ was built to fix that.</p>
-  </div>
-
-  <div class="page-content">
-
-    <div class="about-two-col reveal">
-      <div class="prose">
-        <p class="section-label">The Problem</p>
-        <p>I've been on projects where the quality program had a procedure for everything. Procedure for coating inspection. Procedure for joint fit-up. Procedure for the procedure. The QMS was thorough. It was organized. Nobody in the field had ever read it.</p>
-        <p>That's not an exaggeration. I've asked field crews to show me where they'd find the answer to a basic question about their scope, and watched them flip through a three-ring binder with no idea where to look. The system wasn't built for them. It was built to pass an audit.</p>
-        <p>That version of quality costs money, slows crews down, and still doesn't stop the failures. Somewhere along the way, quality became something that happened to construction instead of something that happened in it.</p>
-      </div>
-      <div class="prose">
-        <p class="section-label">The FDQ Approach</p>
-        <p>Quality lives where the work happens. Not in the QC trailer. Not in the quality manual. On the pad, at the joint, in the trench. That's the premise FDQ is built on, and everything in the certification flows from it.</p>
-        <p>Tier 1 gives field crews the tools and language to own quality at the task level. Tier 2 gives QC professionals a system that holds up under field conditions. Tier 3 gives quality directors a program architecture built to scale across a project without falling apart when the schedule gets tight.</p>
-        <p>The result is simpler than most quality programs: fewer NCRs, less rework, and a crew that catches problems before they become expensive.</p>
-      </div>
+    <div class="admin-header">
+      <p class="admin-label">FDQ Admin</p>
+      <h1>Edit Blog Post</h1>
     </div>
 
-    <p class="section-label reveal">The Certification Framework</p>
-    <div class="pillars-grid stagger" style="margin-bottom:5rem;">
-      <div class="pillar">
-        <p class="pillar-number">Tier 1 / FIELD CREW</p>
-        <h3>In the Dirt</h3>
-        <p>Built for the people doing the work. Covers pre-task quality fundamentals, FDQ documentation, and how to identify and flag task-level risks before they hit inspection. No quality background required to start.</p>
-      </div>
-      <div class="pillar">
-        <p class="pillar-number">Tier 2 / QC AND OPERATIONS</p>
-        <h3>Own the Process</h3>
-        <p>Built for the people accountable for quality outcomes on an active project. Covers deploying FDQ tools in the field, managing quality data, leading pre-task quality conversations, and keeping quality performance from falling apart under schedule pressure.</p>
-      </div>
-      <div class="pillar">
-        <p class="pillar-number">Tier 3 / SENIOR QUALITY</p>
-        <h3>Build the Program</h3>
-        <p>Built for senior quality professionals responsible for the whole system. Covers QMS design, audit program development, metrics and KPI reporting, and how to build a quality culture that functions at the project or organizational level without requiring constant supervision to hold together.</p>
-      </div>
-    </div>
+    <form class="admin-form" method="POST" action="#">
 
-    <div class="aside-box reveal" style="max-width:760px;">
-      <p class="section-label">Built for Construction Quality</p>
-      <div class="prose" style="max-width:100%;">
-        <p>Construction quality is different from quality in a factory, a lab, or an office building. Your workforce rotates. Your project footprint moves. Your work goes in the ground and can't always be undone. Your schedule pressure is relentless and it doesn't respect your quality plan. The certification programs built for other industries don't account for any of that.</p>
-        <p>FDQ does. The tools are designed to work in a construction trailer, not a conference room. The documentation is written for someone filling it out at the joint, not sitting at a desk. The assessment content comes from real pipeline, energy, industrial, and heavy civil projects, with scenarios that reflect what actually happens when quality meets field conditions.</p>
-        <p>Tier 1 speaks the language of the crew. It doesn't assume quality knowledge. It meets people where they are and gives them something practical they can use the next day. Tier 2 addresses the real challenges of managing quality on a live project: keeping inspection current with the work, managing NCRs before they pile up, and running a pre-task process that the crew actually participates in. Tier 3 covers what it takes to build a quality program that functions at scale, under pressure, with a workforce that turns over and a scope that changes.</p>
-        <p><strong>If you work in pipeline, energy, industrial, or heavy civil construction, FDQ is the credential built for your work.</strong> Not adapted. Not retrofitted. Built from the start for this environment.</p>
+      <!-- TITLE -->
+      <div class="admin-field">
+        <label>Post Title</label>
+        <input type="text" name="title" placeholder="Post title..." value="Why Quality Programs Fail in the Field" />
       </div>
-    </div>
 
-  </div>
+      <!-- SLUG -->
+      <div class="admin-field">
+        <label>Slug (URL)</label>
+        <input type="text" name="slug" placeholder="url-friendly-slug" value="why-quality-programs-fail-in-the-field" />
+      </div>
 
-  <div class="cta-band">
-    <div class="cta-band-inner">
-      <h2>Your tier is<br/>waiting.</h2>
-      <a href="/contact/" class="btn-dark">Get Started with FDQ</a>
-    </div>
+      <!-- TIER + DATE -->
+      <div class="admin-two-col">
+        <div class="admin-field">
+          <label>Tier Tag</label>
+          <select name="tier">
+            <option value="">No tier</option>
+            <option value="tier1" selected>Tier 1</option>
+            <option value="tier2">Tier 2</option>
+            <option value="tier3">Tier 3</option>
+            <option value="general">General</option>
+          </select>
+        </div>
+        <div class="admin-field">
+          <label>Publish Date</label>
+          <input type="date" name="publish_date" value="2025-06-01" />
+        </div>
+      </div>
+
+      <!-- READ TIME + FEATURED -->
+      <div class="admin-two-col">
+        <div class="admin-field">
+          <label>Read Time (minutes)</label>
+          <input type="text" name="read_time" placeholder="e.g. 8" value="8" />
+        </div>
+        <div class="admin-field" style="justify-content: flex-end; padding-bottom: 0.85rem;">
+          <div class="admin-checkbox-row">
+            <input type="checkbox" name="is_featured" id="is_featured" checked />
+            <label for="is_featured">Featured Post</label>
+          </div>
+          <div class="admin-checkbox-row" style="margin-top:0.75rem;">
+            <input type="checkbox" name="is_published" id="is_published" checked />
+            <label for="is_published">Published</label>
+          </div>
+        </div>
+      </div>
+
+      <!-- EXCERPT -->
+      <div class="admin-field">
+        <label>Excerpt (shown on blog list)</label>
+        <textarea name="excerpt" style="min-height:80px;">I've seen quality programs with excellent documentation and a perfect audit score that still produced rework on nearly every major scope item. The procedures weren't the problem.</textarea>
+      </div>
+
+      <!-- BODY -->
+      <div class="admin-field">
+        <label>Post Body (HTML or Markdown)</label>
+        <textarea name="body" placeholder="Write your post content here..."></textarea>
+      </div>
+
+      <!-- ACTIONS -->
+      <div class="admin-actions">
+        <button type="submit" class="btn-primary" style="border:none; cursor:pointer;">Save Post</button>
+        <button type="submit" name="action" value="save_and_continue" class="btn-secondary" style="cursor:pointer;">Save and Continue Editing</button>
+        <button type="button" class="btn-danger">Delete Post</button>
+      </div>
+
+    </form>
   </div>
 
 
