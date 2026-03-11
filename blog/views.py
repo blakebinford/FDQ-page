@@ -9,7 +9,7 @@ def blog_list(request):
     tags = Tag.objects.all()
     if tag:
         posts = posts.filter(tags__name=tag)
-    return render(request, 'blog/blog_list.html', {
+    return render(request, 'blog/fdq_blog.html', {
         'posts': posts,
         'featured_post': featured_post,
         'tags': tags,
