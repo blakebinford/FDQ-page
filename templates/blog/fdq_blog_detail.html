@@ -1,181 +1,544 @@
-{% extends "fdq_base.html" %}
-{% load static %}
-{% block title %}{{ post.title }} | FDQ Blog{% endblock %}
-{% block meta_tags %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{{ post.title }} | FDQ Blog</title>
   <meta property="og:type" content="article">
   <meta property="og:title" content="{{ post.title }}">
   <meta property="og:description" content="{{ post.summary|striptags|truncatewords:30 }}">
   <meta property="og:url" content="{{ request.build_absolute_uri }}">
   {% if post.banner_image %}
-  <meta property="og:image" content="">
+  <meta property="og:image" content="{{ post.banner_image.url }}">
   {% endif %}
-{% endblock %}
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
 
-{% block extra_head %}
-<link rel="stylesheet" href="{% static 'css/blog.css' %}">
-{% endblock %}
-{% block extra_styles %}
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-<style>
-  .blog-hero {
-    padding-top: 5rem;
-    padding-bottom: 3rem;
-    background: linear-gradient(to right, var(--fdq-dark), #1c1c1c);
-    color: white;
-  }
+    :root {
+      --bg:       #111210;
+      --surface:  #1a1c19;
+      --surface2: #222420;
+      --border:   #2e3129;
+      --text:     #ddd9cf;
+      --muted:    #888880;
+      --amber:    #d4832a;
+      --amber-lt: #e8a04a;
+      --amber-dk: #a0601c;
+      --steel:    #3d5a72;
+      --white:    #f2ede4;
+    }
 
-  .blog-hero h1 {
-    font-size: 2.5rem;
-    Afont-weight: bold;
-    letter-spacing: 0.03em;
-  }
+    html { scroll-behavior: smooth; }
 
-  .blog-tags a {
-    background-color: var(--fdq-orange);
-    color: #fff;
-    text-decoration: none;
-    margin-right: 0.5rem;
-    margin-bottom: 0.5rem;
-    display: inline-block;
-  }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Barlow', sans-serif;
+      font-weight: 400;
+      font-size: 17px;
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+    }
 
-  .blog-meta {
-    font-size: 0.9rem;
-    color: #ccc;
-  }
+    /* ── NAV ── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(17, 18, 16, 0.92);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 clamp(1.5rem, 5vw, 4rem);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 60px;
+    }
 
-  .blog-banner {
-    max-height: 480px;
-    object-fit: cover;
-    object-position: center;
-    border-radius: 1rem;
-    box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.15);
-  }
+    .nav-logo {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 800;
+      font-size: 1.3rem;
+      letter-spacing: 0.08em;
+      color: var(--amber);
+      text-decoration: none;
+      text-transform: uppercase;
+    }
 
-  .blog-body {
-    padding-top: 4rem;
-    padding-bottom: 6rem;
-  }
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
 
-  .blog-content {
-    font-size: 1.05rem;
-    line-height: 1.8;
-  }
+    .nav-links a {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
 
-  .blog-content h2, .blog-content h3 {
-    margin-top: 2rem;
-    margin-bottom: 1rem;
-    font-weight: bold;
-    color: var(--fdq-dark);
-    border-left: 4px solid var(--fdq-orange);
-    padding-left: 0.75rem;
-  }
+    .nav-links a:hover { color: var(--white); }
 
-  .blog-content blockquote {
-    border-left: 4px solid var(--fdq-blue);
-    padding-left: 1rem;
-    margin-left: 0;
-    font-style: italic;
-    color: #555;
-  }
+    .nav-hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px;
+    }
 
-  .blog-content ul, .blog-content li {
-    padding-left: 2rem;
-    margin-bottom: 1rem;
-  }
+    .nav-hamburger span {
+      display: block;
+      width: 22px;
+      height: 2px;
+      background: var(--muted);
+      transition: all 0.25s;
+    }
 
-  .blog-content img {
-    max-width: 100%;
-    height: auto;
-    margin: 2rem 0;
-    border-radius: 0.5rem;
-  }
-  .badge-fdq {
-  background-color: #fff3e0;
-  color: #5c3b00;
-  border: 1px solid var(--fdq-orange);
-  font-weight: 500;
-}
-.btn-outline-primary:hover {
-  background-color: var(--fdq-blue);
-  color: white;
-  border-color: var(--fdq-blue);
-}
+    .nav-hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .nav-hamburger.open span:nth-child(2) { opacity: 0; }
+    .nav-hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
-</style>
-{% endblock %}
+    @media (max-width: 640px) {
+      .nav-links {
+        display: none;
+        position: absolute;
+        top: 60px;
+        left: 0;
+        right: 0;
+        background: rgba(17, 18, 16, 0.98);
+        border-bottom: 1px solid var(--border);
+        flex-direction: column;
+        gap: 0;
+        padding: 0.5rem 0;
+      }
 
-{% block content %}
-<nav class="container mb-3">
-  <div class="small text-muted">
-    <a href="{% url 'blog_list' %}" class="text-decoration-none text-muted">← Back to Articles</a>
+      .nav-links.open { display: flex; }
+
+      .nav-links li a {
+        display: block;
+        padding: 0.9rem clamp(1.5rem, 5vw, 4rem);
+        border-bottom: 1px solid var(--border);
+      }
+
+      .nav-hamburger { display: flex; }
+      .nav-cta { display: none; }
+    }
+
+    .nav-cta {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      background: var(--amber);
+      color: var(--bg);
+      padding: 0.45rem 1.1rem;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+
+    .nav-cta:hover { background: var(--amber-lt); }
+
+    /* ── BACK LINK ── */
+    .back-link {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 1.5rem clamp(1.5rem, 5vw, 4rem) 0;
+    }
+
+    .back-link a {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.68rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .back-link a:hover { color: var(--amber); }
+
+    /* ── ARTICLE HERO ── */
+    .article-hero {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: clamp(2rem, 5vw, 4rem) clamp(1.5rem, 5vw, 4rem);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .article-hero h1 {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 900;
+      font-size: clamp(2.2rem, 6vw, 4.5rem);
+      line-height: 0.95;
+      letter-spacing: -0.01em;
+      text-transform: uppercase;
+      color: var(--white);
+      margin-bottom: 1.2rem;
+      max-width: 900px;
+    }
+
+    .post-meta {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.68rem;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      margin-bottom: 1rem;
+    }
+
+    .post-tag {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.62rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.25rem 0.6rem;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      text-decoration: none;
+      display: inline-block;
+      margin-right: 0.4rem;
+      margin-bottom: 0.4rem;
+      transition: color 0.2s, border-color 0.2s;
+    }
+
+    .post-tag:hover { color: var(--white); border-color: var(--muted); }
+
+    /* ── BANNER ── */
+    .article-banner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 clamp(1.5rem, 5vw, 4rem);
+    }
+
+    .article-banner img {
+      width: 100%;
+      max-height: 500px;
+      object-fit: cover;
+      margin-top: 2rem;
+    }
+
+    /* ── ARTICLE CONTENT ── */
+    .article-content {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: clamp(2.5rem, 6vw, 4rem) clamp(1.5rem, 5vw, 4rem) clamp(4rem, 8vw, 6rem);
+    }
+
+    .article-content p {
+      color: var(--text);
+      font-size: 1.02rem;
+      line-height: 1.85;
+      margin-bottom: 1.4rem;
+    }
+
+    .article-content h2, .article-content h3 {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 800;
+      text-transform: uppercase;
+      color: var(--white);
+      margin-top: 2.5rem;
+      margin-bottom: 1rem;
+      padding-left: 1rem;
+      border-left: 3px solid var(--amber);
+    }
+
+    .article-content h2 { font-size: 1.6rem; }
+    .article-content h3 { font-size: 1.3rem; }
+
+    .article-content blockquote {
+      border-left: 3px solid var(--steel);
+      padding-left: 1.2rem;
+      margin: 2rem 0;
+      font-style: italic;
+      color: var(--muted);
+    }
+
+    .article-content ul, .article-content ol {
+      padding-left: 1.5rem;
+      margin-bottom: 1.4rem;
+    }
+
+    .article-content li {
+      color: var(--text);
+      font-size: 1.02rem;
+      line-height: 1.85;
+      margin-bottom: 0.5rem;
+    }
+
+    .article-content img {
+      max-width: 100%;
+      height: auto;
+      margin: 2rem 0;
+    }
+
+    .article-content a {
+      color: var(--amber);
+      text-decoration: none;
+    }
+
+    .article-content a:hover { color: var(--amber-lt); }
+
+    /* ── CTA BAND ── */
+    .cta-band {
+      background: var(--amber);
+      padding: clamp(3rem, 7vw, 5rem) clamp(1.5rem, 5vw, 4rem);
+    }
+
+    .cta-band-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .cta-band h2 {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 900;
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      text-transform: uppercase;
+      color: var(--bg);
+      line-height: 1;
+    }
+
+    .btn-dark {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.78rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      background: var(--bg);
+      color: var(--white);
+      padding: 0.9rem 2rem;
+      text-decoration: none;
+      display: inline-block;
+      white-space: nowrap;
+      transition: background 0.2s;
+    }
+
+    .btn-dark:hover { background: #222; }
+
+    .btn-primary {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.78rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      background: var(--amber);
+      color: var(--bg);
+      padding: 0.7rem 1.6rem;
+      text-decoration: none;
+      display: inline-block;
+      transition: background 0.2s, transform 0.15s;
+      border: none;
+    }
+
+    .btn-primary:hover { background: var(--amber-lt); transform: translateY(-1px); }
+
+    /* ── SHARE FAB ── */
+    .share-fab {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1050;
+      width: 48px;
+      height: 48px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--amber);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-decoration: none;
+      font-size: 1.1rem;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .share-fab:hover { background: var(--amber); color: var(--bg); }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2.5rem clamp(1.5rem, 5vw, 4rem);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    footer .footer-logo {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 800;
+      font-size: 1.05rem;
+      letter-spacing: 0.08em;
+      color: var(--amber);
+      text-transform: uppercase;
+    }
+
+    footer .footer-copy {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    footer .footer-links {
+      display: flex;
+      gap: 1.5rem;
+      list-style: none;
+    }
+
+    footer .footer-links a {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-decoration: none;
+    }
+
+    footer .footer-links a:hover { color: var(--white); }
+
+    @media (max-width: 480px) {
+      footer {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1.2rem;
+      }
+
+      .footer-links {
+        flex-wrap: wrap;
+        gap: 1rem;
+      }
+
+      .cta-band-inner {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+
+    /* ── SCROLL ANIMATION ── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a href="/" class="nav-logo">FDQ</a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="/about/">What is FDQ</a></li>
+      <li><a href="/blog/">Blog</a></li>
+      <li><a href="/contact/">Contact</a></li>
+    </ul>
+    <a href="/accounts/login/" class="nav-cta">Login</a>
+    <button class="nav-hamburger" id="hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  <!-- BACK LINK -->
+  <div class="back-link">
+    <a href="/blog/">&larr; Back to Articles</a>
   </div>
-</nav>
 
-<!-- Banner -->
-{% if post.banner_image %}
-<section class="container mt-4" style="padding-bottom: 20px;">
-  <img src="{{ post.banner_image.url }}" alt="{{ post.title }}" class="blog-banner w-100">
-</section>
-{% endif %}
-    <!-- Hero Section -->
-<section class="blog-hero">
-  <div class="container">
-    <div class="row align-items-center g-4">
-      <div class="col-lg-8 mx-auto text-center">
-        <h1 class="mb-3">{{ post.title }}</h1>
-        <div class="blog-meta mb-3" style="color: #7d7d7d;">
-          ⏱️ Estimated reading time: {{ post.reading_time }} min
-        </div>
+  <!-- BANNER -->
+  {% if post.banner_image %}
+  <div class="article-banner">
+    <img src="{{ post.banner_image.url }}" alt="{{ post.title }}">
+  </div>
+  {% endif %}
 
+  <!-- ARTICLE HERO -->
+  <div class="article-hero reveal">
+    <h1>{{ post.title }}</h1>
+    <p class="post-meta">{{ post.reading_time }} min read</p>
+    {% if post.tags.all %}
+    <div>
+      {% for tag in post.tags.all %}
+        <a href="/blog/?tag={{ tag.name }}" class="post-tag">{{ tag.name }}</a>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
 
+  <!-- ARTICLE CONTENT -->
+  <div class="article-content reveal">
+    {{ post.content|safe }}
+  </div>
 
-
-        {% if post.tags.all %}
-        <div class="blog-tags mb-3">
-          {% for tag in post.tags.all %}
-            <a href="{% url 'blog_list' %}?tag={{ tag.name }}" class="badge rounded-pill px-3 py-2 badge-fdq">
-              {{ tag.name }}
-            </a>
-          {% endfor %}
-        </div>
-        {% endif %}
-      </div>
+  <!-- CTA BAND -->
+  <div class="cta-band">
+    <div class="cta-band-inner">
+      <h2>Ready to bring FDQ<br/>to your team?</h2>
+      <a href="/about/" class="btn-dark">What is FDQ</a>
     </div>
   </div>
-</section>
 
-<!-- Content -->
-<section class="container blog-body">
-  <div class="row justify-content-center">
-    <div class="col-lg-10 col-xl-8">
-      <div class="blog-content">
-        {{ post.content|safe }}
-      </div>
-    </div>
-  </div>
-</section>
-<section class="container text-center mt-5 pt-5 border-top">
-  <h5 class="fw-bold mb-3">Ready to bring FDQ to your team?</h5>
-  <a href="{% url 'about' %}" class="btn btn-primary btn-lg px-4">What is FDQ</a>
-</section>
-<a href="https://www.linkedin.com/sharing/share-offsite/?url={{ request.build_absolute_uri }}"
-   target="_blank"
-   rel="noopener noreferrer"
-   class="btn btn-outline-primary shadow-lg rounded-circle"
-   style="
-     position: fixed;
-     bottom: 20px;
-     right: 20px;
-     z-index: 1050;
-     width: 52px;
-     height: 52px;
-     display: flex;
-     justify-content: center;
-     align-items: center;
-     font-size: 1.25rem;
-   ">
-  <i class="bi bi-linkedin"></i>
-</a>
+  <!-- SHARE FAB -->
+  <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ request.build_absolute_uri }}"
+     target="_blank"
+     rel="noopener noreferrer"
+     class="share-fab"
+     title="Share on LinkedIn">
+    in
+  </a>
 
-{% endblock %}
+  <!-- FOOTER -->
+  <footer>
+    <span class="footer-logo">Field-Driven Quality</span>
+    <ul class="footer-links">
+      <li><a href="/about/">About</a></li>
+      <li><a href="/blog/">Blog</a></li>
+      <li><a href="/contact/">Contact</a></li>
+      <li><a href="/accounts/login/">Login</a></li>
+    </ul>
+    <span class="footer-copy">&copy; 2025 Field-Driven Quality</span>
+  </footer>
+
+  <script>
+    const hamburger = document.getElementById('hamburger');
+    const navLinks = document.getElementById('navLinks');
+    hamburger.addEventListener('click', () => {
+      hamburger.classList.toggle('open');
+      navLinks.classList.toggle('open');
+    });
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>

@@ -1,123 +1,655 @@
-{% extends "fdq_base.html" %}
-{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Blog | Field-Driven Quality</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
 
-{% block title %}FDQ Blog{% endblock %}
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-{% block extra_styles %}
-  .blog-card {
-  border-radius: 1rem;
-  overflow: hidden;
-  background: #fff;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
-.blog-card:hover {
-  transform: scale(1.01);
-  box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.15);
-}
+    :root {
+      --bg:       #111210;
+      --surface:  #1a1c19;
+      --surface2: #222420;
+      --border:   #2e3129;
+      --text:     #ddd9cf;
+      --muted:    #888880;
+      --amber:    #d4832a;
+      --amber-lt: #e8a04a;
+      --amber-dk: #a0601c;
+      --steel:    #3d5a72;
+      --white:    #f2ede4;
+    }
 
-.blog-card .banner {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
+    html { scroll-behavior: smooth; }
 
-.blog-card-body {
-  padding: 1.25rem;
-  display: flex;
-  flex-direction: column;
-  flex-grow: 1;
-}
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Barlow', sans-serif;
+      font-weight: 400;
+      font-size: 17px;
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+    }
 
-.text-truncate-multiline {
-  display: -webkit-box;
-  -webkit-line-clamp: 5; /* Show 5 lines max */
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
+    /* ── NAV ── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(17, 18, 16, 0.92);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 clamp(1.5rem, 5vw, 4rem);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 60px;
+    }
 
-{% endblock %}
+    .nav-logo {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 800;
+      font-size: 1.3rem;
+      letter-spacing: 0.08em;
+      color: var(--amber);
+      text-decoration: none;
+      text-transform: uppercase;
+    }
 
-{% block content %}
-<section class="container py-5">
-  <h1 class="text-uppercase fw-bold text-center mb-5">From the Field</h1>
+    .nav-links {
+      display: flex;
+      gap: 2rem;
+      list-style: none;
+    }
 
-  <!-- Tag Filters -->
-  <div class="text-center mb-4">
-    <a href="{% url 'blog_list' %}" class="btn btn-sm {% if not active_tag %}btn-dark{% else %}btn-outline-dark{% endif %} me-2">All</a>
-    {% for tag in tags %}
-      <a href="?tag={{ tag.name }}" class="btn btn-sm {% if active_tag == tag.name %}btn-dark{% else %}btn-outline-dark{% endif %} me-2">
-        {{ tag.name }}
-      </a>
-    {% endfor %}
+    .nav-links a {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--white); }
+
+    .nav-hamburger {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px;
+    }
+
+    .nav-hamburger span {
+      display: block;
+      width: 22px;
+      height: 2px;
+      background: var(--muted);
+      transition: all 0.25s;
+    }
+
+    .nav-hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .nav-hamburger.open span:nth-child(2) { opacity: 0; }
+    .nav-hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    @media (max-width: 640px) {
+      .nav-links {
+        display: none;
+        position: absolute;
+        top: 60px;
+        left: 0;
+        right: 0;
+        background: rgba(17, 18, 16, 0.98);
+        border-bottom: 1px solid var(--border);
+        flex-direction: column;
+        gap: 0;
+        padding: 0.5rem 0;
+      }
+
+      .nav-links.open { display: flex; }
+
+      .nav-links li a {
+        display: block;
+        padding: 0.9rem clamp(1.5rem, 5vw, 4rem);
+        border-bottom: 1px solid var(--border);
+      }
+
+      .nav-hamburger { display: flex; }
+      .nav-cta { display: none; }
+    }
+
+    .nav-cta {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.72rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      background: var(--amber);
+      color: var(--bg);
+      padding: 0.45rem 1.1rem;
+      text-decoration: none;
+      transition: background 0.2s;
+    }
+
+    .nav-cta:hover { background: var(--amber-lt); }
+
+    /* ── PAGE HERO ── */
+    .page-hero {
+      padding: clamp(4rem, 10vw, 7rem) clamp(1.5rem, 5vw, 4rem) clamp(3rem, 6vw, 5rem);
+      max-width: 1200px;
+      margin: 0 auto;
+      border-bottom: 1px solid var(--border);
+    }
+    .page-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--amber);
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .page-label::before {
+      content: '';
+      display: block;
+      width: 2rem;
+      height: 1px;
+      background: var(--amber);
+    }
+    .page-hero h1 {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 900;
+      font-size: clamp(2.8rem, 7vw, 5.5rem);
+      line-height: 0.95;
+      letter-spacing: -0.01em;
+      text-transform: uppercase;
+      color: var(--white);
+      margin-bottom: 1.2rem;
+    }
+    .page-hero h1 em { font-style: normal; color: var(--amber); }
+    .page-sub {
+      font-size: clamp(1rem, 2vw, 1.15rem);
+      color: var(--muted);
+      max-width: 560px;
+      line-height: 1.7;
+      font-weight: 300;
+    }
+
+    /* ── SECTION BASE ── */
+    .section-label {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.68rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--amber);
+      margin-bottom: 2.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .section-label::before {
+      content: '';
+      display: block;
+      width: 1.5rem;
+      height: 1px;
+      background: var(--amber);
+    }
+
+    .page-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: clamp(3rem, 7vw, 5rem) clamp(1.5rem, 5vw, 4rem);
+    }
+
+    /* ── TAG FILTERS ── */
+    .tag-filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      margin-bottom: 3rem;
+    }
+
+    .tag-btn {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.68rem;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.45rem 1rem;
+      text-decoration: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      background: transparent;
+      transition: all 0.2s;
+    }
+
+    .tag-btn:hover { color: var(--white); border-color: var(--muted); }
+    .tag-btn.active { background: var(--amber); color: var(--bg); border-color: var(--amber); }
+
+    /* ── FEATURED POST ── */
+    .featured-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--amber);
+      margin-bottom: 3rem;
+      overflow: hidden;
+    }
+
+    .featured-card img {
+      width: 100%;
+      max-height: 400px;
+      object-fit: cover;
+    }
+
+    .featured-body {
+      padding: clamp(1.5rem, 4vw, 2.5rem);
+    }
+
+    .featured-body h3 {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 800;
+      font-size: clamp(1.4rem, 3vw, 2rem);
+      text-transform: uppercase;
+      color: var(--white);
+      margin-bottom: 0.6rem;
+    }
+
+    .post-meta {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.68rem;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      margin-bottom: 0.8rem;
+    }
+
+    .post-tag {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.62rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 0.25rem 0.6rem;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      display: inline-block;
+      margin-right: 0.4rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .featured-summary {
+      color: var(--muted);
+      font-size: 0.95rem;
+      line-height: 1.7;
+      margin: 1rem 0;
+    }
+
+    .btn-primary {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.78rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      background: var(--amber);
+      color: var(--bg);
+      padding: 0.7rem 1.6rem;
+      text-decoration: none;
+      display: inline-block;
+      transition: background 0.2s, transform 0.15s;
+      border: none;
+    }
+
+    .btn-primary:hover { background: var(--amber-lt); transform: translateY(-1px); }
+
+    /* ── BLOG GRID ── */
+    .blog-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: var(--border);
+    }
+
+    @media (max-width: 960px) {
+      .blog-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 560px) {
+      .blog-grid { grid-template-columns: 1fr; }
+    }
+
+    .blog-card {
+      background: var(--surface);
+      display: flex;
+      flex-direction: column;
+      transition: background 0.2s;
+    }
+
+    .blog-card:hover { background: var(--surface2); }
+
+    .blog-card a {
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .blog-card img {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+    }
+
+    .blog-card-body {
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+    }
+
+    .blog-card-body h5 {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 1.15rem;
+      text-transform: uppercase;
+      color: var(--white);
+      margin-bottom: 0.5rem;
+    }
+
+    .blog-card-body .post-meta {
+      margin-bottom: 0.6rem;
+    }
+
+    .card-summary {
+      font-size: 0.88rem;
+      color: var(--muted);
+      line-height: 1.6;
+      display: -webkit-box;
+      -webkit-line-clamp: 4;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      margin-bottom: 1rem;
+    }
+
+    .read-more {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.68rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--amber);
+      margin-top: auto;
+    }
+
+    .empty-msg {
+      grid-column: 1 / -1;
+      background: var(--surface);
+      padding: 3rem;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    /* ── CTA BAND ── */
+    .cta-band {
+      background: var(--amber);
+      padding: clamp(3rem, 7vw, 5rem) clamp(1.5rem, 5vw, 4rem);
+    }
+
+    .cta-band-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .cta-band h2 {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 900;
+      font-size: clamp(1.8rem, 4vw, 3rem);
+      text-transform: uppercase;
+      color: var(--bg);
+      line-height: 1;
+    }
+
+    .btn-dark {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.78rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      background: var(--bg);
+      color: var(--white);
+      padding: 0.9rem 2rem;
+      text-decoration: none;
+      display: inline-block;
+      white-space: nowrap;
+      transition: background 0.2s;
+    }
+
+    .btn-dark:hover { background: #222; }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2.5rem clamp(1.5rem, 5vw, 4rem);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    footer .footer-logo {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 800;
+      font-size: 1.05rem;
+      letter-spacing: 0.08em;
+      color: var(--amber);
+      text-transform: uppercase;
+    }
+
+    footer .footer-copy {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    footer .footer-links {
+      display: flex;
+      gap: 1.5rem;
+      list-style: none;
+    }
+
+    footer .footer-links a {
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-decoration: none;
+    }
+
+    footer .footer-links a:hover { color: var(--white); }
+
+    @media (max-width: 480px) {
+      footer {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1.2rem;
+      }
+
+      .footer-links {
+        flex-wrap: wrap;
+        gap: 1rem;
+      }
+
+      .cta-band-inner {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+
+    /* ── SCROLL ANIMATION ── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .stagger > * {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+
+    .stagger.visible > *:nth-child(1) { opacity: 1; transform: none; transition-delay: 0.05s; }
+    .stagger.visible > *:nth-child(2) { opacity: 1; transform: none; transition-delay: 0.15s; }
+    .stagger.visible > *:nth-child(3) { opacity: 1; transform: none; transition-delay: 0.25s; }
+    .stagger.visible > *:nth-child(4) { opacity: 1; transform: none; transition-delay: 0.35s; }
+    .stagger.visible > *:nth-child(5) { opacity: 1; transform: none; transition-delay: 0.45s; }
+    .stagger.visible > *:nth-child(6) { opacity: 1; transform: none; transition-delay: 0.55s; }
+
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <a href="/" class="nav-logo">FDQ</a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="/about/">What is FDQ</a></li>
+      <li><a href="/blog/">Blog</a></li>
+      <li><a href="/contact/">Contact</a></li>
+    </ul>
+    <a href="/accounts/login/" class="nav-cta">Login</a>
+    <button class="nav-hamburger" id="hamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  <!-- PAGE HERO -->
+  <div class="page-hero reveal">
+    <p class="page-label">From the Field</p>
+    <h1>FDQ <em>Blog.</em></h1>
+    <p class="page-sub">Lessons, insights, and hard-earned perspective on construction quality from the field.</p>
   </div>
 
-  <!-- Featured Post -->
-  {% if featured_post %}
-  <div class="card shadow border-0 mb-5" style="border-left: 8px solid var(--fdq-orange);">
-    {% if featured_post.banner_image %}
-      <img src="{{ featured_post.banner_image.url }}" class="banner" alt="{{ featured_post.title }}">
-    {% endif %}
-    <div class="card-body">
-      <h3 class="fw-bold mb-2">{{ featured_post.title }}</h3>
-      <p class="text-muted small mb-1">
-        ⏱️ {{ featured_post.reading_time }} min read &nbsp;&bull;&nbsp;
-      </p>
-      <div class="mb-2">
-        {% for tag in featured_post.tags.all %}
-          <span class="badge bg-secondary me-1">{{ tag.name }}</span>
-        {% endfor %}
+  <div class="page-content">
+
+    <!-- Tag Filters -->
+    <div class="tag-filters reveal">
+      <a href="/blog/" class="tag-btn {% if not active_tag %}active{% endif %}">All</a>
+      {% for tag in tags %}
+        <a href="?tag={{ tag.name }}" class="tag-btn {% if active_tag == tag.name %}active{% endif %}">{{ tag.name }}</a>
+      {% endfor %}
+    </div>
+
+    <!-- Featured Post -->
+    {% if featured_post %}
+    <div class="featured-card reveal">
+      {% if featured_post.banner_image %}
+        <img src="{{ featured_post.banner_image.url }}" alt="{{ featured_post.title }}">
+      {% endif %}
+      <div class="featured-body">
+        <h3>{{ featured_post.title }}</h3>
+        <p class="post-meta">{{ featured_post.reading_time }} min read</p>
+        <div>
+          {% for tag in featured_post.tags.all %}
+            <span class="post-tag">{{ tag.name }}</span>
+          {% endfor %}
+        </div>
+        <p class="featured-summary">{{ featured_post.summary|striptags }}</p>
+        <a href="/blog/{{ featured_post.slug }}/" class="btn-primary">Read Article</a>
       </div>
-      <p class="text-muted">{{ featured_post.summary|safe }}</p>
-      <a href="{% url 'blog_detail' slug=featured_post.slug %}" class="btn btn-outline-dark mt-2">Read Article</a>
+    </div>
+    {% endif %}
+
+    <!-- Blog Grid -->
+    <div class="blog-grid stagger">
+      {% for post in posts %}
+      <div class="blog-card">
+        <a href="/blog/{{ post.slug }}/">
+          {% if post.banner_image %}
+            <img src="{{ post.banner_image.url }}" alt="{{ post.title }}">
+          {% endif %}
+          <div class="blog-card-body">
+            <h5>{{ post.title }}</h5>
+            <p class="post-meta">{{ post.reading_time }} min read</p>
+            <div style="margin-bottom: 0.6rem;">
+              {% for tag in post.tags.all %}
+                <span class="post-tag">{{ tag.name }}</span>
+              {% endfor %}
+            </div>
+            <p class="card-summary">{{ post.summary|striptags }}</p>
+            <span class="read-more">Read More &rarr;</span>
+          </div>
+        </a>
+      </div>
+      {% empty %}
+        <p class="empty-msg">No blog posts found for this tag.</p>
+      {% endfor %}
+    </div>
+
+  </div>
+
+  <!-- CTA BAND -->
+  <div class="cta-band">
+    <div class="cta-band-inner">
+      <h2>Quality starts<br/>in the field.</h2>
+      <a href="/contact/" class="btn-dark">Get Started with FDQ</a>
     </div>
   </div>
-  {% endif %}
 
-  <!-- Regular Posts Grid -->
-<div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
-  {% for post in posts %}
-  <div class="col">
-    <a href="{% url 'blog_detail' slug=post.slug %}" class="text-decoration-none text-dark">
-      <div class="blog-card h-100 shadow-sm border border-light d-flex flex-column">
+  <!-- FOOTER -->
+  <footer>
+    <span class="footer-logo">Field-Driven Quality</span>
+    <ul class="footer-links">
+      <li><a href="/about/">About</a></li>
+      <li><a href="/blog/">Blog</a></li>
+      <li><a href="/contact/">Contact</a></li>
+      <li><a href="/accounts/login/">Login</a></li>
+    </ul>
+    <span class="footer-copy">&copy; 2025 Field-Driven Quality</span>
+  </footer>
 
-        {% if post.banner_image %}
-          <div class="ratio ratio-16x9">
-            <img src="{{ post.banner_image.url }}" class="banner rounded-0" alt="{{ post.title }}" style="object-fit: cover;">
-          </div>
-        {% endif %}
+  <script>
+    const hamburger = document.getElementById('hamburger');
+    const navLinks = document.getElementById('navLinks');
+    hamburger.addEventListener('click', () => {
+      hamburger.classList.toggle('open');
+      navLinks.classList.toggle('open');
+    });
 
-        <div class="blog-card-body d-flex flex-column flex-grow-1">
-          <h5 class="fw-bold mb-2">{{ post.title }}</h5>
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.1 });
 
-          <div class="blog-meta mb-2">
-            ⏱️ {{ post.reading_time }} min read
-          </div>
-
-          <div class="mb-2">
-            {% for tag in post.tags.all %}
-              <span class="badge bg-light text-dark border me-1">{{ tag.name }}</span>
-            {% endfor %}
-          </div>
-
-          <p class="text-muted small mb-3 text-truncate-multiline">
-            {{ post.summary|striptags }}
-          </p>
-
-          <div class="mt-auto">
-            <span class="btn btn-sm btn-outline-dark">Read More</span>
-          </div>
-        </div>
-      </div>
-    </a>
-  </div>
-  {% empty %}
-    <p class="text-center">No blog posts found for this tag.</p>
-  {% endfor %}
-</div>
-
-</section>
-{% endblock %}
+    document.querySelectorAll('.reveal, .stagger').forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>
