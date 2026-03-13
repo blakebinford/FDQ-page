@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+
+{% block title %}Certificate | Field-Driven Quality{% endblock %}
+
+{% block extra_styles %}
+.cert-wrap {
+  max-width: 700px;
+  margin: 0 auto;
+  padding: clamp(3rem, 7vw, 5rem) clamp(1.5rem, 5vw, 4rem);
+}
+
+.cert-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  text-align: center;
+  padding: clamp(3rem, 6vw, 4rem) clamp(2rem, 4vw, 3rem);
+  position: relative;
+}
+
+.cert-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: var(--amber);
+}
+
+.cert-brand {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 800;
+  font-size: 1.1rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--amber);
+  margin-bottom: 0.3rem;
+}
+
+.cert-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 2.5rem;
+}
+
+.cert-name {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 900;
+  font-size: clamp(2.2rem, 5vw, 3.2rem);
+  text-transform: uppercase;
+  color: var(--white);
+  line-height: 1;
+  margin-bottom: 0.8rem;
+}
+
+.cert-completed {
+  font-size: 0.95rem;
+  color: var(--muted);
+  margin-bottom: 0.3rem;
+}
+
+.cert-tier {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 800;
+  font-size: 1.6rem;
+  text-transform: uppercase;
+  color: var(--amber);
+  margin-bottom: 2rem;
+}
+
+.cert-date {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  margin-bottom: 0.4rem;
+}
+
+.cert-id {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  word-break: break-all;
+}
+
+.cert-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 2.5rem;
+}
+
+.cert-verify-link {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  text-align: center;
+  margin-top: 1.5rem;
+}
+
+.cert-verify-link a {
+  color: var(--amber);
+  text-decoration: none;
+}
+
+.cert-verify-link a:hover {
+  color: var(--amber-lt);
+}
+
+.cert-share {
+  text-align: center;
+  margin-top: 1.5rem;
+}
+
+.cert-share a {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-decoration: none;
+  border: 1px solid var(--border);
+  padding: 0.5rem 1.2rem;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.cert-share a:hover {
+  color: var(--white);
+  border-color: var(--muted);
+}
+{% endblock %}
+
+{% block content %}
+<div class="cert-wrap reveal">
+  <div class="cert-card">
+    <div class="cert-brand">Field-Driven Quality</div>
+    <div class="cert-label">Certificate of Completion</div>
+
+    <div class="cert-name">{{ user.first_name }} {{ user.last_name }}</div>
+    <div class="cert-completed">has successfully completed</div>
+    <div class="cert-tier">{{ tier.name }}</div>
+
+    <div class="cert-date">Issued: {{ certificate.issued_at|date:"F j, Y" }}</div>
+    <div class="cert-id">ID: {{ certificate.certificate_id }}</div>
+  </div>
+
+  <div class="cert-actions">
+    <a href="{% url 'lms:certificate_pdf' tier.slug %}" class="btn-primary">Download PDF</a>
+    <a href="{% url 'lms:learn' tier.slug %}" class="btn-secondary">Back to Course</a>
+  </div>
+
+  <div class="cert-verify-link">
+    Verify: <a href="{% url 'lms:certificate_verify' certificate.certificate_id %}">fielddrivenquality.com/certifications/verify/{{ certificate.certificate_id }}/</a>
+  </div>
+
+  <div class="cert-share">
+    <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ request.build_absolute_uri }}" target="_blank" rel="noopener">Share on LinkedIn</a>
+  </div>
+</div>
+{% endblock %}

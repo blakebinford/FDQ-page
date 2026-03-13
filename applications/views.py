@@ -109,7 +109,7 @@ def _send_application_received_email(user):
 
 
 def _send_new_application_admin_email(user, application):
-    name = user.get_full_name() or user.email
+    name = f'{user.first_name} {user.last_name}'.strip() or user.email
     admin_url = f'{settings.SITE_URL}/admin/applications/application/{application.id}/change/'
 
     # Build work history summary
@@ -135,7 +135,7 @@ def _send_new_application_admin_email(user, application):
 
 
 def _send_reapply_admin_email(user, application):
-    name = user.get_full_name() or user.email
+    name = f'{user.first_name} {user.last_name}'.strip() or user.email
     admin_url = f'{settings.SITE_URL}/admin/applications/application/{application.id}/change/'
     try:
         send_mail(

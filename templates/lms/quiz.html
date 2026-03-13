@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ quiz.title }} | Field-Driven Quality{% endblock %}
+
+{% block extra_styles %}
+.quiz-wrap {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: clamp(2rem, 5vw, 3rem) clamp(1.5rem, 5vw, 4rem);
+}
+
+.quiz-header {
+  margin-bottom: 2.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.quiz-header h1 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 900;
+  font-size: clamp(2rem, 5vw, 3rem);
+  text-transform: uppercase;
+  color: var(--white);
+  margin-bottom: 0.5rem;
+}
+
+.quiz-info {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.question-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: clamp(1.5rem, 3vw, 2rem);
+  margin-bottom: 1rem;
+}
+
+.question-number {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--amber);
+  margin-bottom: 0.6rem;
+}
+
+.question-text {
+  font-size: 1rem;
+  color: var(--white);
+  line-height: 1.6;
+  margin-bottom: 1.2rem;
+  font-weight: 500;
+}
+
+.choice-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.choice-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.7rem 1rem;
+  cursor: pointer;
+  transition: background 0.15s;
+  border: 1px solid transparent;
+}
+
+.choice-label:hover {
+  background: var(--surface2);
+}
+
+.choice-label input[type="radio"] {
+  margin-top: 0.15rem;
+  accent-color: var(--amber);
+  flex-shrink: 0;
+}
+
+.choice-text {
+  font-size: 0.93rem;
+  color: var(--text);
+  line-height: 1.5;
+}
+
+.quiz-submit {
+  margin-top: 2rem;
+  text-align: center;
+}
+{% endblock %}
+
+{% block content %}
+<div class="quiz-wrap reveal">
+  <div class="quiz-header">
+    <h1>{{ quiz.title }}</h1>
+    <div class="quiz-info">
+      <span>{{ questions|length }} questions</span>
+      <span>Passing score: {{ quiz.passing_score }}%</span>
+    </div>
+  </div>
+
+  <form method="post">
+    {% csrf_token %}
+    {% for question in questions %}
+    <div class="question-section">
+      <div class="question-number">Question {{ forloop.counter }}</div>
+      <div class="question-text">{{ question.text }}</div>
+      <div class="choice-group">
+        <label class="choice-label">
+          <input type="radio" name="question_{{ question.pk }}" value="a" required>
+          <span class="choice-text">{{ question.choice_a }}</span>
+        </label>
+        <label class="choice-label">
+          <input type="radio" name="question_{{ question.pk }}" value="b">
+          <span class="choice-text">{{ question.choice_b }}</span>
+        </label>
+        <label class="choice-label">
+          <input type="radio" name="question_{{ question.pk }}" value="c">
+          <span class="choice-text">{{ question.choice_c }}</span>
+        </label>
+        <label class="choice-label">
+          <input type="radio" name="question_{{ question.pk }}" value="d">
+          <span class="choice-text">{{ question.choice_d }}</span>
+        </label>
+      </div>
+    </div>
+    {% endfor %}
+
+    <div class="quiz-submit">
+      <button type="submit" class="btn-primary">Submit Quiz</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,196 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ lesson.title }} | Field-Driven Quality{% endblock %}
+
+{% block extra_styles %}
+.lesson-wrap {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: clamp(2rem, 5vw, 3rem) clamp(1.5rem, 5vw, 4rem);
+}
+
+.lesson-meta {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.5rem;
+}
+
+.lesson-meta-tag {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--amber);
+}
+
+.lesson-meta-dot {
+  width: 3px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--muted);
+}
+
+.lesson-meta-info {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.lesson-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 900;
+  font-size: clamp(2rem, 5vw, 3rem);
+  text-transform: uppercase;
+  color: var(--white);
+  line-height: 1;
+  margin-bottom: 0.8rem;
+}
+
+.lesson-position {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.72rem;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+  margin-bottom: 2.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.lesson-body {
+  font-size: 1rem;
+  line-height: 1.8;
+  color: var(--text);
+  margin-bottom: 3rem;
+}
+
+.lesson-body h2, .lesson-body h3, .lesson-body h4 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--white);
+  margin-top: 2rem;
+  margin-bottom: 0.8rem;
+}
+
+.lesson-body h2 { font-size: 1.5rem; }
+.lesson-body h3 { font-size: 1.2rem; }
+
+.lesson-body p { margin-bottom: 1.2rem; }
+
+.lesson-body ul, .lesson-body ol {
+  margin-bottom: 1.2rem;
+  padding-left: 1.5rem;
+}
+
+.lesson-body li { margin-bottom: 0.4rem; }
+
+.lesson-body strong { color: var(--white); font-weight: 600; }
+
+.lesson-body blockquote {
+  border-left: 3px solid var(--amber);
+  padding: 1rem 1.5rem;
+  margin: 1.5rem 0;
+  background: var(--surface);
+  color: var(--muted);
+  font-style: italic;
+}
+
+.lesson-complete-badge {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #81c784;
+  background: rgba(76, 175, 80, 0.1);
+  border: 1px solid rgba(76, 175, 80, 0.3);
+  padding: 0.6rem 1.2rem;
+  display: inline-block;
+  margin-bottom: 2rem;
+}
+
+.lesson-cta {
+  border-top: 1px solid var(--border);
+  padding-top: 2rem;
+  margin-bottom: 2rem;
+}
+
+.lesson-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  border-top: 1px solid var(--border);
+  padding-top: 2rem;
+  flex-wrap: wrap;
+}
+
+.lesson-nav a {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.75rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.lesson-nav a:hover { color: var(--white); }
+
+.lesson-nav .spacer { flex: 1; }
+{% endblock %}
+
+{% block content %}
+<div class="lesson-wrap reveal">
+  <div class="lesson-meta">
+    <span class="lesson-meta-tag">{{ lesson.module.title }}</span>
+    <span class="lesson-meta-dot"></span>
+    <span class="lesson-meta-info">{{ lesson.estimated_minutes }} min read</span>
+  </div>
+
+  <h1 class="lesson-title">{{ lesson.title }}</h1>
+
+  <div class="lesson-position">
+    Lesson {{ lesson_number }} of {{ total_lessons }} &middot;
+    Module progress: {{ module_completed }}/{{ module_total }}
+  </div>
+
+  {% if is_completed %}
+  <div class="lesson-complete-badge">&#10003; Completed</div>
+  {% endif %}
+
+  <div class="lesson-body">
+    {{ lesson.body|safe }}
+  </div>
+
+  <div class="lesson-cta">
+    {% if not is_completed %}
+    <form method="post">
+      {% csrf_token %}
+      <button type="submit" class="btn-primary">Mark Complete &amp; Continue &rarr;</button>
+    </form>
+    {% elif next_lesson %}
+    <a href="{% url 'lms:lesson' tier.slug next_number %}" class="btn-primary">Next Lesson &rarr;</a>
+    {% else %}
+    <a href="{% url 'lms:learn' tier.slug %}" class="btn-primary">Back to Course &rarr;</a>
+    {% endif %}
+  </div>
+
+  <div class="lesson-nav">
+    {% if prev_lesson %}
+      <a href="{% url 'lms:lesson' tier.slug prev_number %}">&larr; {{ prev_lesson.title }}</a>
+    {% else %}
+      <span></span>
+    {% endif %}
+    <span class="spacer"></span>
+    {% if next_lesson %}
+      <a href="{% url 'lms:lesson' tier.slug next_number %}">{{ next_lesson.title }} &rarr;</a>
+    {% else %}
+      <a href="{% url 'lms:learn' tier.slug %}">Back to Course &rarr;</a>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

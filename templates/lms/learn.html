@@ -1,0 +1,258 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ tier.name }} | Field-Driven Quality{% endblock %}
+
+{% block extra_styles %}
+.learn-layout {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: clamp(2rem, 5vw, 3rem) clamp(1.5rem, 5vw, 4rem);
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 3rem;
+  align-items: start;
+}
+
+@media (max-width: 800px) {
+  .learn-layout {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+}
+
+/* Sidebar */
+.learn-sidebar {
+  position: sticky;
+  top: 80px;
+}
+
+@media (max-width: 800px) {
+  .learn-sidebar { position: static; }
+}
+
+.sidebar-module {
+  margin-bottom: 1.5rem;
+}
+
+.sidebar-module-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--amber);
+  margin-bottom: 0.6rem;
+  padding-bottom: 0.4rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.sidebar-lesson {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 0;
+  font-size: 0.88rem;
+  color: var(--text);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.sidebar-lesson:hover { color: var(--white); }
+
+.sidebar-check {
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 0.65rem;
+  color: transparent;
+}
+
+.sidebar-check.done {
+  background: rgba(76, 175, 80, 0.2);
+  border-color: #81c784;
+  color: #81c784;
+}
+
+/* Main content */
+.learn-main h1 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 900;
+  font-size: clamp(2rem, 5vw, 3rem);
+  text-transform: uppercase;
+  color: var(--white);
+  margin-bottom: 0.5rem;
+}
+
+.learn-main h1 em { font-style: normal; color: var(--amber); }
+
+.learn-progress-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  flex-wrap: wrap;
+}
+
+.learn-pct {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+.progress-bar-track {
+  flex: 1;
+  min-width: 120px;
+  height: 6px;
+  background: var(--surface2);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: var(--amber);
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+
+.learn-continue {
+  margin-bottom: 3rem;
+}
+
+.quiz-block {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: clamp(1.5rem, 3vw, 2rem);
+  margin-top: 2rem;
+}
+
+.quiz-block h3 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 800;
+  font-size: 1.3rem;
+  text-transform: uppercase;
+  color: var(--white);
+  margin-bottom: 0.5rem;
+}
+
+.quiz-block p {
+  font-size: 0.9rem;
+  color: var(--muted);
+  margin-bottom: 1rem;
+  line-height: 1.6;
+}
+
+.quiz-locked {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 0.7rem 1.5rem;
+  border: 1px solid var(--border);
+  display: inline-block;
+}
+
+.cert-result {
+  background: rgba(76, 175, 80, 0.1);
+  border: 1px solid rgba(76, 175, 80, 0.3);
+  padding: clamp(1.5rem, 3vw, 2rem);
+  margin-top: 2rem;
+}
+
+.cert-result h3 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 800;
+  font-size: 1.3rem;
+  text-transform: uppercase;
+  color: #81c784;
+  margin-bottom: 0.5rem;
+}
+
+.cert-result p {
+  font-size: 0.9rem;
+  color: var(--text);
+  margin-bottom: 1rem;
+}
+
+.cert-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+{% endblock %}
+
+{% block content %}
+<div class="page-hero reveal">
+  <p class="page-label">{{ tier.name }}</p>
+  <h1>Learn<em>.</em></h1>
+  <p class="page-sub">Work through each module and complete every lesson to unlock the certification quiz.</p>
+</div>
+
+<div class="learn-layout">
+  <!-- Sidebar -->
+  <aside class="learn-sidebar reveal">
+    {% for md in module_data %}
+    <div class="sidebar-module">
+      <div class="sidebar-module-title">{{ md.module.title }}</div>
+      {% for ld in md.lessons %}
+      <a href="{% url 'lms:lesson' tier.slug ld.number %}" class="sidebar-lesson">
+        <span class="sidebar-check {% if ld.completed %}done{% endif %}">{% if ld.completed %}&#10003;{% endif %}</span>
+        {{ ld.lesson.title }}
+      </a>
+      {% endfor %}
+    </div>
+    {% endfor %}
+  </aside>
+
+  <!-- Main -->
+  <div class="learn-main reveal">
+    <h1>{{ tier.name }}<em>.</em></h1>
+    <div class="learn-progress-row">
+      <span class="learn-pct">{{ completed_count }}/{{ total_lessons }} lessons &middot; {{ pct }}%</span>
+      <div class="progress-bar-track">
+        <div class="progress-bar-fill" style="width: {{ pct }}%;"></div>
+      </div>
+    </div>
+
+    {% if first_incomplete %}
+    <div class="learn-continue">
+      <a href="{% url 'lms:lesson' tier.slug first_incomplete_number %}" class="btn-primary">Continue Learning &rarr;</a>
+    </div>
+    {% endif %}
+
+    {% if certificate %}
+    <div class="cert-result">
+      <h3>&#10003; Certified</h3>
+      <p>You have completed {{ tier.name }} and earned your certificate.</p>
+      <div class="cert-actions">
+        <a href="{% url 'lms:certificate' tier.slug %}" class="btn-primary">View Certificate</a>
+        <a href="{% url 'lms:certificate_pdf' tier.slug %}" class="btn-secondary">Download PDF</a>
+      </div>
+    </div>
+    {% elif all_complete %}
+    <div class="quiz-block">
+      <h3>Quiz Unlocked</h3>
+      {% if best_attempt %}
+        <p>You passed with {{ best_attempt.score }}%. Take the quiz again or view your results.</p>
+      {% else %}
+        <p>You've completed all lessons. You're ready to take the certification quiz.</p>
+      {% endif %}
+      <a href="{% url 'lms:quiz' tier.slug %}" class="btn-primary">Take the Quiz</a>
+    </div>
+    {% else %}
+    <div class="quiz-block">
+      <h3>Certification Quiz</h3>
+      <p>Complete all {{ total_lessons }} lessons to unlock the quiz. You have {{ completed_count }} done so far.</p>
+      <span class="quiz-locked">Locked &mdash; {{ remaining }} lessons remaining</span>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

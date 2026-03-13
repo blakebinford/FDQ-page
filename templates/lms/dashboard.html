@@ -2,12 +2,166 @@
 
 {% block title %}Dashboard | Field-Driven Quality{% endblock %}
 
+{% block extra_styles %}
+.dash-section {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: clamp(3rem, 7vw, 5rem) clamp(1.5rem, 5vw, 4rem);
+}
+
+.dash-section + .dash-section {
+  padding-top: 0;
+}
+
+.dash-heading {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 900;
+  font-size: clamp(1.6rem, 4vw, 2.2rem);
+  text-transform: uppercase;
+  color: var(--white);
+  margin-bottom: 1.5rem;
+}
+
+.tier-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: clamp(1.5rem, 3vw, 2rem);
+  margin-bottom: 1rem;
+}
+
+.tc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.tc-name {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 800;
+  font-size: 1.4rem;
+  text-transform: uppercase;
+  color: var(--white);
+}
+
+.tc-count {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.progress-bar-track {
+  width: 100%;
+  height: 6px;
+  background: var(--surface2);
+  border-radius: 3px;
+  margin-bottom: 1.2rem;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: var(--amber);
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+
+.tc-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.tc-actions .btn-primary,
+.tc-actions .btn-secondary {
+  padding: 0.7rem 1.5rem;
+  font-size: 0.72rem;
+}
+
+.cert-badge {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #81c784;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+}
+
+.empty-state p {
+  color: var(--muted);
+  font-size: 1rem;
+  margin-bottom: 2rem;
+}
+{% endblock %}
+
 {% block content %}
-<div class="center-wrap">
-  <div class="center-box reveal">
-    <h1>Your <em>dashboard.</em></h1>
-    <p class="center-sub">This page is coming soon. Your enrollments and course progress will appear here.</p>
+<div class="page-hero reveal">
+  <p class="page-label">Dashboard</p>
+  <h1>Your <em>progress.</em></h1>
+  <p class="page-sub">Track your certifications, continue where you left off, and download your certificates.</p>
+</div>
+
+{% if not active and not completed %}
+<div class="dash-section">
+  <div class="empty-state reveal">
+    <p>You don't have any enrollments yet. Browse our certifications to get started.</p>
     <a href="{% url 'lms:tier_list' %}" class="btn-primary">View Certifications</a>
   </div>
 </div>
+{% endif %}
+
+{% if active %}
+<div class="dash-section reveal">
+  <h2 class="dash-heading">Active Certifications</h2>
+  {% for entry in active %}
+  <div class="tier-card">
+    <div class="tc-header">
+      <span class="tc-name">{{ entry.tier.name }}</span>
+      <span class="tc-count">{{ entry.completed_lessons }} / {{ entry.total_lessons }} lessons</span>
+    </div>
+    <div class="progress-bar-track">
+      <div class="progress-bar-fill" style="width: {{ entry.pct }}%;"></div>
+    </div>
+    <div class="tc-actions">
+      {% if entry.all_complete %}
+        <a href="{% url 'lms:quiz' entry.tier.slug %}" class="btn-primary">Take the Quiz</a>
+      {% else %}
+        <a href="{% url 'lms:learn' entry.tier.slug %}" class="btn-primary">Continue Learning</a>
+      {% endif %}
+      <a href="{% url 'lms:learn' entry.tier.slug %}" class="btn-secondary">Course Overview</a>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% if completed %}
+<div class="dash-section reveal">
+  <h2 class="dash-heading">Completed Certifications</h2>
+  {% for entry in completed %}
+  <div class="tier-card">
+    <div class="tc-header">
+      <span class="tc-name">{{ entry.tier.name }}</span>
+      <span class="cert-badge">&#10003; Certified</span>
+    </div>
+    <div class="tc-actions">
+      <a href="{% url 'lms:certificate' entry.tier.slug %}" class="btn-primary">View Certificate</a>
+      <a href="{% url 'lms:certificate_pdf' entry.tier.slug %}" class="btn-secondary">Download PDF</a>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
 {% endblock %}

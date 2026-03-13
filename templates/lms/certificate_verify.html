@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+
+{% block title %}Verify Certificate | Field-Driven Quality{% endblock %}
+
+{% block extra_styles %}
+.verify-wrap {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: clamp(3rem, 7vw, 5rem) clamp(1.5rem, 5vw, 4rem);
+  text-align: center;
+}
+
+.verify-badge {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+  font-size: 1.6rem;
+}
+
+.verify-badge.valid {
+  background: rgba(76, 175, 80, 0.15);
+  border: 2px solid #81c784;
+  color: #81c784;
+}
+
+.verify-badge.invalid {
+  background: rgba(229, 115, 115, 0.1);
+  border: 2px solid rgba(229, 115, 115, 0.4);
+  color: #e57373;
+}
+
+.verify-status {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 900;
+  font-size: clamp(1.8rem, 4vw, 2.5rem);
+  text-transform: uppercase;
+  margin-bottom: 2rem;
+}
+
+.verify-status.valid { color: #81c784; }
+.verify-status.invalid { color: #e57373; }
+
+.verify-details {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: clamp(1.5rem, 3vw, 2rem);
+  text-align: left;
+}
+
+.vd-row {
+  padding: 0.8rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.vd-row:last-child { border-bottom: none; }
+
+.vd-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--amber);
+  margin-bottom: 0.2rem;
+}
+
+.vd-value {
+  font-size: 0.95rem;
+  color: var(--text);
+}
+
+.verify-invalid-msg {
+  font-size: 1rem;
+  color: var(--muted);
+  line-height: 1.7;
+}
+{% endblock %}
+
+{% block content %}
+<div class="verify-wrap reveal">
+  {% if valid %}
+    <div class="verify-badge valid">&#10003;</div>
+    <div class="verify-status valid">Verified</div>
+
+    <div class="verify-details">
+      <div class="vd-row">
+        <div class="vd-label">Recipient</div>
+        <div class="vd-value">{{ certificate.user.first_name }} {{ certificate.user.last_name }}</div>
+      </div>
+      <div class="vd-row">
+        <div class="vd-label">Certification</div>
+        <div class="vd-value">{{ certificate.tier.name }}</div>
+      </div>
+      <div class="vd-row">
+        <div class="vd-label">Issued</div>
+        <div class="vd-value">{{ certificate.issued_at|date:"F j, Y" }}</div>
+      </div>
+      <div class="vd-row">
+        <div class="vd-label">Certificate ID</div>
+        <div class="vd-value" style="word-break: break-all;">{{ certificate.certificate_id }}</div>
+      </div>
+    </div>
+  {% else %}
+    <div class="verify-badge invalid">&#10007;</div>
+    <div class="verify-status invalid">Not Found</div>
+    <p class="verify-invalid-msg">
+      This certificate could not be verified. The ID may be incorrect or the certificate may not exist.
+    </p>
+  {% endif %}
+</div>
+{% endblock %}

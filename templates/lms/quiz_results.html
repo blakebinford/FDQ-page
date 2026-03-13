@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+
+{% block title %}Quiz Results | Field-Driven Quality{% endblock %}
+
+{% block extra_styles %}
+.results-wrap {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: clamp(3rem, 7vw, 5rem) clamp(1.5rem, 5vw, 4rem);
+  text-align: center;
+}
+
+.results-score {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 900;
+  font-size: clamp(5rem, 12vw, 8rem);
+  line-height: 1;
+  margin-bottom: 0.5rem;
+}
+
+.results-score.pass { color: #81c784; }
+.results-score.fail { color: var(--muted); }
+
+.results-pct {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+
+.results-pct.pass { color: #81c784; }
+.results-pct.fail { color: #e57373; }
+
+.results-status {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 800;
+  font-size: 1.8rem;
+  text-transform: uppercase;
+  margin-bottom: 1.5rem;
+}
+
+.results-status.pass { color: #81c784; }
+.results-status.fail { color: #e57373; }
+
+.results-detail {
+  font-size: 0.95rem;
+  color: var(--muted);
+  line-height: 1.7;
+  margin-bottom: 2.5rem;
+}
+
+.results-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.attempt-info {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 2rem;
+}
+{% endblock %}
+
+{% block content %}
+<div class="results-wrap reveal">
+  <div class="results-score {% if attempt.passed %}pass{% else %}fail{% endif %}">{{ attempt.score }}%</div>
+  <div class="results-pct {% if attempt.passed %}pass{% else %}fail{% endif %}">Score</div>
+  <div class="results-status {% if attempt.passed %}pass{% else %}fail{% endif %}">
+    {% if attempt.passed %}Passed{% else %}Not Passed{% endif %}
+  </div>
+
+  <div class="attempt-info">Attempt #{{ attempt.attempt_number }}</div>
+
+  {% if attempt.passed %}
+    <p class="results-detail">
+      Congratulations! You've passed the {{ tier.name }} certification quiz.
+      Your certificate has been issued.
+    </p>
+    <div class="results-actions">
+      <a href="{% url 'lms:certificate' tier.slug %}" class="btn-primary">View Certificate</a>
+      <a href="{% url 'lms:learn' tier.slug %}" class="btn-secondary">Back to Course</a>
+    </div>
+  {% else %}
+    <p class="results-detail">
+      You scored {{ attempt.score }}%. The passing score is {{ quiz.passing_score }}%.
+      Review the material and try again when you're ready.
+    </p>
+    <div class="results-actions">
+      <a href="{% url 'lms:quiz' tier.slug %}" class="btn-primary">Retry Quiz</a>
+      <a href="{% url 'lms:learn' tier.slug %}" class="btn-secondary">Back to Course</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -12,6 +12,7 @@ logger = logging.getLogger(__name__)
 
 @admin.action(description='Approve selected applications')
 def approve_applications(modeladmin, request, queryset):
+    count = 0
     for application in queryset:
         application.status = 'approved'
         application.reviewed_at = timezone.now()
@@ -19,16 +20,21 @@ def approve_applications(modeladmin, request, queryset):
         application.can_reapply = False
         application.save()
         _send_approval_email(application.user)
+        count += 1
+    modeladmin.message_user(request, f'{count} application(s) approved.')
 
 
 @admin.action(description='Deny selected applications')
 def deny_applications(modeladmin, request, queryset):
+    count = 0
     for application in queryset:
         application.status = 'denied'
         application.reviewed_at = timezone.now()
         application.reviewed_by = request.user
         application.save()
         _send_denial_email(application.user, application.can_reapply)
+        count += 1
+    modeladmin.message_user(request, f'{count} application(s) denied.')
 
 
 def _send_approval_email(user):
@@ -37,10 +43,10 @@ def _send_approval_email(user):
         send_mail(
             'Your FDQ application has been approved',
             f'Hi {name},\n\n'
-            f'Your application for FDQ certification has been approved. '
-            f'You can now enroll in a certification tier.\n\n'
-            f'Get started: {settings.SITE_URL}/certifications/\n\n'
-            f'\u2014 Field-Driven Quality',
+            f'Your application for FDQ certification has been approved.\n\n'
+            f'Log in and click Enroll to complete your enrollment:\n'
+            f'{settings.SITE_URL}/certifications/\n\n'
+            f'Field-Driven Quality',
             settings.DEFAULT_FROM_EMAIL,
             [user.email],
             fail_silently=True,
