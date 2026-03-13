@@ -24,8 +24,8 @@ urlpatterns = [
     path('', include('core.urls')),
     path('blog/', include('blog.urls')),
     path('ckeditor5/', include('django_ckeditor_5.urls')),
-    path('accounts/', include('accounts.urls')),
-    path('courses/', include('courses.urls')),
+    path('accounts/', include('accounts.urls', namespace='accounts')),
+    path('', include('lms.urls', namespace='lms')),
     path('billing/', include('billing.urls')),
 ]
 

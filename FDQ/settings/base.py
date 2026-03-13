@@ -10,6 +10,7 @@ DEBUG = config('DEBUG', cast=bool, default=False)
 
 SITE_URL = config("SITE_URL", default="http://localhost:8000")
 STRIPE_SECRET_KEY = config("STRIPE_SECRET_KEY", default="")
+STRIPE_PUBLISHABLE_KEY = config("STRIPE_PUBLISHABLE_KEY", default="")
 STRIPE_WEBHOOK_SECRET = config("STRIPE_WEBHOOK_SECRET", default="")
 STRIPE_PRICE_ID_SMALL = config("STRIPE_PRICE_ID_SMALL", default="")
 STRIPE_PRICE_ID_MID = config("STRIPE_PRICE_ID_MID", default="")
@@ -30,8 +31,8 @@ INSTALLED_APPS = [
     'accounts',
     'core',
     'blog',
-    'courses',
     'billing',
+    'lms',
 
     'localflavor',
     'django_ckeditor_5',
@@ -68,6 +69,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'FDQ.wsgi.application'
 
 AUTH_USER_MODEL = 'accounts.User'
+LOGIN_URL = '/accounts/login/'
 
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'

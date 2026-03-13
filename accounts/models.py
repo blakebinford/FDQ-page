@@ -4,6 +4,7 @@ from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 from localflavor.us.models import USStateField
 
+
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
         if not email:
@@ -21,11 +22,6 @@ class CustomUserManager(BaseUserManager):
 
 
 class User(AbstractBaseUser, PermissionsMixin):
-    FDQ_LEVEL_CHOICES = [
-        ('L1', 'FDQ Level 1 - Practitioner'),
-        ('L2', 'FDQ Level 2 - Implementer'),
-    ]
-
     INDUSTRY_CHOICES = [
         ('gc', 'General Contractor'),
         ('insp', 'Inspection'),
@@ -70,6 +66,16 @@ class User(AbstractBaseUser, PermissionsMixin):
         ('other', 'Other'),
     ]
 
+    PROJECT_TYPE_CHOICES = [
+        ('pipeline', 'Pipeline'),
+        ('facility', 'Facility / Plant'),
+        ('commercial', 'Commercial Building'),
+        ('infrastructure', 'Infrastructure / Civil'),
+        ('residential', 'Residential'),
+        ('industrial', 'Industrial / Manufacturing'),
+        ('other', 'Other'),
+    ]
+
     email = models.EmailField(_('email address'), unique=True)
     first_name = models.CharField(max_length=30)
     last_name = models.CharField(max_length=30)
@@ -87,16 +93,25 @@ class User(AbstractBaseUser, PermissionsMixin):
         help_text="How did you hear about FDQ?"
     )
 
-    is_certified = models.BooleanField(default=False)
-    certified_at = models.DateField(null=True, blank=True)
-
-    fdq_level = models.CharField(
-        max_length=2,
-        choices=FDQ_LEVEL_CHOICES,
+    years_experience = models.PositiveIntegerField(
         null=True,
         blank=True,
-        verbose_name='FDQ Certification Level',
+        help_text="Years of industry experience",
     )
+    project_type = models.CharField(
+        max_length=20,
+        choices=PROJECT_TYPE_CHOICES,
+        blank=True,
+        help_text="Primary project type",
+    )
+    certifications_held = models.TextField(
+        blank=True,
+        help_text="Comma-separated list of certifications (e.g. CWI, NACE, PMP)",
+    )
+    linkedin_url = models.URLField(blank=True, help_text="LinkedIn profile URL")
+
+    email_verified = models.BooleanField(default=False)
+    profile_complete = models.BooleanField(default=False)
 
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
@@ -105,7 +120,22 @@ class User(AbstractBaseUser, PermissionsMixin):
     objects = CustomUserManager()
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['first_name', 'last_name', 'profession', 'industry']
+    REQUIRED_FIELDS = ['first_name', 'last_name']
 
     def __str__(self):
         return f'{self.first_name} {self.last_name} ({self.email})'
+
+    @property
+    def certifications_list(self):
+        if not self.certifications_held:
+            return []
+        return [c.strip() for c in self.certifications_held.split(',') if c.strip()]
+
+    @property
+    def highest_tier(self):
+        certs = [c.upper() for c in self.certifications_list]
+        if 'CWI' in certs or 'NACE' in certs:
+            return 'Advanced'
+        if certs:
+            return 'Intermediate'
+        return 'Entry'
