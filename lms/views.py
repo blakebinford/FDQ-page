@@ -151,6 +151,7 @@ def create_checkout_session(request, tier_slug):
         'cancel_url': f"{domain}{reverse('lms:checkout_cancel')}",
         'metadata': {
             'tier_slug': tier.slug,
+            'user_email': request.user.email,
         },
         'billing_address_collection': 'auto',
         'customer_creation': 'always',
@@ -179,7 +180,11 @@ def stripe_webhook(request):
         event = stripe.Webhook.construct_event(
             payload, sig_header, settings.STRIPE_WEBHOOK_SECRET
         )
-    except (stripe.error.SignatureVerificationError, ValueError):
+    except stripe.error.SignatureVerificationError as e:
+        logger.error(f"Webhook signature verification failed: {e}")
+        return HttpResponse(status=400)
+    except ValueError as e:
+        logger.error(f"Webhook invalid payload: {e}")
         return HttpResponse(status=400)
 
     if event['type'] == 'checkout.session.completed':
@@ -191,7 +196,10 @@ def stripe_webhook(request):
 
 def _handle_checkout_completed(session):
     """Internal handler for checkout.session.completed."""
+    logger.info("Webhook: checkout.session.completed received")
+
     tier_slug = session.get('metadata', {}).get('tier_slug')
+    logger.info(f"Webhook: tier_slug={tier_slug}")
     if not tier_slug:
         logger.error("Webhook: missing tier_slug in session metadata")
         return
@@ -204,11 +212,14 @@ def _handle_checkout_completed(session):
 
     customer_details = session.get('customer_details', {})
     email = customer_details.get('email', '').lower().strip()
-    full_name = customer_details.get('name', '').strip()
-
     if not email:
-        logger.error("Webhook: no customer email in session")
+        email = session.get('metadata', {}).get('user_email', '').lower().strip()
+    if not email:
+        logger.error("Webhook: no email found in session")
         return
+    logger.info(f"Webhook: email={email}")
+
+    full_name = customer_details.get('name', '').strip()
 
     # Split name best-effort
     name_parts = full_name.split(' ', 1)
@@ -237,6 +248,7 @@ def _handle_checkout_completed(session):
             'is_active': True,
         }
     )
+    logger.info(f"Webhook: enrollment created/found for {user.email} / {tier.name}")
 
     # Send password-set email only to newly created users
     if created:
@@ -272,6 +284,31 @@ def _send_password_set_email(user):
 
 
 def checkout_success(request):
+    # If session_id is present, attempt to reconcile enrollment
+    session_id = request.GET.get('session_id')
+    if session_id and request.user.is_authenticated:
+        try:
+            session = stripe.checkout.Session.retrieve(session_id)
+            tier_slug = session.get('metadata', {}).get('tier_slug')
+            if tier_slug:
+                tier = Tier.objects.filter(slug=tier_slug).first()
+                if tier:
+                    Enrollment.objects.get_or_create(
+                        user=request.user,
+                        tier=tier,
+                        defaults={
+                            'stripe_payment_intent_id': session.get(
+                                'payment_intent', ''),
+                            'is_active': True,
+                        }
+                    )
+                    logger.info(
+                        f"checkout_success: enrollment reconciled for "
+                        f"{request.user.email} / {tier.name}"
+                    )
+        except Exception as e:
+            logger.error(f"checkout_success reconciliation failed: {e}")
+
     return render(request, 'lms/checkout_success.html')
 
 

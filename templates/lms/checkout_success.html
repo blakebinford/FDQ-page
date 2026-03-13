@@ -1,15 +1,16 @@
 {% extends 'base.html' %}
 
-{% block title %}You're In | Field-Driven Quality{% endblock %}
+{% block title %}Enrollment Confirmed | Field-Driven Quality{% endblock %}
 
 {% block content %}
 <div class="center-wrap">
   <div class="center-box reveal">
-    <h1>You're <em>in.</em></h1>
-    <p class="center-sub">Check your email to set your password and access your certification. If you already have an account, log in to get started.</p>
+    <h1>You're <em>enrolled.</em></h1>
+    <p class="center-sub">Your payment was successful. Head to your
+    dashboard to start your certification.</p>
     <div class="btn-row">
-      <a href="{% url 'accounts:login' %}" class="btn-primary">Log In</a>
-      <a href="/" class="btn-secondary">Return Home</a>
+      <a href="{% url 'lms:dashboard' %}" class="btn-primary">Go to Dashboard</a>
+      <a href="{% url 'lms:tier_list' %}" class="btn-secondary">View Certifications</a>
     </div>
   </div>
 </div>
