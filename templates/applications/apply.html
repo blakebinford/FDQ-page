@@ -81,6 +81,13 @@
 }
 .wh-notice a { color: var(--amber); text-decoration: none; }
 .wh-notice a:hover { color: var(--amber-lt); }
+
+@media (max-width: 480px) {
+  .apply-form button[type="submit"] {
+    width: 100%;
+    text-align: center;
+  }
+}
 {% endblock %}
 
 {% block content %}

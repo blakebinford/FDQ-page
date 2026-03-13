@@ -10,6 +10,14 @@ from .forms import ContactForm
 logger = logging.getLogger(__name__)
 
 
+def custom_404(request, exception=None):
+    return render(request, '404.html', status=404)
+
+
+def custom_500(request):
+    return render(request, '500.html', status=500)
+
+
 def home(request):
     return render(request, 'core/home.html')
 

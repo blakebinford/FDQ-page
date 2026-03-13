@@ -1,6 +1,7 @@
 import uuid
 from django.db import models
 from django.conf import settings
+from django_ckeditor_5.fields import CKEditor5Field
 
 
 class Tier(models.Model):
@@ -58,7 +59,7 @@ class Lesson(models.Model):
         help_text="Phase 1 uses reading only. Video is reserved for future use."
     )
     video_url = models.URLField(blank=True)
-    body = models.TextField(blank=True, help_text="HTML content for reading lessons.")
+    body = CKEditor5Field(blank=True, help_text='Rich text content for reading lessons.', config_name='default')
     estimated_minutes = models.IntegerField(default=5)
 
     class Meta:

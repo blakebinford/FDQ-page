@@ -126,6 +126,7 @@
 
       .nav-hamburger { display: flex; }
       .nav-cta { display: none; }
+      .mobile-only { display: list-item; }
     }
 
     .nav-cta {
@@ -565,6 +566,9 @@
       padding: clamp(2rem, 4vw, 3rem);
     }
 
+    /* ── MOBILE-ONLY UTILITY ── */
+    .mobile-only { display: none; }
+
     {% block extra_styles %}{% endblock %}
   </style>
 </head>
@@ -582,11 +586,28 @@
     <li><a href="{% url 'contact' %}">Contact</a></li>
     {% if user.is_authenticated %}
       <li><a href="{% url 'lms:dashboard' %}">Dashboard</a></li>
+      <li class="mobile-only"><a href="{% url 'accounts:profile' %}">Profile</a></li>
+      <li class="mobile-only">
+        <form method="post" action="{% url 'accounts:logout' %}">
+          {% csrf_token %}
+          <button type="submit"
+            style="background:none;border:none;cursor:pointer;
+                   font-family:'IBM Plex Mono',monospace;
+                   font-size:0.72rem;letter-spacing:0.1em;
+                   text-transform:uppercase;color:var(--muted);
+                   padding:0.9rem clamp(1.5rem,5vw,4rem);
+                   width:100%;text-align:left;
+                   border-bottom:1px solid var(--border);">
+            Logout
+          </button>
+        </form>
+      </li>
     {% endif %}
   </ul>
   {% if user.is_authenticated %}
     <div class="nav-right">
       <a href="{% url 'lms:dashboard' %}">Dashboard</a>
+      <a href="{% url 'accounts:profile' %}">Profile</a>
       <form method="post" action="{% url 'accounts:logout' %}" style="display:inline;">
         {% csrf_token %}
         <button type="submit" class="nav-logout-btn">Logout</button>

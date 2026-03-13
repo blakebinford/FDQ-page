@@ -86,6 +86,21 @@
       <a href="{% url 'lms:certificate' tier.slug %}" class="btn-primary">View Certificate</a>
       <a href="{% url 'lms:learn' tier.slug %}" class="btn-secondary">Back to Course</a>
     </div>
+    {% if next_tier %}
+    <div style="margin-top:2.5rem;padding-top:2rem;
+                border-top:1px solid var(--border);">
+      <p class="section-label" style="justify-content:center;
+         margin-bottom:1rem;">What's Next</p>
+      <p style="font-size:0.95rem;color:var(--muted);
+                margin-bottom:1.5rem;">
+        You've completed {{ tier.name }}. The next step is
+        {{ next_tier.name }}.
+      </p>
+      <a href="{% url 'lms:tier_list' %}" class="btn-primary">
+        View {{ next_tier.name }} &rarr;
+      </a>
+    </div>
+    {% endif %}
   {% else %}
     <p class="results-detail">
       You scored {{ attempt.score }}%. The passing score is {{ quiz.passing_score }}%.

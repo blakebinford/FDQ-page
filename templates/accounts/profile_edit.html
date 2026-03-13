@@ -104,6 +104,16 @@
 .wh-add-form .form-group { margin: 0; }
 .wh-add-form .form-group.full { grid-column: 1 / -1; }
 @media (max-width: 600px) { .wh-add-form { grid-template-columns: 1fr; } }
+
+@media (max-width: 480px) {
+  .edit-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .edit-actions .btn-primary {
+    text-align: center;
+  }
+}
 {% endblock %}
 
 {% block content %}

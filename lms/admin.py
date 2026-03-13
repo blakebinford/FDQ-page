@@ -1,8 +1,22 @@
+from django import forms
 from django.contrib import admin
+from django_ckeditor_5.widgets import CKEditor5Widget
+
 from .models import (
     Tier, Module, Lesson, Quiz, Question,
     Enrollment, LessonProgress, QuizAttempt, Certificate
 )
+
+
+class LessonAdminForm(forms.ModelForm):
+    body = forms.CharField(
+        widget=CKEditor5Widget(config_name='default'),
+        required=False,
+    )
+
+    class Meta:
+        model = Lesson
+        fields = '__all__'
 
 
 class ModuleInline(admin.TabularInline):
@@ -37,6 +51,7 @@ class ModuleAdmin(admin.ModelAdmin):
 
 @admin.register(Lesson)
 class LessonAdmin(admin.ModelAdmin):
+    form = LessonAdminForm
     list_display = ('title', 'module', 'order', 'content_type', 'estimated_minutes')
     list_filter = ('module__tier', 'content_type')
 

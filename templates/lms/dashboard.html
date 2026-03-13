@@ -104,6 +104,17 @@
   font-size: 1rem;
   margin-bottom: 2rem;
 }
+
+@media (max-width: 480px) {
+  .tc-actions {
+    flex-direction: column;
+  }
+  .tc-actions .btn-primary,
+  .tc-actions .btn-secondary {
+    width: 100%;
+    text-align: center;
+  }
+}
 {% endblock %}
 
 {% block content %}
@@ -111,6 +122,15 @@
   <p class="page-label">Dashboard</p>
   <h1>Your <em>progress.</em></h1>
   <p class="page-sub">Track your certifications, continue where you left off, and download your certificates.</p>
+</div>
+
+<div class="dash-section" style="padding-bottom:0;">
+  <div style="text-align:right; margin-bottom: 2rem;">
+    <a href="{% url 'accounts:profile' %}" class="btn-secondary"
+       style="font-size:0.72rem; padding:0.5rem 1.2rem;">
+      Profile &amp; Settings
+    </a>
+  </div>
 </div>
 
 {% if not active and not completed %}
@@ -160,6 +180,19 @@
       <a href="{% url 'lms:certificate' entry.tier.slug %}" class="btn-primary">View Certificate</a>
       <a href="{% url 'lms:certificate_pdf' entry.tier.slug %}" class="btn-secondary">Download PDF</a>
     </div>
+    {% if entry.next_tier and not entry.next_tier_enrolled %}
+    <div style="margin-top:1rem;padding-top:1rem;
+                border-top:1px solid var(--border);">
+      <p style="font-family:'IBM Plex Mono',monospace;
+                font-size:0.65rem;letter-spacing:0.14em;
+                text-transform:uppercase;color:var(--amber);
+                margin-bottom:0.5rem;">Next Step</p>
+      <a href="{% url 'lms:tier_list' %}" class="btn-primary"
+         style="font-size:0.72rem;padding:0.7rem 1.5rem;">
+        Enroll in {{ entry.next_tier.name }} &rarr;
+      </a>
+    </div>
+    {% endif %}
   </div>
   {% endfor %}
 </div>

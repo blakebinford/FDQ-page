@@ -14,7 +14,7 @@ from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
-from reportlab.lib.pagesizes import letter
+from reportlab.lib.pagesizes import letter, landscape
 from reportlab.lib.units import inch
 from reportlab.pdfgen import canvas
 
@@ -240,7 +240,7 @@ def _handle_checkout_completed(session):
 
     # Create enrollment - skip if already exists
     payment_intent = session.get('payment_intent', '')
-    Enrollment.objects.get_or_create(
+    enrollment, enrollment_created = Enrollment.objects.get_or_create(
         user=user,
         tier=tier,
         defaults={
@@ -249,6 +249,9 @@ def _handle_checkout_completed(session):
         }
     )
     logger.info(f"Webhook: enrollment created/found for {user.email} / {tier.name}")
+
+    if enrollment_created:
+        _send_enrollment_confirmation(user, tier)
 
     # Send password-set email only to newly created users
     if created:
@@ -283,6 +286,59 @@ def _send_password_set_email(user):
         logger.exception(f"Failed to send password-set email to {user.email}")
 
 
+def _send_enrollment_confirmation(user, tier):
+    name = user.first_name or user.email
+    domain = settings.SITE_URL.rstrip('/')
+    try:
+        send_mail(
+            f'You\'re enrolled in FDQ {tier.name}',
+            f'Hi {name},\n\n'
+            f'Your enrollment in FDQ {tier.name} is confirmed.\n\n'
+            f'Start your certification:\n'
+            f'{domain}/certifications/{tier.slug}/learn/\n\n'
+            f'You can also access it anytime from your dashboard:\n'
+            f'{domain}/certifications/dashboard/\n\n'
+            f'\u2014 Field-Driven Quality\n'
+            f'fielddrivenquality.com',
+            settings.DEFAULT_FROM_EMAIL,
+            [user.email],
+            fail_silently=True,
+        )
+    except Exception:
+        logger.exception(
+            f'Failed to send enrollment confirmation to {user.email}'
+        )
+
+
+def _send_certificate_email(user, tier, certificate):
+    name = user.first_name or user.email
+    domain = settings.SITE_URL.rstrip('/')
+    verify_url = (f'{domain}/certifications/verify/'
+                  f'{certificate.certificate_id}/')
+    cert_url = (f'{domain}/certifications/'
+                f'{tier.slug}/certificate/')
+    try:
+        send_mail(
+            f'Your FDQ {tier.name} certificate is ready',
+            f'Hi {name},\n\n'
+            f'Congratulations \u2014 you\'ve passed the FDQ {tier.name} '
+            f'assessment and your certificate has been issued.\n\n'
+            f'View and download your certificate:\n'
+            f'{cert_url}\n\n'
+            f'Certificate ID: {certificate.certificate_id}\n'
+            f'Verify: {verify_url}\n\n'
+            f'\u2014 Field-Driven Quality\n'
+            f'fielddrivenquality.com',
+            settings.DEFAULT_FROM_EMAIL,
+            [user.email],
+            fail_silently=True,
+        )
+    except Exception:
+        logger.exception(
+            f'Failed to send certificate email to {user.email}'
+        )
+
+
 def checkout_success(request):
     # If session_id is present, attempt to reconcile enrollment
     session_id = request.GET.get('session_id')
@@ -293,7 +349,7 @@ def checkout_success(request):
             if tier_slug:
                 tier = Tier.objects.filter(slug=tier_slug).first()
                 if tier:
-                    Enrollment.objects.get_or_create(
+                    _, created = Enrollment.objects.get_or_create(
                         user=request.user,
                         tier=tier,
                         defaults={
@@ -302,6 +358,8 @@ def checkout_success(request):
                             'is_active': True,
                         }
                     )
+                    if created:
+                        _send_enrollment_confirmation(request.user, tier)
                     logger.info(
                         f"checkout_success: enrollment reconciled for "
                         f"{request.user.email} / {tier.name}"
@@ -388,6 +446,12 @@ def dashboard(request):
         }
 
         if cert:
+            nt = Tier.objects.filter(prerequisite=tier, is_active=True).first()
+            entry['next_tier'] = nt
+            entry['next_tier_enrolled'] = (
+                Enrollment.objects.filter(user=request.user, tier=nt).exists()
+                if nt else False
+            )
             completed.append(entry)
         else:
             active.append(entry)
@@ -457,6 +521,9 @@ def learn(request, tier_slug):
     # Certificate
     certificate = Certificate.objects.filter(user=request.user, tier=tier).first()
 
+    # Next tier
+    next_tier = Tier.objects.filter(prerequisite=tier, is_active=True).first()
+
     return render(request, 'lms/learn.html', {
         'tier': tier,
         'module_data': module_data,
@@ -470,6 +537,7 @@ def learn(request, tier_slug):
         'quiz': quiz,
         'best_attempt': best_attempt,
         'certificate': certificate,
+        'next_tier': next_tier,
     })
 
 
@@ -568,7 +636,11 @@ def quiz_view(request, tier_slug):
 
         # Auto-issue certificate on pass
         if passed:
-            Certificate.objects.get_or_create(user=request.user, tier=tier)
+            certificate, cert_created = Certificate.objects.get_or_create(
+                user=request.user, tier=tier
+            )
+            if cert_created:
+                _send_certificate_email(request.user, tier, certificate)
 
         return redirect('lms:quiz_results', tier_slug=tier.slug)
 
@@ -593,14 +665,17 @@ def quiz_results(request, tier_slug):
         return redirect('lms:quiz', tier_slug=tier.slug)
 
     certificate = None
+    next_tier = None
     if attempt.passed:
         certificate = Certificate.objects.filter(user=request.user, tier=tier).first()
+        next_tier = Tier.objects.filter(prerequisite=tier, is_active=True).first()
 
     return render(request, 'lms/quiz_results.html', {
         'tier': tier,
         'quiz': quiz,
         'attempt': attempt,
         'certificate': certificate,
+        'next_tier': next_tier,
     })
 
 
@@ -610,9 +685,18 @@ def certificate_view(request, tier_slug):
     tier = get_object_or_404(Tier, slug=tier_slug)
     certificate = get_object_or_404(Certificate, user=request.user, tier=tier)
 
+    next_tier = Tier.objects.filter(prerequisite=tier, is_active=True).first()
+    next_tier_enrolled = False
+    if next_tier:
+        next_tier_enrolled = Enrollment.objects.filter(
+            user=request.user, tier=next_tier
+        ).exists()
+
     return render(request, 'lms/certificate.html', {
         'tier': tier,
         'certificate': certificate,
+        'next_tier': next_tier,
+        'next_tier_enrolled': next_tier_enrolled,
     })
 
 
@@ -624,63 +708,99 @@ def certificate_pdf(request, tier_slug):
     user = request.user
 
     buf = io.BytesIO()
-    c = canvas.Canvas(buf, pagesize=letter)
-    w, h = letter
+    page = landscape(letter)
+    c = canvas.Canvas(buf, pagesize=page)
+    w, h = page
 
-    # Dark background
+    # ── Background (full bleed) ──
     c.setFillColor('#111210')
     c.rect(0, 0, w, h, fill=True, stroke=False)
 
-    # Amber accent line at top
-    c.setStrokeColor('#d4832a')
-    c.setLineWidth(4)
-    c.line(0.75 * inch, h - 0.75 * inch, w - 0.75 * inch, h - 0.75 * inch)
+    # ── Watermark (subtle "FDQ" behind all content) ──
+    c.saveState()
+    c.setFillColor('#1a1c19')
+    c.setFont('Helvetica-Bold', 200)
+    c.drawCentredString(w / 2, h / 2 - 0.6 * inch, 'FDQ')
+    c.restoreState()
 
-    # Title
+    # ── Top decorative bar (amber, full width, 0.35" tall) ──
     c.setFillColor('#d4832a')
-    c.setFont('Helvetica-Bold', 14)
-    c.drawCentredString(w / 2, h - 1.3 * inch, 'FIELD-DRIVEN QUALITY')
+    c.rect(0, h - 0.35 * inch, w, 0.35 * inch, fill=True, stroke=False)
 
-    c.setFillColor('#f2ede4')
+    # ── Bottom decorative bar ──
+    c.setFillColor('#d4832a')
+    c.rect(0, 0, w, 0.35 * inch, fill=True, stroke=False)
+
+    # ── Header text (white on amber top bar) ──
+    c.setFillColor('#ffffff')
+    c.setFont('Helvetica-Bold', 11)
+    c.drawCentredString(w / 2, h - 0.24 * inch, 'FIELD-DRIVEN QUALITY')
+
+    # ── Outer border: 2pt amber, inset 0.5" ──
+    c.setStrokeColor('#d4832a')
+    c.setLineWidth(2)
+    c.rect(0.5 * inch, 0.5 * inch, w - 1.0 * inch, h - 1.0 * inch,
+           fill=False, stroke=True)
+
+    # ── Inner border: 0.5pt #2e3129, inset 0.6" ──
+    c.setStrokeColor('#2e3129')
+    c.setLineWidth(0.5)
+    c.rect(0.6 * inch, 0.6 * inch, w - 1.2 * inch, h - 1.2 * inch,
+           fill=False, stroke=True)
+
+    # ── Body content (all measurements from top of page) ──
+    cx = w / 2
+
+    # "Certificate of Completion" — 1.4" from top
+    c.setFillColor('#888880')
     c.setFont('Helvetica', 11)
-    c.drawCentredString(w / 2, h - 1.6 * inch, 'CERTIFICATE OF COMPLETION')
+    c.drawCentredString(cx, h - 1.4 * inch, 'C E R T I F I C A T E   O F   C O M P L E T I O N')
 
-    # Recipient name
+    # "This certifies that" — 2.0" from top
+    c.setFont('Helvetica', 12)
+    c.drawCentredString(cx, h - 2.0 * inch, 'This certifies that')
+
+    # Recipient full name — 2.5" from top
     full_name = f'{user.first_name} {user.last_name}'.strip() or user.email
-    c.setFont('Helvetica-Bold', 32)
+    full_name = full_name.upper()
     c.setFillColor('#f2ede4')
-    c.drawCentredString(w / 2, h - 3 * inch, full_name)
+    c.setFont('Helvetica-Bold', 42)
+    c.drawCentredString(cx, h - 2.5 * inch, full_name)
 
-    # "has successfully completed"
-    c.setFont('Helvetica', 13)
+    # Horizontal rule — 1pt #2e3129, 5" wide centered, at 3.3"
+    c.setStrokeColor('#2e3129')
+    c.setLineWidth(1)
+    c.line(cx - 2.5 * inch, h - 3.3 * inch, cx + 2.5 * inch, h - 3.3 * inch)
+
+    # "has successfully completed" — 3.6" from top
     c.setFillColor('#888880')
-    c.drawCentredString(w / 2, h - 3.5 * inch, 'has successfully completed')
+    c.setFont('Helvetica', 12)
+    c.drawCentredString(cx, h - 3.6 * inch, 'has successfully completed')
 
-    # Tier name
-    c.setFont('Helvetica-Bold', 22)
+    # Tier name — 4.1" from top
     c.setFillColor('#d4832a')
-    c.drawCentredString(w / 2, h - 4.2 * inch, tier.name)
+    c.setFont('Helvetica-Bold', 28)
+    c.drawCentredString(cx, h - 4.1 * inch, tier.name)
 
-    # Issued date
+    # "FDQ Certification" — 4.55" from top
+    c.setFillColor('#888880')
     c.setFont('Helvetica', 11)
-    c.setFillColor('#888880')
-    issued_str = certificate.issued_at.strftime('%B %d, %Y')
-    c.drawCentredString(w / 2, h - 5 * inch, f'Issued: {issued_str}')
+    c.drawCentredString(cx, h - 4.55 * inch, 'FDQ Certification')
 
-    # Certificate ID
+    # Issued date — 5.2" from top
     c.setFont('Helvetica', 10)
-    c.drawCentredString(w / 2, h - 5.4 * inch, f'Certificate ID: {certificate.certificate_id}')
+    issued_str = certificate.issued_at.strftime('%B %d, %Y')
+    c.drawCentredString(cx, h - 5.2 * inch, f'Issued: {issued_str}')
 
-    # Amber accent line at bottom
-    c.setStrokeColor('#d4832a')
-    c.setLineWidth(4)
-    c.line(0.75 * inch, 1.2 * inch, w - 0.75 * inch, 1.2 * inch)
+    # Certificate ID — 5.55" from top
+    c.setFont('Helvetica', 8)
+    c.drawCentredString(cx, h - 5.55 * inch, f'Certificate ID: {certificate.certificate_id}')
 
-    # Verification URL
-    c.setFont('Helvetica', 9)
-    c.setFillColor('#888880')
+    # ── Footer text (white on amber bottom bar) ──
     verify_url = f'fielddrivenquality.com/certifications/verify/{certificate.certificate_id}/'
-    c.drawCentredString(w / 2, 0.85 * inch, f'Verify: {verify_url}')
+    c.setFillColor('#ffffff')
+    c.setFont('Helvetica', 8)
+    c.drawCentredString(cx, 0.12 * inch, f'Verify at {verify_url}')
 
     c.save()
     buf.seek(0)

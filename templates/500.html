@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %}500 — Server Error | Field-Driven Quality{% endblock %}
+
+{% block extra_styles %}
+.error-number {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 900;
+  font-size: 6rem;
+  color: var(--amber);
+  line-height: 1;
+  margin-bottom: 1rem;
+  opacity: 0.6;
+}
+{% endblock %}
+
+{% block content %}
+<div class="center-wrap">
+  <div class="center-box reveal">
+    <div class="error-number">500</div>
+    <h1>Something went <em>wrong.</em></h1>
+    <p class="center-sub">We've encountered an error. Try again in a moment or contact us if the problem persists.</p>
+    <div class="btn-row">
+      <a href="/" class="btn-primary">Go Home</a>
+      <a href="/contact/" class="btn-secondary">Contact Us</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

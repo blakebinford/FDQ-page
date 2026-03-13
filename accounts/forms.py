@@ -13,15 +13,6 @@ class CustomUserCreationForm(UserCreationForm):
         )
 
 
-class ProfileCompleteForm(forms.ModelForm):
-    class Meta:
-        model = User
-        fields = (
-            'years_experience', 'project_type',
-            'certifications_held', 'linkedin_url',
-        )
-
-
 class CustomLoginForm(AuthenticationForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

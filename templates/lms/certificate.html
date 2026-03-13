@@ -160,5 +160,33 @@
   <div class="cert-share">
     <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ request.build_absolute_uri }}" target="_blank" rel="noopener">Share on LinkedIn</a>
   </div>
+
+  {% if next_tier %}
+  <div style="margin-top:2rem;padding-top:2rem;
+              border-top:1px solid var(--border);text-align:center;">
+    <p style="font-family:'IBM Plex Mono',monospace;
+              font-size:0.68rem;letter-spacing:0.18em;
+              text-transform:uppercase;color:var(--amber);
+              margin-bottom:0.75rem;">Continue Your Certification</p>
+    <p style="font-size:0.95rem;color:var(--muted);
+              margin-bottom:1.5rem;">
+      {% if next_tier_enrolled %}
+        You're already enrolled in {{ next_tier.name }}.
+      {% else %}
+        The next step in your FDQ path is {{ next_tier.name }}.
+      {% endif %}
+    </p>
+    {% if next_tier_enrolled %}
+      <a href="{% url 'lms:learn' next_tier.slug %}"
+         class="btn-primary">
+        Continue to {{ next_tier.name }} &rarr;
+      </a>
+    {% else %}
+      <a href="{% url 'lms:tier_list' %}" class="btn-primary">
+        Enroll in {{ next_tier.name }} &rarr;
+      </a>
+    {% endif %}
+  </div>
+  {% endif %}
 </div>
 {% endblock %}
