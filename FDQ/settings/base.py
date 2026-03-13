@@ -33,6 +33,7 @@ INSTALLED_APPS = [
     'blog',
     'billing',
     'lms',
+    'applications',
 
     'localflavor',
     'django_ckeditor_5',
