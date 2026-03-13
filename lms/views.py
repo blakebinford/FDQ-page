@@ -53,7 +53,7 @@ def tier_list(request):
     })
 
 
-def create_checkout_session(request, slug):
+def create_checkout_session(request, tier_slug):
     """
     Creates a Stripe Checkout Session for the given tier.
 
@@ -62,7 +62,7 @@ def create_checkout_session(request, slug):
     - Tier 2+: requires login. Prerequisite certificate must exist.
     - If user is already enrolled, redirect to dashboard.
     """
-    tier = get_object_or_404(Tier, slug=slug, is_active=True)
+    tier = get_object_or_404(Tier, slug=tier_slug, is_active=True)
 
     # Already enrolled
     if request.user.is_authenticated:
@@ -229,3 +229,50 @@ def checkout_error(request):
 def dashboard(request):
     """Stub dashboard view. Will be built out in a future prompt."""
     return render(request, 'lms/dashboard.html')
+
+
+@login_required
+def learn(request, tier_slug):
+    """Stub — tier learning hub will be built in a future prompt."""
+    tier = get_object_or_404(Tier, slug=tier_slug)
+    return render(request, 'lms/learn.html', {'tier': tier})
+
+
+@login_required
+def lesson_view(request, tier_slug, lesson_order):
+    """Stub — lesson viewer will be built in a future prompt."""
+    tier = get_object_or_404(Tier, slug=tier_slug)
+    return render(request, 'lms/lesson.html', {'tier': tier, 'lesson_order': lesson_order})
+
+
+@login_required
+def quiz_view(request, tier_slug):
+    """Stub — quiz page will be built in a future prompt."""
+    tier = get_object_or_404(Tier, slug=tier_slug)
+    return render(request, 'lms/quiz.html', {'tier': tier})
+
+
+@login_required
+def quiz_results(request, tier_slug):
+    """Stub — quiz results page will be built in a future prompt."""
+    tier = get_object_or_404(Tier, slug=tier_slug)
+    return render(request, 'lms/quiz_results.html', {'tier': tier})
+
+
+@login_required
+def certificate_view(request, tier_slug):
+    """Stub — certificate display will be built in a future prompt."""
+    tier = get_object_or_404(Tier, slug=tier_slug)
+    return render(request, 'lms/certificate.html', {'tier': tier})
+
+
+@login_required
+def certificate_pdf(request, tier_slug):
+    """Stub — PDF generation will be built in a future prompt."""
+    tier = get_object_or_404(Tier, slug=tier_slug)
+    return render(request, 'lms/certificate_pdf.html', {'tier': tier})
+
+
+def certificate_verify(request, certificate_number):
+    """Stub — public certificate verification will be built in a future prompt."""
+    return render(request, 'lms/certificate_verify.html', {'certificate_number': certificate_number})

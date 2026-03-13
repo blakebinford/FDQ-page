@@ -1,5 +1,12 @@
 from django.contrib.auth import logout
-from django.contrib.auth.views import LoginView, PasswordResetConfirmView
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.views import (
+    LoginView,
+    PasswordResetConfirmView,
+    PasswordResetView,
+    PasswordResetDoneView,
+    PasswordResetCompleteView,
+)
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 from django.views.decorators.http import require_http_methods
@@ -16,6 +23,23 @@ def custom_logout_view(request):
 class CustomLoginView(LoginView):
     authentication_form = CustomLoginForm
     template_name = 'accounts/login.html'
+
+
+def register_view(request):
+    """Stub — registration form will be built in a future prompt."""
+    return render(request, 'accounts/register.html')
+
+
+@login_required
+def profile_view(request):
+    """Stub — profile detail page will be built in a future prompt."""
+    return render(request, 'accounts/profile.html')
+
+
+@login_required
+def profile_edit_view(request):
+    """Stub — profile edit form will be built in a future prompt."""
+    return render(request, 'accounts/profile_edit.html')
 
 
 class PasswordSetView(PasswordResetConfirmView):
@@ -39,3 +63,26 @@ class PasswordSetView(PasswordResetConfirmView):
 
 def password_set_done(request):
     return render(request, 'accounts/password_set_done.html')
+
+
+class CustomPasswordResetView(PasswordResetView):
+    """Stub — template will be built in a future prompt."""
+    template_name = 'accounts/password_reset.html'
+    email_template_name = 'accounts/password_reset_email.html'
+    success_url = reverse_lazy('accounts:password_reset_done')
+
+
+class CustomPasswordResetDoneView(PasswordResetDoneView):
+    """Stub — template will be built in a future prompt."""
+    template_name = 'accounts/password_reset_done.html'
+
+
+class CustomPasswordResetConfirmView(PasswordResetConfirmView):
+    """Stub — template will be built in a future prompt."""
+    template_name = 'accounts/password_reset_confirm.html'
+    success_url = reverse_lazy('accounts:password_reset_complete')
+
+
+class CustomPasswordResetCompleteView(PasswordResetCompleteView):
+    """Stub — template will be built in a future prompt."""
+    template_name = 'accounts/password_reset_complete.html'
