@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Account | Field-Driven Quality{% endblock %}
+
+{% block content %}
+<div class="login-wrap">
+  <div class="login-box reveal">
+    <p class="login-logo">Join FDQ.</p>
+    <p class="login-tagline">Create Account</p>
+    {% if errors %}
+      <ul class="error-list">
+        {% for error in errors %}
+          <li>{{ error }}</li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+    <form class="login-form" action="{% url 'accounts:register' %}" method="POST">
+      {% csrf_token %}
+      <div class="lf-group">
+        <label>First Name</label>
+        <input type="text" name="first_name" value="{{ first_name|default:'' }}" placeholder="First name" required />
+      </div>
+      <div class="lf-group">
+        <label>Last Name</label>
+        <input type="text" name="last_name" value="{{ last_name|default:'' }}" placeholder="Last name" required />
+      </div>
+      <div class="lf-group">
+        <label>Email</label>
+        <input type="email" name="email" value="{{ email|default:'' }}" placeholder="you@company.com" required />
+      </div>
+      <div class="lf-group">
+        <label>Password</label>
+        <input type="password" name="password" placeholder="Choose a password (8+ characters)" required />
+      </div>
+      <div class="lf-group">
+        <label>Confirm Password</label>
+        <input type="password" name="password2" placeholder="Confirm your password" required />
+      </div>
+      <button type="submit" class="btn-primary" style="width:100%;text-align:center;margin-top:0.5rem;">Create Account</button>
+    </form>
+    <div class="login-divider"></div>
+    <p class="login-link">Already have an account? <a href="{% url 'accounts:login' %}">Sign in</a></p>
+  </div>
+</div>
+{% endblock %}

@@ -1,7 +1,6 @@
-from django.contrib.auth import logout
+from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import (
-    LoginView,
     PasswordResetConfirmView,
     PasswordResetView,
     PasswordResetDoneView,
@@ -9,56 +8,94 @@ from django.contrib.auth.views import (
 )
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
-from django.views.decorators.http import require_http_methods
 
-from accounts.forms import CustomLoginForm
-
-
-@require_http_methods(["POST", "GET"])
-def custom_logout_view(request):
-    logout(request)
-    return redirect('home')
+User = get_user_model()
 
 
-class CustomLoginView(LoginView):
-    authentication_form = CustomLoginForm
-    template_name = 'accounts/login.html'
+def login_view(request):
+    if request.user.is_authenticated:
+        return redirect('lms:dashboard')
+    if request.method == 'POST':
+        email = request.POST.get('email', '').strip().lower()
+        password = request.POST.get('password')
+        user = authenticate(request, username=email, password=password)
+        if user:
+            login(request, user)
+            return redirect(request.GET.get('next') or 'lms:dashboard')
+        return render(request, 'accounts/login.html', {'error': 'Invalid email or password.'})
+    return render(request, 'accounts/login.html')
+
+
+def logout_view(request):
+    if request.method == 'POST':
+        logout(request)
+    return redirect('accounts:login')
 
 
 def register_view(request):
-    """Stub — registration form will be built in a future prompt."""
+    if request.user.is_authenticated:
+        return redirect('lms:dashboard')
+    if request.method == 'POST':
+        first_name = request.POST.get('first_name', '').strip()
+        last_name = request.POST.get('last_name', '').strip()
+        email = request.POST.get('email', '').strip().lower()
+        password = request.POST.get('password')
+        password2 = request.POST.get('password2')
+
+        errors = []
+        if not first_name:
+            errors.append('First name is required.')
+        if not last_name:
+            errors.append('Last name is required.')
+        if not email:
+            errors.append('Email is required.')
+        if not password:
+            errors.append('Password is required.')
+        elif len(password) < 8:
+            errors.append('Password must be at least 8 characters.')
+        if password != password2:
+            errors.append('Passwords do not match.')
+        if not errors and User.objects.filter(email=email).exists():
+            errors.append('An account with that email already exists.')
+
+        if errors:
+            return render(request, 'accounts/register.html', {
+                'errors': errors,
+                'first_name': first_name,
+                'last_name': last_name,
+                'email': email,
+            })
+
+        user = User.objects.create_user(
+            email=email,
+            password=password,
+            first_name=first_name,
+            last_name=last_name,
+        )
+        login(request, user)
+        return redirect('applications:apply')
     return render(request, 'accounts/register.html')
-
-
-@login_required
-def profile_view(request):
-    """Stub — profile detail page will be built in a future prompt."""
-    return render(request, 'accounts/profile.html')
-
-
-@login_required
-def profile_edit_view(request):
-    """Stub — profile edit form will be built in a future prompt."""
-    return render(request, 'accounts/profile_edit.html')
 
 
 class PasswordSetView(PasswordResetConfirmView):
     """
     Used for new users setting their password after purchase.
     On success, sets email_verified = True.
-    Template: accounts/password_set.html
+    If profile is incomplete, redirects to profile_edit instead of password_set_done.
     """
     template_name = 'accounts/password_set.html'
-    success_url = reverse_lazy('accounts:password_set_done')
     post_reset_login = True
 
     def form_valid(self, form):
         response = super().form_valid(form)
-        # Mark email as verified since they clicked the link from their inbox
-        user = form.save()
-        user.email_verified = True
-        user.save(update_fields=['email_verified'])
+        self.user.email_verified = True
+        self.user.save(update_fields=['email_verified'])
         return response
+
+    def get_success_url(self):
+        if not self.user.profile_complete:
+            return reverse_lazy('accounts:profile_edit')
+        return reverse_lazy('accounts:password_set_done')
 
 
 def password_set_done(request):
@@ -66,23 +103,54 @@ def password_set_done(request):
 
 
 class CustomPasswordResetView(PasswordResetView):
-    """Stub — template will be built in a future prompt."""
     template_name = 'accounts/password_reset.html'
-    email_template_name = 'accounts/password_reset_email.html'
+    email_template_name = 'emails/password_reset_email.txt'
+    subject_template_name = 'emails/password_reset_subject.txt'
     success_url = reverse_lazy('accounts:password_reset_done')
 
 
 class CustomPasswordResetDoneView(PasswordResetDoneView):
-    """Stub — template will be built in a future prompt."""
     template_name = 'accounts/password_reset_done.html'
 
 
 class CustomPasswordResetConfirmView(PasswordResetConfirmView):
-    """Stub — template will be built in a future prompt."""
     template_name = 'accounts/password_reset_confirm.html'
     success_url = reverse_lazy('accounts:password_reset_complete')
 
 
 class CustomPasswordResetCompleteView(PasswordResetCompleteView):
-    """Stub — template will be built in a future prompt."""
     template_name = 'accounts/password_reset_complete.html'
+
+
+@login_required
+def profile_view(request):
+    try:
+        application = request.user.application
+    except Exception:
+        application = None
+    return render(request, 'accounts/profile_view.html', {'application': application})
+
+
+@login_required
+def profile_edit_view(request):
+    user = request.user
+    if request.method == 'POST':
+        user.first_name = request.POST.get('first_name', '').strip()
+        user.last_name = request.POST.get('last_name', '').strip()
+        user.company_name = request.POST.get('company_name', '').strip()
+        user.profession = request.POST.get('profession', '')
+        user.industry = request.POST.get('industry', '')
+        user.state = request.POST.get('state', '')
+        years = request.POST.get('years_experience', '')
+        user.years_experience = int(years) if years else None
+        user.project_type = request.POST.get('project_type', '')
+        user.certifications_held = request.POST.get('certifications_held', '').strip()
+        user.linkedin_url = request.POST.get('linkedin_url', '').strip()
+        user.profile_complete = True
+        user.save()
+        return redirect('accounts:profile')
+    return render(request, 'accounts/profile_edit.html', {
+        'profession_choices': User.PROFESSION_CHOICES,
+        'industry_choices': User.INDUSTRY_CHOICES,
+        'project_type_choices': User.PROJECT_TYPE_CHOICES,
+    })

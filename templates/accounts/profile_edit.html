@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Profile | Field-Driven Quality{% endblock %}
+
+{% block extra_styles %}
+.edit-form { max-width: 640px; display: flex; flex-direction: column; gap: 1.2rem; }
+.edit-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
+@media (max-width: 480px) { .edit-row { grid-template-columns: 1fr; } }
+.edit-actions { display: flex; gap: 1rem; align-items: center; margin-top: 1rem; }
+.edit-cancel { font-size: 0.85rem; color: var(--muted); text-decoration: none; }
+.edit-cancel:hover { color: var(--white); }
+{% endblock %}
+
+{% block content %}
+<div class="page-hero reveal">
+  <p class="page-label">Edit Profile</p>
+  <h1>Update your <em>information.</em></h1>
+</div>
+
+<div class="page-content">
+  <form class="edit-form reveal" action="{% url 'accounts:profile_edit' %}" method="POST">
+    {% csrf_token %}
+    <div class="edit-row">
+      <div class="form-group">
+        <label>First Name</label>
+        <input type="text" name="first_name" value="{{ user.first_name }}" required />
+      </div>
+      <div class="form-group">
+        <label>Last Name</label>
+        <input type="text" name="last_name" value="{{ user.last_name }}" required />
+      </div>
+    </div>
+    <div class="form-group">
+      <label>Company / Employer</label>
+      <input type="text" name="company_name" value="{{ user.company_name }}" placeholder="Your company" />
+    </div>
+    <div class="form-group">
+      <label>Profession</label>
+      <select name="profession">
+        <option value="">Select...</option>
+        {% for value, display in profession_choices %}
+          <option value="{{ value }}" {% if user.profession == value %}selected{% endif %}>{{ display }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Industry</label>
+      <select name="industry">
+        <option value="">Select...</option>
+        {% for value, display in industry_choices %}
+          <option value="{{ value }}" {% if user.industry == value %}selected{% endif %}>{{ display }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-group">
+      <label>State</label>
+      <input type="text" name="state" value="{{ user.state }}" placeholder="TX" maxlength="2" />
+    </div>
+    <div class="form-group">
+      <label>Years of Experience</label>
+      <input type="number" name="years_experience" value="{% if user.years_experience is not None %}{{ user.years_experience }}{% endif %}" min="0" placeholder="0" />
+    </div>
+    <div class="form-group">
+      <label>Project Types</label>
+      <select name="project_type">
+        <option value="">Select...</option>
+        {% for value, display in project_type_choices %}
+          <option value="{{ value }}" {% if user.project_type == value %}selected{% endif %}>{{ display }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-group">
+      <label>Certifications Held</label>
+      <textarea name="certifications_held" placeholder="CWI, NACE, PMP, etc.">{{ user.certifications_held }}</textarea>
+    </div>
+    <div class="form-group">
+      <label>LinkedIn URL</label>
+      <input type="url" name="linkedin_url" value="{{ user.linkedin_url }}" placeholder="https://linkedin.com/in/..." />
+    </div>
+    <div class="edit-actions">
+      <button type="submit" class="btn-primary">Save Changes</button>
+      <a href="{% url 'accounts:profile' %}" class="edit-cancel">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

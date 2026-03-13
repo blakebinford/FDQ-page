@@ -536,6 +536,35 @@
     .stagger.visible > *:nth-child(3) { opacity: 1; transform: none; transition-delay: 0.25s; }
     .stagger.visible > *:nth-child(4) { opacity: 1; transform: none; transition-delay: 0.35s; }
 
+    /* ── FORM GROUP (contact/profile forms) ── */
+    .form-group { display: flex; flex-direction: column; gap: 0.45rem; }
+    .form-group label {
+      font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem;
+      letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted);
+    }
+    .form-group input, .form-group select, .form-group textarea {
+      background: var(--surface); border: 1px solid var(--border);
+      color: var(--text); font-family: 'Barlow', sans-serif; font-size: 0.95rem;
+      padding: 0.8rem 1rem; outline: none; width: 100%; transition: border-color 0.2s;
+    }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--amber); }
+    .form-group textarea { resize: vertical; min-height: 140px; }
+    .form-group select option { background: var(--surface); }
+
+    /* ── CI ITEM (info rows) ── */
+    .ci-item { padding: 1.3rem 0; border-bottom: 1px solid var(--border); }
+    .ci-label { font-family: 'IBM Plex Mono', monospace; font-size: 0.65rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--amber); margin-bottom: 0.3rem; }
+    .ci-value { font-size: 0.97rem; color: var(--text); }
+    .ci-sub { font-size: 0.85rem; color: var(--muted); margin-top: 0.15rem; }
+
+    /* ── ASIDE BOX ── */
+    .aside-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--amber);
+      padding: clamp(2rem, 4vw, 3rem);
+    }
+
     {% block extra_styles %}{% endblock %}
   </style>
 </head>

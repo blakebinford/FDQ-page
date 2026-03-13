@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% block title %}My Account | Field-Driven Quality{% endblock %}
+
+{% block extra_styles %}
+.profile-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: start; }
+@media (max-width: 720px) { .profile-two-col { grid-template-columns: 1fr; gap: 2rem; } }
+.status-approved { color: #4caf50; }
+.status-pending { color: var(--amber); }
+.status-denied { color: #e57373; }
+{% endblock %}
+
+{% block content %}
+<div class="page-hero reveal">
+  <p class="page-label">My Account</p>
+  <h1>{% if user.first_name %}{{ user.first_name }} <em>{{ user.last_name }}</em>{% else %}<em>{{ user.email }}</em>{% endif %}</h1>
+</div>
+
+<div class="page-content">
+  <div class="profile-two-col">
+    <div class="reveal">
+      <div class="ci-item">
+        <p class="ci-label">Email</p>
+        <p class="ci-value">{{ user.email }}</p>
+      </div>
+      <div class="ci-item">
+        <p class="ci-label">Name</p>
+        <p class="ci-value">{{ user.first_name }} {{ user.last_name }}</p>
+      </div>
+      <div class="ci-item">
+        <p class="ci-label">Company</p>
+        <p class="ci-value">{{ user.company_name|default:"—" }}</p>
+      </div>
+      <div class="ci-item">
+        <p class="ci-label">Profession</p>
+        <p class="ci-value">{{ user.get_profession_display|default:"—" }}</p>
+      </div>
+      <div class="ci-item">
+        <p class="ci-label">Years Experience</p>
+        <p class="ci-value">{% if user.years_experience is not None %}{{ user.years_experience }}{% else %}—{% endif %}</p>
+      </div>
+      <div class="ci-item">
+        <p class="ci-label">Industry</p>
+        <p class="ci-value">{{ user.get_industry_display|default:"—" }}</p>
+      </div>
+      <div class="ci-item">
+        <p class="ci-label">Project Types</p>
+        <p class="ci-value">{{ user.get_project_type_display|default:"—" }}</p>
+      </div>
+      <div class="ci-item">
+        <p class="ci-label">Certifications</p>
+        <p class="ci-value">{{ user.certifications_held|default:"—" }}</p>
+      </div>
+      <div class="ci-item">
+        <p class="ci-label">LinkedIn</p>
+        <p class="ci-value">{% if user.linkedin_url %}<a href="{{ user.linkedin_url }}" style="color:var(--amber);text-decoration:none;">{{ user.linkedin_url }}</a>{% else %}—{% endif %}</p>
+      </div>
+      <div style="margin-top:2rem;">
+        <a href="{% url 'accounts:profile_edit' %}" class="btn-primary">Edit Profile</a>
+      </div>
+    </div>
+
+    <div class="reveal">
+      <div class="aside-box">
+        <p class="section-label">Application Status</p>
+        {% if application %}
+          {% if application.is_approved %}
+            <p class="ci-value status-approved" style="font-weight:500;">Approved</p>
+          {% elif application.is_pending %}
+            <p class="ci-value status-pending" style="font-weight:500;">Under Review</p>
+            <p class="ci-sub">We'll notify you when your application has been reviewed.</p>
+          {% elif application.can_resubmit %}
+            <p class="ci-value status-denied" style="font-weight:500;">Reapplication Available</p>
+            <p class="ci-sub" style="margin-bottom:1.5rem;">You may submit a new application.</p>
+            <a href="{% url 'applications:apply' %}" class="btn-primary">Reapply</a>
+          {% else %}
+            <p class="ci-value status-denied" style="font-weight:500;">Not Eligible</p>
+          {% endif %}
+        {% else %}
+          <p class="ci-value">Not submitted</p>
+          <p class="ci-sub" style="margin-bottom:1.5rem;">Apply to access FDQ certifications.</p>
+          <a href="{% url 'applications:apply' %}" class="btn-primary">Apply Now</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
