@@ -1,1133 +1,714 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Field-Driven Quality | FDQ Certification</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --bg:       #111210;
-      --surface:  #1a1c19;
-      --surface2: #222420;
-      --border:   #2e3129;
-      --text:     #ddd9cf;
-      --muted:    #888880;
-      --amber:    #d4832a;
-      --amber-lt: #e8a04a;
-      --amber-dk: #a0601c;
-      --steel:    #3d5a72;
-      --white:    #f2ede4;
-    }
-
-    html { scroll-behavior: smooth; }
-
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'Barlow', sans-serif;
-      font-weight: 400;
-      font-size: 17px;
-      line-height: 1.65;
-      -webkit-font-smoothing: antialiased;
-    }
-
-    /* ── NAV ── */
-    nav {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: rgba(17, 18, 16, 0.92);
-      backdrop-filter: blur(10px);
-      border-bottom: 1px solid var(--border);
-      padding: 0 clamp(1.5rem, 5vw, 4rem);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      height: 60px;
-      /* needed so mobile dropdown anchors to nav */
-    }
-
-    .nav-logo {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-weight: 800;
-      font-size: 1.3rem;
-      letter-spacing: 0.08em;
-      color: var(--amber);
-      text-decoration: none;
-      text-transform: uppercase;
-    }
-
-    .nav-links {
-      display: flex;
-      gap: 2rem;
-      list-style: none;
-    }
-
-    .nav-links a {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 0.72rem;
-      font-weight: 500;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--muted);
-      text-decoration: none;
-      transition: color 0.2s;
-    }
-
-    .nav-links a:hover { color: var(--white); }
-
-    /* Mobile nav */
-    .nav-hamburger {
-      display: none;
-      flex-direction: column;
-      gap: 5px;
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 4px;
-    }
-
-    .nav-hamburger span {
-      display: block;
-      width: 22px;
-      height: 2px;
-      background: var(--muted);
-      transition: all 0.25s;
-    }
-
-    .nav-hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
-    .nav-hamburger.open span:nth-child(2) { opacity: 0; }
-    .nav-hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
-
-    @media (max-width: 640px) {
-      .nav-links {
-        display: none;
-        position: absolute;
-        top: 60px;
-        left: 0;
-        right: 0;
-        background: rgba(17, 18, 16, 0.98);
-        border-bottom: 1px solid var(--border);
-        flex-direction: column;
-        gap: 0;
-        padding: 0.5rem 0;
-      }
-
-      .nav-links.open { display: flex; }
-
-      .nav-links li a {
-        display: block;
-        padding: 0.9rem clamp(1.5rem, 5vw, 4rem);
-        border-bottom: 1px solid var(--border);
-      }
-
-      .nav-hamburger { display: flex; }
-      .nav-cta { display: none; }
-    }
-
-    .nav-cta {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 0.72rem;
-      font-weight: 500;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      background: var(--amber);
-      color: var(--bg);
-      padding: 0.45rem 1.1rem;
-      text-decoration: none;
-      transition: background 0.2s;
-    }
-
-    .nav-cta:hover { background: var(--amber-lt); }
-
-    /* ── HERO ── */
-    .hero {
-      padding: clamp(5rem, 12vw, 9rem) clamp(1.5rem, 5vw, 4rem) clamp(4rem, 8vw, 7rem);
-      max-width: 1200px;
-      margin: 0 auto;
-      position: relative;
-    }
-
-    .hero-label {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 0.72rem;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: var(--amber);
-      margin-bottom: 1.8rem;
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
-
-    .hero-label::before {
-      content: '';
-      display: block;
-      width: 2rem;
-      height: 1px;
-      background: var(--amber);
-    }
-
-    .hero h1 {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-weight: 900;
-      font-size: clamp(3.2rem, 9vw, 7.5rem);
-      line-height: 0.92;
-      letter-spacing: -0.01em;
-      text-transform: uppercase;
-      color: var(--white);
-      margin-bottom: 1.8rem;
-    }
-
-    .hero h1 em {
-      font-style: normal;
-      color: var(--amber);
-    }
-
-    .hero-sub {
-      font-size: clamp(1rem, 2.2vw, 1.2rem);
-      color: var(--muted);
-      max-width: 560px;
-      line-height: 1.7;
-      margin-bottom: 2.8rem;
-      font-weight: 300;
-    }
-
-    .hero-sub strong {
-      color: var(--text);
-      font-weight: 500;
-    }
-
-    .hero-actions {
-      display: flex;
-      gap: 1rem;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-
-    .btn-primary {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 0.78rem;
-      font-weight: 500;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      background: var(--amber);
-      color: var(--bg);
-      padding: 0.9rem 2rem;
-      text-decoration: none;
-      display: inline-block;
-      transition: background 0.2s, transform 0.15s;
-    }
-
-    .btn-primary:hover { background: var(--amber-lt); transform: translateY(-1px); }
-
-    .btn-secondary {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 0.78rem;
-      font-weight: 500;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      background: transparent;
-      color: var(--muted);
-      padding: 0.9rem 2rem;
-      text-decoration: none;
-      display: inline-block;
-      border: 1px solid var(--border);
-      transition: color 0.2s, border-color 0.2s;
-    }
-
-    .btn-secondary:hover { color: var(--white); border-color: var(--muted); }
-
-    /* Hero rule */
-    .hero-rule {
-      margin-top: clamp(4rem, 8vw, 6rem);
-      height: 1px;
-      background: linear-gradient(to right, var(--amber) 0%, var(--border) 40%, transparent 100%);
-    }
-
-    /* ── STATEMENT BAND ── */
-    .statement {
-      background: var(--surface);
-      border-top: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
-      padding: clamp(2.5rem, 5vw, 4rem) clamp(1.5rem, 5vw, 4rem);
-    }
-
-    .statement-inner {
-      max-width: 1200px;
-      margin: 0 auto;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 4rem;
-      align-items: center;
-    }
-
-    @media (max-width: 720px) {
-      .statement-inner { grid-template-columns: 1fr; gap: 2rem; }
-    }
-
-    .statement-quote {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-weight: 700;
-      font-size: clamp(1.5rem, 3vw, 2.2rem);
-      line-height: 1.2;
-      color: var(--white);
-    }
-
-    .statement-quote em {
-      font-style: normal;
-      color: var(--amber);
-    }
-
-    .statement-body {
-      font-size: 0.97rem;
-      color: var(--muted);
-      line-height: 1.75;
-    }
-
-    .statement-body p + p { margin-top: 1rem; }
-
-    /* ── SECTION BASE ── */
-    section {
-      padding: clamp(4rem, 9vw, 7rem) clamp(1.5rem, 5vw, 4rem);
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    .section-label {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 0.68rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--amber);
-      margin-bottom: 2.5rem;
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
-
-    .section-label::before {
-      content: '';
-      display: block;
-      width: 1.5rem;
-      height: 1px;
-      background: var(--amber);
-    }
-
-    /* ── PILLARS ── */
-    .pillars-header {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 4rem;
-      align-items: end;
-      margin-bottom: 4rem;
-    }
-
-    @media (max-width: 720px) {
-      .pillars-header { grid-template-columns: 1fr; gap: 1.5rem; }
-    }
-
-    .pillars-header h2 {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-weight: 900;
-      font-size: clamp(2.2rem, 5vw, 3.8rem);
-      line-height: 0.95;
-      text-transform: uppercase;
-      color: var(--white);
-    }
-
-    .pillars-header h2 em {
-      font-style: normal;
-      color: var(--amber);
-    }
-
-    .pillars-header p {
-      color: var(--muted);
-      font-size: 0.97rem;
-      line-height: 1.75;
-    }
-
-    .pillars-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1px;
-      background: var(--border);
-    }
-
-    @media (max-width: 720px) {
-      .pillars-grid { grid-template-columns: 1fr; }
-    }
-
-    .pillar {
-      background: var(--surface);
-      padding: 2.5rem 2rem;
-      transition: background 0.2s;
-    }
-
-    .pillar:hover { background: var(--surface2); }
-
-    .pillar-number {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 0.68rem;
-      letter-spacing: 0.15em;
-      color: var(--amber);
-      margin-bottom: 1.5rem;
-    }
-
-    .pillar h3 {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-weight: 800;
-      font-size: 1.6rem;
-      letter-spacing: 0.02em;
-      text-transform: uppercase;
-      color: var(--white);
-      margin-bottom: 0.9rem;
-    }
-
-    .pillar p {
-      font-size: 0.93rem;
-      color: var(--muted);
-      line-height: 1.7;
-    }
-
-    /* ── LEVELS ── */
-    .levels-section {
-      background: var(--surface);
-      border-top: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
-    }
-
-    .levels-section > * {
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    .levels-section section {
-      background: transparent;
-      border: none;
-    }
-
-    .levels-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1px;
-      background: var(--border);
-    }
-
-    @media (max-width: 960px) {
-      .levels-grid { grid-template-columns: 1fr 1fr; }
-    }
-
-    @media (max-width: 560px) {
-      .levels-grid { grid-template-columns: 1fr; }
-    }
-
-    .level-card {
-      background: var(--surface);
-      padding: clamp(2rem, 4vw, 3.5rem);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .level-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 3px;
-      background: var(--amber);
-    }
-
-    .level-card.level-2::before {
-      background: var(--steel);
-    }
-
-    .level-card.level-3::before {
-      background: #6a4e2a;
-    }
-
-    .level-tag {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 0.68rem;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: var(--amber);
-      margin-bottom: 1.2rem;
-    }
-
-    .level-card.level-2 .level-tag {
-      color: #6a9abc;
-    }
-
-    .level-card.level-3 .level-tag {
-      color: #b8824a;
-    }
-
-    .level-card h3 {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-weight: 900;
-      font-size: clamp(2rem, 4vw, 3rem);
-      text-transform: uppercase;
-      color: var(--white);
-      line-height: 1;
-      margin-bottom: 0.5rem;
-    }
-
-    .level-who {
-      font-size: 0.85rem;
-      color: var(--muted);
-      font-style: italic;
-      margin-bottom: 1.8rem;
-    }
-
-    .level-desc {
-      font-size: 0.97rem;
-      color: var(--text);
-      line-height: 1.7;
-      margin-bottom: 2rem;
-    }
-
-    .level-items {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-    }
-
-    .level-items li {
-      font-size: 0.92rem;
-      color: var(--muted);
-      padding-left: 1.4rem;
-      position: relative;
-      line-height: 1.5;
-    }
-
-    .level-items li::before {
-      content: '→';
-      position: absolute;
-      left: 0;
-      color: var(--amber);
-      font-weight: 600;
-    }
-
-    .level-card.level-2 .level-items li::before {
-      color: #6a9abc;
-    }
-
-    .level-card.level-3 .level-items li::before {
-      color: #b8824a;
-    }
-
-    .level-badge {
-      position: absolute;
-      right: 2rem;
-      top: 2.5rem;
-      width: 64px;
-      height: 64px;
-      opacity: 0.25;
-    }
-
-    /* ── WHO IT'S FOR ── */
-    .audience-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1px;
-      background: var(--border);
-      margin-top: 3rem;
-    }
-
-    @media (max-width: 800px) {
-      .audience-grid { grid-template-columns: repeat(2, 1fr); }
-    }
-
-    @media (max-width: 480px) {
-      .audience-grid { grid-template-columns: 1fr; }
-    }
-
-    .audience-card {
-      background: var(--surface);
-      padding: 1.8rem 1.5rem;
-    }
-
-    .audience-card .role {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-weight: 700;
-      font-size: 1.15rem;
-      text-transform: uppercase;
-      color: var(--white);
-      margin-bottom: 0.5rem;
-    }
-
-    .audience-card .desc {
-      font-size: 0.85rem;
-      color: var(--muted);
-      line-height: 1.55;
-    }
-
-    .audience-card .level-dot {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 0.62rem;
-      letter-spacing: 0.1em;
-      color: var(--amber);
-      text-transform: uppercase;
-      margin-bottom: 1rem;
-      display: block;
-    }
-
-    .audience-card {
-      border-top: 2px solid var(--border);
-    }
-
-    .tier-1-card { border-top-color: var(--amber); }
-    .tier-2-card { border-top-color: #6a9abc; }
-    .tier-3-card { border-top-color: #b8824a; }
-
-    .tier-1-dot { color: var(--amber); }
-    .tier-2-dot { color: #6a9abc; }
-    .tier-3-dot { color: #b8824a; }
-
-    /* ── ABOUT / FOUNDER ── */
-    .founder-grid {
-      display: grid;
-      grid-template-columns: 2fr 1fr;
-      gap: 6rem;
-      align-items: start;
-    }
-
-    @media (max-width: 720px) {
-      .founder-grid { grid-template-columns: 1fr; gap: 3rem; }
-    }
-
-    .founder-grid h2 {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-weight: 900;
-      font-size: clamp(2rem, 4vw, 3.2rem);
-      line-height: 0.95;
-      text-transform: uppercase;
-      color: var(--white);
-      margin-bottom: 1.5rem;
-    }
-
-    .founder-grid h2 em {
-      font-style: normal;
-      color: var(--amber);
-    }
-
-    .founder-body p {
-      color: var(--muted);
-      font-size: 0.97rem;
-      line-height: 1.78;
-      margin-bottom: 1.1rem;
-    }
-
-    .founder-body p strong {
-      color: var(--text);
-      font-weight: 500;
-    }
-
-    .cred-list {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 0;
-    }
-
-    .cred-list li {
-      padding: 0.9rem 0;
-      border-bottom: 1px solid var(--border);
-      font-size: 0.85rem;
-      color: var(--muted);
-      display: flex;
-      flex-direction: column;
-      gap: 0.2rem;
-    }
-
-    .cred-list li .cred-title {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-weight: 700;
-      font-size: 0.95rem;
-      text-transform: uppercase;
-      color: var(--text);
-      letter-spacing: 0.04em;
-    }
-
-    /* ── TIER GROUPS ── */
-    .tier-group {
-      margin-bottom: 1px;
-    }
-
-    .tier-group-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 2rem;
-      padding: 1.2rem 1.8rem;
-      flex-wrap: wrap;
-    }
-
-    .tier-1-header { background: rgba(212, 131, 42, 0.12); border-left: 3px solid var(--amber); }
-    .tier-2-header { background: rgba(106, 154, 188, 0.10); border-left: 3px solid #6a9abc; }
-    .tier-3-header { background: rgba(184, 130, 74, 0.10); border-left: 3px solid #b8824a; }
-
-    .tier-group-label {
-      display: flex;
-      align-items: baseline;
-      gap: 1rem;
-    }
-
-    .tier-number {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 0.72rem;
-      font-weight: 500;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-    }
-
-    .tier-1-header .tier-number { color: var(--amber); }
-    .tier-2-header .tier-number { color: #6a9abc; }
-    .tier-3-header .tier-number { color: #b8824a; }
-
-    .tier-title {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-weight: 800;
-      font-size: 1.3rem;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      color: var(--white);
-    }
-
-    .tier-group-desc {
-      font-size: 0.85rem;
-      color: var(--muted);
-      font-style: italic;
-    }
-
-    .tier-cards {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 1px;
-      background: var(--border);
-    }
-
-    @media (max-width: 720px) {
-      .tier-cards { grid-template-columns: 1fr 1fr; }
-      .tier-group-header { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
-    }
-
-    @media (max-width: 480px) {
-      .tier-cards { grid-template-columns: 1fr; }
-    }
-
-    /* ── CTA BAND ── */
-    .cta-band {
-      background: var(--amber);
-      padding: clamp(3rem, 7vw, 5rem) clamp(1.5rem, 5vw, 4rem);
-    }
-
-    .cta-band-inner {
-      max-width: 1200px;
-      margin: 0 auto;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      gap: 2rem;
-      flex-wrap: wrap;
-    }
-
-    .cta-band h2 {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-weight: 900;
-      font-size: clamp(1.8rem, 4vw, 3rem);
-      text-transform: uppercase;
-      color: var(--bg);
-      line-height: 1;
-    }
-
-    .btn-dark {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 0.78rem;
-      font-weight: 500;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      background: var(--bg);
-      color: var(--white);
-      padding: 0.9rem 2rem;
-      text-decoration: none;
-      display: inline-block;
-      white-space: nowrap;
-      transition: background 0.2s;
-    }
-
-    .btn-dark:hover { background: #222; }
-
-    /* ── FOOTER ── */
-    footer {
-      border-top: 1px solid var(--border);
-      padding: 2.5rem clamp(1.5rem, 5vw, 4rem);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 1rem;
-    }
-
-    footer .footer-logo {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-weight: 800;
-      font-size: 1.05rem;
-      letter-spacing: 0.08em;
-      color: var(--amber);
-      text-transform: uppercase;
-    }
-
-    footer .footer-copy {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 0.65rem;
-      letter-spacing: 0.1em;
-      color: var(--muted);
-      text-transform: uppercase;
-    }
-
-    footer .footer-links {
-      display: flex;
-      gap: 1.5rem;
-      list-style: none;
-    }
-
-    footer .footer-links a {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 0.65rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--muted);
-      text-decoration: none;
-    }
-
-    footer .footer-links a:hover { color: var(--white); }
-
-    @media (max-width: 480px) {
-      footer {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 1.2rem;
-      }
-
-      .footer-links {
-        flex-wrap: wrap;
-        gap: 1rem;
-      }
-
-      .cta-band-inner {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-    }
-
-    /* ── DIVIDER ── */
-    .full-divider {
-      height: 1px;
-      background: var(--border);
-    }
-
-    /* ── SCROLL ANIMATION ── */
-    .reveal {
-      opacity: 0;
-      transform: translateY(24px);
-      transition: opacity 0.6s ease, transform 0.6s ease;
-    }
-
-    .reveal.visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    /* staggered children */
-    .stagger > * {
-      opacity: 0;
-      transform: translateY(20px);
-      transition: opacity 0.5s ease, transform 0.5s ease;
-    }
-
-    .stagger.visible > *:nth-child(1) { opacity: 1; transform: none; transition-delay: 0.05s; }
-    .stagger.visible > *:nth-child(2) { opacity: 1; transform: none; transition-delay: 0.15s; }
-    .stagger.visible > *:nth-child(3) { opacity: 1; transform: none; transition-delay: 0.25s; }
-    .stagger.visible > *:nth-child(4) { opacity: 1; transform: none; transition-delay: 0.35s; }
-  </style>
-</head>
-<body>
-
-  <!-- NAV -->
-  <nav>
-    <a href="/" class="nav-logo">FDQ</a>
-    <ul class="nav-links" id="navLinks">
-      <li><a href="/about/">What is FDQ</a></li>
-      <li><a href="/blog/">Blog</a></li>
-      <li><a href="/contact/">Contact</a></li>
-    </ul>
-    <a href="/accounts/login/" class="nav-cta">Login</a>
-    <button class="nav-hamburger" id="hamburger" aria-label="Menu">
-      <span></span><span></span><span></span>
-    </button>
-  </nav>
-
-  <!-- HERO -->
-  <div style="max-width: 1200px; margin: 0 auto;">
-    <div class="hero reveal">
-      <p class="hero-label">Field-Driven Quality Certification</p>
-      <h1>Quality that<br/>works <em>in</em><br/>the field.</h1>
-      <p class="hero-sub">
-        I spent fifteen years on construction projects where the quality program looked great on paper and did almost nothing in the field. <strong>FDQ is what I built instead.</strong>
-      </p>
-      <div class="hero-actions">
-        <a href="/about/" class="btn-primary">See How It Works</a>
-        <a href="/contact/" class="btn-secondary">Get Certified</a>
-      </div>
-      <div class="hero-rule"></div>
+{% extends 'base.html' %}
+
+{% block title %}Field-Driven Quality | FDQ Certification{% endblock %}
+
+{% block extra_styles %}
+/* ── HERO ── */
+.hero {
+  padding: clamp(5rem, 12vw, 9rem) clamp(1.5rem, 5vw, 4rem) clamp(4rem, 8vw, 7rem);
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.hero-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--amber);
+  margin-bottom: 1.8rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.hero-label::before {
+  content: '';
+  display: block;
+  width: 2rem;
+  height: 1px;
+  background: var(--amber);
+}
+
+.hero h1 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 900;
+  font-size: clamp(3.2rem, 9vw, 7.5rem);
+  line-height: 0.92;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  color: var(--white);
+  margin-bottom: 1.8rem;
+}
+
+.hero h1 em {
+  font-style: normal;
+  color: var(--amber);
+}
+
+.hero-sub {
+  font-size: clamp(1rem, 2.2vw, 1.2rem);
+  color: var(--muted);
+  max-width: 560px;
+  line-height: 1.7;
+  margin-bottom: 2.8rem;
+  font-weight: 300;
+}
+
+.hero-sub strong {
+  color: var(--text);
+  font-weight: 500;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.hero-rule {
+  margin-top: clamp(4rem, 8vw, 6rem);
+  height: 1px;
+  background: linear-gradient(to right, var(--amber) 0%, var(--border) 40%, transparent 100%);
+}
+
+/* ── STATEMENT BAND ── */
+.statement {
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: clamp(2.5rem, 5vw, 4rem) clamp(1.5rem, 5vw, 4rem);
+}
+
+.statement-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+}
+
+@media (max-width: 720px) {
+  .statement-inner { grid-template-columns: 1fr; gap: 2rem; }
+}
+
+.statement-quote {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: clamp(1.5rem, 3vw, 2.2rem);
+  line-height: 1.2;
+  color: var(--white);
+}
+
+.statement-quote em {
+  font-style: normal;
+  color: var(--amber);
+}
+
+.statement-body {
+  font-size: 0.97rem;
+  color: var(--muted);
+  line-height: 1.75;
+}
+
+.statement-body p + p { margin-top: 1rem; }
+
+/* ── SECTION BASE ── */
+section {
+  padding: clamp(4rem, 9vw, 7rem) clamp(1.5rem, 5vw, 4rem);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* ── PILLARS ── */
+.pillars-header {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: end;
+  margin-bottom: 4rem;
+}
+
+@media (max-width: 720px) {
+  .pillars-header { grid-template-columns: 1fr; gap: 1.5rem; }
+}
+
+.pillars-header h2 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 900;
+  font-size: clamp(2.2rem, 5vw, 3.8rem);
+  line-height: 0.95;
+  text-transform: uppercase;
+  color: var(--white);
+}
+
+.pillars-header h2 em {
+  font-style: normal;
+  color: var(--amber);
+}
+
+.pillars-header p {
+  color: var(--muted);
+  font-size: 0.97rem;
+  line-height: 1.75;
+}
+
+.pillars-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border);
+}
+
+@media (max-width: 720px) {
+  .pillars-grid { grid-template-columns: 1fr; }
+}
+
+.pillar {
+  background: var(--surface);
+  padding: 2.5rem 2rem;
+  transition: background 0.2s;
+}
+
+.pillar:hover { background: var(--surface2); }
+
+.pillar-number {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.15em;
+  color: var(--amber);
+  margin-bottom: 1.5rem;
+}
+
+.pillar h3 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 800;
+  font-size: 1.6rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--white);
+  margin-bottom: 0.9rem;
+}
+
+.pillar p {
+  font-size: 0.93rem;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+/* ── LEVELS ── */
+.levels-section {
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.levels-section > * {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.levels-section section {
+  background: transparent;
+  border: none;
+}
+
+.levels-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border);
+}
+
+@media (max-width: 960px) {
+  .levels-grid { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 560px) {
+  .levels-grid { grid-template-columns: 1fr; }
+}
+
+.level-card {
+  background: var(--surface);
+  padding: clamp(2rem, 4vw, 3.5rem);
+  position: relative;
+  overflow: hidden;
+}
+
+.level-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--amber);
+}
+
+.level-card.level-2::before { background: var(--steel); }
+.level-card.level-3::before { background: #6a4e2a; }
+
+.level-tag {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--amber);
+  margin-bottom: 1.2rem;
+}
+
+.level-card.level-2 .level-tag { color: #6a9abc; }
+.level-card.level-3 .level-tag { color: #b8824a; }
+
+.level-card h3 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 900;
+  font-size: clamp(2rem, 4vw, 3rem);
+  text-transform: uppercase;
+  color: var(--white);
+  line-height: 1;
+  margin-bottom: 0.5rem;
+}
+
+.level-who {
+  font-size: 0.85rem;
+  color: var(--muted);
+  font-style: italic;
+  margin-bottom: 1.8rem;
+}
+
+.level-desc {
+  font-size: 0.97rem;
+  color: var(--text);
+  line-height: 1.7;
+  margin-bottom: 2rem;
+}
+
+.level-items {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.level-items li {
+  font-size: 0.92rem;
+  color: var(--muted);
+  padding-left: 1.4rem;
+  position: relative;
+  line-height: 1.5;
+}
+
+.level-items li::before {
+  content: '\2192';
+  position: absolute;
+  left: 0;
+  color: var(--amber);
+  font-weight: 600;
+}
+
+.level-card.level-2 .level-items li::before { color: #6a9abc; }
+.level-card.level-3 .level-items li::before { color: #b8824a; }
+
+.level-badge {
+  position: absolute;
+  right: 2rem;
+  top: 2.5rem;
+  width: 64px;
+  height: 64px;
+  opacity: 0.25;
+}
+
+/* ── WHO IT'S FOR ── */
+.audience-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border);
+  margin-top: 3rem;
+}
+
+@media (max-width: 800px) {
+  .audience-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 480px) {
+  .audience-grid { grid-template-columns: 1fr; }
+}
+
+.audience-card {
+  background: var(--surface);
+  padding: 1.8rem 1.5rem;
+  border-top: 2px solid var(--border);
+}
+
+.audience-card .role {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 1.15rem;
+  text-transform: uppercase;
+  color: var(--white);
+  margin-bottom: 0.5rem;
+}
+
+.audience-card .desc {
+  font-size: 0.85rem;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.tier-1-card { border-top-color: var(--amber); }
+.tier-2-card { border-top-color: #6a9abc; }
+.tier-3-card { border-top-color: #b8824a; }
+
+/* ── TIER GROUPS ── */
+.tier-group { margin-bottom: 1px; }
+
+.tier-group-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  padding: 1.2rem 1.8rem;
+  flex-wrap: wrap;
+}
+
+.tier-1-header { background: rgba(212, 131, 42, 0.12); border-left: 3px solid var(--amber); }
+.tier-2-header { background: rgba(106, 154, 188, 0.10); border-left: 3px solid #6a9abc; }
+.tier-3-header { background: rgba(184, 130, 74, 0.10); border-left: 3px solid #b8824a; }
+
+.tier-group-label {
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+}
+
+.tier-number {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.tier-1-header .tier-number { color: var(--amber); }
+.tier-2-header .tier-number { color: #6a9abc; }
+.tier-3-header .tier-number { color: #b8824a; }
+
+.tier-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 800;
+  font-size: 1.3rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--white);
+}
+
+.tier-group-desc {
+  font-size: 0.85rem;
+  color: var(--muted);
+  font-style: italic;
+}
+
+.tier-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border);
+}
+
+@media (max-width: 720px) {
+  .tier-cards { grid-template-columns: 1fr 1fr; }
+  .tier-group-header { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
+}
+
+@media (max-width: 480px) {
+  .tier-cards { grid-template-columns: 1fr; }
+}
+
+/* ── FOUNDER ── */
+.founder-body p {
+  color: var(--muted);
+  font-size: 0.97rem;
+  line-height: 1.78;
+  margin-bottom: 1.1rem;
+}
+
+.founder-body p strong {
+  color: var(--text);
+  font-weight: 500;
+}
+
+.founder-body h2 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 900;
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  line-height: 0.95;
+  text-transform: uppercase;
+  color: var(--white);
+  margin-bottom: 1.5rem;
+}
+
+.founder-body h2 em {
+  font-style: normal;
+  color: var(--amber);
+}
+
+/* ── CTA BAND ── */
+.cta-band {
+  background: var(--amber);
+  padding: clamp(3rem, 7vw, 5rem) clamp(1.5rem, 5vw, 4rem);
+}
+
+.cta-band-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.cta-band h2 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 900;
+  font-size: clamp(1.8rem, 4vw, 3rem);
+  text-transform: uppercase;
+  color: var(--bg);
+  line-height: 1;
+}
+
+@media (max-width: 480px) {
+  .cta-band-inner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+{% endblock %}
+
+{% block content %}
+<!-- HERO -->
+<div style="max-width: 1200px; margin: 0 auto;">
+  <div class="hero reveal">
+    <p class="hero-label">Field-Driven Quality Certification</p>
+    <h1>Quality that<br/>works <em>in</em><br/>the field.</h1>
+    <p class="hero-sub">
+      I spent fifteen years on construction projects where the quality program looked great on paper and did almost nothing in the field. <strong>FDQ is what I built instead.</strong>
+    </p>
+    <div class="hero-actions">
+      <a href="{% url 'about' %}" class="btn-primary">See How It Works</a>
+      <a href="{% url 'contact' %}" class="btn-secondary">Get Certified</a>
+    </div>
+    <div class="hero-rule"></div>
+  </div>
+</div>
+
+<!-- STATEMENT BAND -->
+<div class="statement">
+  <div class="statement-inner reveal">
+    <div class="statement-quote">
+      Quality as high as <em>necessary</em>, never unnecessarily high.
+    </div>
+    <div class="statement-body">
+      <p>I've walked into quality programs that had a procedure for everything and prevented nothing. The binder was four inches thick. Nobody had touched it in months. The field crew couldn't tell you what was in it, and honestly, neither could the QC inspector.</p>
+      <p>FDQ came out of watching that happen project after project and deciding there had to be a better way. There is. It starts by treating field crews like professionals who can own quality, instead of problems to be audited after the fact.</p>
     </div>
   </div>
+</div>
 
-  <!-- STATEMENT BAND -->
-  <div class="statement">
-    <div class="statement-inner reveal">
-      <div class="statement-quote">
-        Quality as high as <em>necessary</em>, never unnecessarily high.
-      </div>
-      <div class="statement-body">
-        <p>I've walked into quality programs that had a procedure for everything and prevented nothing. The binder was four inches thick. Nobody had touched it in months. The field crew couldn't tell you what was in it, and honestly, neither could the QC inspector.</p>
-        <p>FDQ came out of watching that happen project after project and deciding there had to be a better way. There is. It starts by treating field crews like professionals who can own quality, instead of problems to be audited after the fact.</p>
-      </div>
+<!-- PILLARS -->
+<section>
+  <p class="section-label">How FDQ Works</p>
+  <div class="pillars-header reveal">
+    <h2>Three things<br/>field quality<br/>actually <em>needs.</em></h2>
+    <p>Fifteen years. Dozens of projects. Pipeline, LNG, compressor stations, industrial facilities. I watched quality programs fail in the same way over and over, and succeed in the same way too. Three things separated the ones that worked.</p>
+  </div>
+  <div class="pillars-grid stagger">
+    <div class="pillar">
+      <p class="pillar-number">01 / CLARITY</p>
+      <h3>No Binders</h3>
+      <p>A welder standing at the joint at 6 AM doesn't have time for a 40-page procedure. If your documentation requires explanation before anyone can use it, it's already failed. FDQ tools are built to be used in the field, not filed in a trailer.</p>
+    </div>
+    <div class="pillar">
+      <p class="pillar-number">02 / OWNERSHIP</p>
+      <h3>Bottom Up</h3>
+      <p>A QC inspector can't be everywhere. When a foreman and their crew own quality at the task level, problems get caught before they become NCRs. That's not a theory. That's what actually happens when you give crews the tools and the reason to care.</p>
+    </div>
+    <div class="pillar">
+      <p class="pillar-number">03 / EFFECTIVENESS</p>
+      <h3>Prevent Rework</h3>
+      <p>Rework on a pipeline project doesn't cost dollars, it costs days. A failed tie-in, a coating reject, a weld that doesn't make it through hydro. Those are the failures that blow budgets and schedules. FDQ is designed to prevent them, not document them after the fact.</p>
     </div>
   </div>
+</section>
 
-  <!-- PILLARS -->
+<div class="full-divider"></div>
+
+<!-- LEVELS -->
+<div class="levels-section">
   <section>
-    <p class="section-label">How FDQ Works</p>
-    <div class="pillars-header reveal">
-      <h2>Three things<br/>field quality<br/>actually <em>needs.</em></h2>
-      <p>Fifteen years. Dozens of projects. Pipeline, LNG, compressor stations, industrial facilities. I watched quality programs fail in the same way over and over, and succeed in the same way too. Three things separated the ones that worked.</p>
-    </div>
-    <div class="pillars-grid stagger">
-      <div class="pillar">
-        <p class="pillar-number">01 / CLARITY</p>
-        <h3>No Binders</h3>
-        <p>A welder standing at the joint at 6 AM doesn't have time for a 40-page procedure. If your documentation requires explanation before anyone can use it, it's already failed. FDQ tools are built to be used in the field, not filed in a trailer.</p>
+    <p class="section-label">Certification Levels</p>
+    <div class="levels-grid stagger">
+
+      <!-- TIER 1 -->
+      <div class="level-card">
+        <p class="level-tag">FDQ Tier 1: Field Crew</p>
+        <h3>In the Dirt.</h3>
+        <p class="level-who">Foremen &middot; Welders &middot; Operators &middot; General Construction</p>
+        <p class="level-desc">
+          If your day starts with a toolbox talk and ends when the last weld is made, this is your tier. Tier 1 covers what you need to catch problems before they catch you: how to read FDQ documentation, run a pre-task quality check, and flag something wrong before it hits inspection. Not a classroom course. A field course.
+        </p>
+        <ul class="level-items">
+          <li>Read, apply, and complete FDQ-format field documentation</li>
+          <li>Run pre-task quality checks during setup and walkdowns</li>
+          <li>Identify and flag field-level risks before they reach inspection</li>
+          <li>Use FDQ checklists, logs, and risk tools on live jobsites</li>
+        </ul>
       </div>
-      <div class="pillar">
-        <p class="pillar-number">02 / OWNERSHIP</p>
-        <h3>Bottom Up</h3>
-        <p>A QC inspector can't be everywhere. When a foreman and their crew own quality at the task level, problems get caught before they become NCRs. That's not a theory. That's what actually happens when you give crews the tools and the reason to care.</p>
+
+      <!-- TIER 2 -->
+      <div class="level-card level-2">
+        <p class="level-tag">FDQ Tier 2: QC and Operations</p>
+        <h3>Own the Process.</h3>
+        <p class="level-who">QC Inspectors &middot; Quality Engineers &middot; Operations Managers &middot; Discipline Leads</p>
+        <p class="level-desc">
+          You're the one who gets the call when a weld gets rejected or a joint fails inspection. Tier 2 is built for QC inspectors and quality engineers who need a system that actually works under field conditions, one that gives you real data, real documentation, and a crew that isn't working against you.
+        </p>
+        <ul class="level-items">
+          <li>Deploy and manage FDQ documentation across an active project</li>
+          <li>Lead pre-task quality talks and drive crew-level accountability</li>
+          <li>Train and support Tier 1 field personnel</li>
+          <li>Use risk profiles, field data, and NCR workflows to manage quality outcomes</li>
+        </ul>
       </div>
-      <div class="pillar">
-        <p class="pillar-number">03 / EFFECTIVENESS</p>
-        <h3>Prevent Rework</h3>
-        <p>Rework on a pipeline project doesn't cost dollars, it costs days. A failed tie-in, a coating reject, a weld that doesn't make it through hydro. Those are the failures that blow budgets and schedules. FDQ is designed to prevent them, not document them after the fact.</p>
+
+      <!-- TIER 3 -->
+      <div class="level-card level-3">
+        <p class="level-tag">FDQ Tier 3: Senior Quality</p>
+        <h3>Build the Program.</h3>
+        <p class="level-who">Quality Directors &middot; QA Managers &middot; Program Leads &middot; Senior QE</p>
+        <p class="level-desc">
+          Building a quality program from scratch is different from running one someone else designed. Tier 3 is for quality directors and senior QEs responsible for the whole system: how it's structured, how it gets deployed, how it's measured, and how it holds together when the project hits its peak.
+        </p>
+        <ul class="level-items">
+          <li>Design and implement an FDQ-based quality management system</li>
+          <li>Build audit programs, NCR lifecycle workflows, and KPI dashboards</li>
+          <li>Lead organizational quality culture change at the project or company level</li>
+          <li>Certify and oversee Tier 1 and Tier 2 practitioners</li>
+        </ul>
       </div>
+
     </div>
   </section>
+</div>
 
-  <div class="full-divider"></div>
-
-  <!-- LEVELS -->
-  <div class="levels-section">
-    <section>
-      <p class="section-label">Certification Levels</p>
-      <div class="levels-grid stagger">
-
-        <!-- TIER 1 -->
-        <div class="level-card">
-          <p class="level-tag">FDQ Tier 1: Field Crew</p>
-          <h3>In the Dirt.</h3>
-          <p class="level-who">Foremen · Welders · Operators · General Construction</p>
-          <p class="level-desc">
-            If your day starts with a toolbox talk and ends when the last weld is made, this is your tier. Tier 1 covers what you need to catch problems before they catch you: how to read FDQ documentation, run a pre-task quality check, and flag something wrong before it hits inspection. Not a classroom course. A field course.
-          </p>
-          <ul class="level-items">
-            <li>Read, apply, and complete FDQ-format field documentation</li>
-            <li>Run pre-task quality checks during setup and walkdowns</li>
-            <li>Identify and flag field-level risks before they reach inspection</li>
-            <li>Use FDQ checklists, logs, and risk tools on live jobsites</li>
-          </ul>
-        </div>
-
-        <!-- TIER 2 -->
-        <div class="level-card level-2">
-          <p class="level-tag">FDQ Tier 2: QC and Operations</p>
-          <h3>Own the Process.</h3>
-          <p class="level-who">QC Inspectors · Quality Engineers · Operations Managers · Discipline Leads</p>
-          <p class="level-desc">
-            You're the one who gets the call when a weld gets rejected or a joint fails inspection. Tier 2 is built for QC inspectors and quality engineers who need a system that actually works under field conditions, one that gives you real data, real documentation, and a crew that isn't working against you.
-          </p>
-          <ul class="level-items">
-            <li>Deploy and manage FDQ documentation across an active project</li>
-            <li>Lead pre-task quality talks and drive crew-level accountability</li>
-            <li>Train and support Tier 1 field personnel</li>
-            <li>Use risk profiles, field data, and NCR workflows to manage quality outcomes</li>
-          </ul>
-        </div>
-
-        <!-- TIER 3 -->
-        <div class="level-card level-3">
-          <p class="level-tag">FDQ Tier 3: Senior Quality</p>
-          <h3>Build the Program.</h3>
-          <p class="level-who">Quality Directors · QA Managers · Program Leads · Senior QE</p>
-          <p class="level-desc">
-            Building a quality program from scratch is different from running one someone else designed. Tier 3 is for quality directors and senior QEs responsible for the whole system: how it's structured, how it gets deployed, how it's measured, and how it holds together when the project hits its peak.
-          </p>
-          <ul class="level-items">
-            <li>Design and implement an FDQ-based quality management system</li>
-            <li>Build audit programs, NCR lifecycle workflows, and KPI dashboards</li>
-            <li>Lead organizational quality culture change at the project or company level</li>
-            <li>Certify and oversee Tier 1 and Tier 2 practitioners</li>
-          </ul>
-        </div>
-
-      </div>
-    </section>
+<!-- WHO IT'S FOR -->
+<section>
+  <p class="section-label">Who Uses FDQ</p>
+  <div class="pillars-header reveal">
+    <h2>Three tiers.<br/>Every role<br/><em>covered.</em></h2>
+    <p>Construction quality is a dozen different jobs that all have to work together. FDQ covers all of them. Find the tier that matches where you work.</p>
   </div>
 
-  <!-- WHO IT'S FOR -->
-  <section>
-    <p class="section-label">Who Uses FDQ</p>
-    <div class="pillars-header reveal">
-      <h2>Three tiers.<br/>Every role<br/><em>covered.</em></h2>
-      <p>Construction quality is a dozen different jobs that all have to work together. FDQ covers all of them. Find the tier that matches where you work.</p>
+  <!-- TIER 1 GROUP -->
+  <div class="tier-group reveal">
+    <div class="tier-group-header tier-1-header">
+      <div class="tier-group-label">
+        <span class="tier-number">Tier 1</span>
+        <span class="tier-title">Field Crew</span>
+      </div>
+      <p class="tier-group-desc">The crew on the ground. No quality background required.</p>
     </div>
-
-    <!-- TIER 1 GROUP -->
-    <div class="tier-group reveal">
-      <div class="tier-group-header tier-1-header">
-        <div class="tier-group-label">
-          <span class="tier-number">Tier 1</span>
-          <span class="tier-title">Field Crew</span>
-        </div>
-        <p class="tier-group-desc">The crew on the ground. No quality background required.</p>
+    <div class="tier-cards">
+      <div class="audience-card tier-1-card">
+        <p class="role">Foremen</p>
+        <p class="desc">The foreman sets the tone. When a crew lead understands what quality looks like and why it matters, the whole crew follows. Tier 1 gives foremen the tools to have that conversation before the work starts, not after something gets rejected.</p>
       </div>
-      <div class="tier-cards">
-        <div class="audience-card tier-1-card">
-          <p class="role">Foremen</p>
-          <p class="desc">The foreman sets the tone. When a crew lead understands what quality looks like and why it matters, the whole crew follows. Tier 1 gives foremen the tools to have that conversation before the work starts, not after something gets rejected.</p>
-        </div>
-        <div class="audience-card tier-1-card">
-          <p class="role">Welders</p>
-          <p class="desc">A bad weld doesn't usually happen because a welder didn't care. It happens because something was unclear, skipped, or assumed. Tier 1 closes those gaps before the arc starts.</p>
-        </div>
-        <div class="audience-card tier-1-card">
-          <p class="role">Operators &amp; General Construction</p>
-          <p class="desc">If your hands touch the work, quality is part of your job. Tier 1 is built so anyone on the crew can pick it up and apply it, regardless of how much quality experience they've had before.</p>
-        </div>
+      <div class="audience-card tier-1-card">
+        <p class="role">Welders</p>
+        <p class="desc">A bad weld doesn't usually happen because a welder didn't care. It happens because something was unclear, skipped, or assumed. Tier 1 closes those gaps before the arc starts.</p>
       </div>
-    </div>
-
-    <!-- TIER 2 GROUP -->
-    <div class="tier-group reveal">
-      <div class="tier-group-header tier-2-header">
-        <div class="tier-group-label">
-          <span class="tier-number">Tier 2</span>
-          <span class="tier-title">QC and Operations</span>
-        </div>
-        <p class="tier-group-desc">QC, quality engineering, and operations. Where accountability lives.</p>
+      <div class="audience-card tier-1-card">
+        <p class="role">Operators &amp; General Construction</p>
+        <p class="desc">If your hands touch the work, quality is part of your job. Tier 1 is built so anyone on the crew can pick it up and apply it, regardless of how much quality experience they've had before.</p>
       </div>
-      <div class="tier-cards">
-        <div class="audience-card tier-2-card">
-          <p class="role">QC Inspectors</p>
-          <p class="desc">Catching a problem at pre-task costs nothing. Catching it after the work is done costs days. FDQ is built to move QC inspectors upstream, so they're preventing failures instead of just recording them.</p>
-        </div>
-        <div class="audience-card tier-2-card">
-          <p class="role">Quality Engineers</p>
-          <p class="desc">You know what the spec says. The hard part is getting the crew to know it too, and to act on it. FDQ gives you a framework that translates spec requirements into field-level actions your crews can actually execute.</p>
-        </div>
-        <div class="audience-card tier-2-card">
-          <p class="role">Operations Managers</p>
-          <p class="desc">Schedule pressure is real. But a failed hydro test or a rejected weld costs more time than a pre-task quality check ever will. Tier 2 gives operations managers the tools to build quality into the work sequence instead of bolting it on afterward.</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- TIER 3 GROUP -->
-    <div class="tier-group reveal">
-      <div class="tier-group-header tier-3-header">
-        <div class="tier-group-label">
-          <span class="tier-number">Tier 3</span>
-          <span class="tier-title">Senior Quality</span>
-        </div>
-        <p class="tier-group-desc">The people who design the system everyone else works in.</p>
-      </div>
-      <div class="tier-cards">
-        <div class="audience-card tier-3-card">
-          <p class="role">Quality Directors</p>
-          <p class="desc">A quality program lives or dies in execution. Tier 3 covers how to build one that actually functions in the field, from initial mobilization through project turnover, and everything that happens in between.</p>
-        </div>
-        <div class="audience-card tier-3-card">
-          <p class="role">QA Managers</p>
-          <p class="desc">Audit programs that only find paperwork problems aren't finding the right problems. Tier 3 builds the skills to design audits, NCR workflows, and reporting systems that tell you what's actually happening on the project.</p>
-        </div>
-        <div class="audience-card tier-3-card">
-          <p class="role">Senior Quality Engineers</p>
-          <p class="desc">If you've spent years executing someone else's quality program and you're ready to build your own, Tier 3 is where that transition happens.</p>
-        </div>
-      </div>
-    </div>
-
-  </section>
-
-  <div class="full-divider"></div>
-
-  <!-- ABOUT / FOUNDER -->
-  <section>
-    <p class="section-label">About FDQ</p>
-    <div class="founder-body reveal" style="max-width: 720px;">
-      <h2>Built from<br/>the <em>field.</em><br/>Not the office.</h2>
-      <p>I started as a field inspector. I've held the weld log, walked the right-of-way at 5 AM, and sat across from a project director explaining why a quality NCR is going to affect the schedule. I know what it looks like when a quality program works in the field, and I know what it looks like when it doesn't.</p>
-      <p>FDQ is built from that experience. Not from a textbook. Not from a manufacturing framework with construction examples dropped in. From fifteen years of doing the work, watching what held up and what didn't, and building tools and systems around what actually worked.</p>
-      <p><strong>The certification exists to validate that knowledge for the people who have it</strong>, and to build it in the people who are working toward it.</p>
-    </div>
-  </section>
-
-  <!-- CTA BAND -->
-  <div class="cta-band">
-    <div class="cta-band-inner">
-      <h2>If your quality program<br/>isn't working in the field,<br/>it isn't working.</h2>
-      <a href="/contact/" class="btn-dark">Get Started with FDQ</a>
     </div>
   </div>
 
-  <!-- FOOTER -->
-  <footer>
-    <span class="footer-logo">Field-Driven Quality</span>
-    <ul class="footer-links">
-      <li><a href="/about/">About</a></li>
-      <li><a href="/blog/">Blog</a></li>
-      <li><a href="/contact/">Contact</a></li>
-      <li><a href="/accounts/login/">Login</a></li>
-    </ul>
-    <span class="footer-copy">© 2025 Field-Driven Quality</span>
-  </footer>
+  <!-- TIER 2 GROUP -->
+  <div class="tier-group reveal">
+    <div class="tier-group-header tier-2-header">
+      <div class="tier-group-label">
+        <span class="tier-number">Tier 2</span>
+        <span class="tier-title">QC and Operations</span>
+      </div>
+      <p class="tier-group-desc">QC, quality engineering, and operations. Where accountability lives.</p>
+    </div>
+    <div class="tier-cards">
+      <div class="audience-card tier-2-card">
+        <p class="role">QC Inspectors</p>
+        <p class="desc">Catching a problem at pre-task costs nothing. Catching it after the work is done costs days. FDQ is built to move QC inspectors upstream, so they're preventing failures instead of just recording them.</p>
+      </div>
+      <div class="audience-card tier-2-card">
+        <p class="role">Quality Engineers</p>
+        <p class="desc">You know what the spec says. The hard part is getting the crew to know it too, and to act on it. FDQ gives you a framework that translates spec requirements into field-level actions your crews can actually execute.</p>
+      </div>
+      <div class="audience-card tier-2-card">
+        <p class="role">Operations Managers</p>
+        <p class="desc">Schedule pressure is real. But a failed hydro test or a rejected weld costs more time than a pre-task quality check ever will. Tier 2 gives operations managers the tools to build quality into the work sequence instead of bolting it on afterward.</p>
+      </div>
+    </div>
+  </div>
 
-  <script>
-    // Hamburger nav
-    const hamburger = document.getElementById('hamburger');
-    const navLinks = document.getElementById('navLinks');
-    hamburger.addEventListener('click', () => {
-      hamburger.classList.toggle('open');
-      navLinks.classList.toggle('open');
-    });
+  <!-- TIER 3 GROUP -->
+  <div class="tier-group reveal">
+    <div class="tier-group-header tier-3-header">
+      <div class="tier-group-label">
+        <span class="tier-number">Tier 3</span>
+        <span class="tier-title">Senior Quality</span>
+      </div>
+      <p class="tier-group-desc">The people who design the system everyone else works in.</p>
+    </div>
+    <div class="tier-cards">
+      <div class="audience-card tier-3-card">
+        <p class="role">Quality Directors</p>
+        <p class="desc">A quality program lives or dies in execution. Tier 3 covers how to build one that actually functions in the field, from initial mobilization through project turnover, and everything that happens in between.</p>
+      </div>
+      <div class="audience-card tier-3-card">
+        <p class="role">QA Managers</p>
+        <p class="desc">Audit programs that only find paperwork problems aren't finding the right problems. Tier 3 builds the skills to design audits, NCR workflows, and reporting systems that tell you what's actually happening on the project.</p>
+      </div>
+      <div class="audience-card tier-3-card">
+        <p class="role">Senior Quality Engineers</p>
+        <p class="desc">If you've spent years executing someone else's quality program and you're ready to build your own, Tier 3 is where that transition happens.</p>
+      </div>
+    </div>
+  </div>
 
-    // Intersection Observer for scroll reveals
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add('visible');
-        }
-      });
-    }, { threshold: 0.1 });
+</section>
 
-    document.querySelectorAll('.reveal, .stagger').forEach(el => observer.observe(el));
-  </script>
-</body>
-</html>
+<div class="full-divider"></div>
+
+<!-- ABOUT / FOUNDER -->
+<section>
+  <p class="section-label">About FDQ</p>
+  <div class="founder-body reveal" style="max-width: 720px;">
+    <h2>Built from<br/>the <em>field.</em><br/>Not the office.</h2>
+    <p>I started as a field inspector. I've held the weld log, walked the right-of-way at 5 AM, and sat across from a project director explaining why a quality NCR is going to affect the schedule. I know what it looks like when a quality program works in the field, and I know what it looks like when it doesn't.</p>
+    <p>FDQ is built from that experience. Not from a textbook. Not from a manufacturing framework with construction examples dropped in. From fifteen years of doing the work, watching what held up and what didn't, and building tools and systems around what actually worked.</p>
+    <p><strong>The certification exists to validate that knowledge for the people who have it</strong>, and to build it in the people who are working toward it.</p>
+  </div>
+</section>
+
+<!-- CTA BAND -->
+<div class="cta-band">
+  <div class="cta-band-inner">
+    <h2>If your quality program<br/>isn't working in the field,<br/>it isn't working.</h2>
+    <a href="{% url 'contact' %}" class="btn-dark">Get Started with FDQ</a>
+  </div>
+</div>
+{% endblock %}

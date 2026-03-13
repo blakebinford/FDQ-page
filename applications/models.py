@@ -18,12 +18,14 @@ class Application(models.Model):
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
     can_reapply = models.BooleanField(default=False)
 
-    # Work history fields
-    current_employer = models.CharField(max_length=150)
-    job_title = models.CharField(max_length=100)
-    years_experience = models.PositiveIntegerField(help_text='Total years of industry experience')
-    project_types_worked = models.TextField(help_text='Types of projects worked (pipeline, facility, civil, etc.)')
-    industry_background = models.TextField(help_text='Describe your industry background and experience')
+    # Work history M2M — entries from user profile at time of submission
+    work_history = models.ManyToManyField(
+        'accounts.WorkHistory',
+        blank=True,
+        related_name='applications',
+        help_text='Work history entries submitted with this application'
+    )
+
     certifications_held = models.TextField(blank=True, help_text='Any current certifications (CWI, NACE, PMP, etc.)')
     additional_info = models.TextField(blank=True, help_text='Anything else you want us to know')
 

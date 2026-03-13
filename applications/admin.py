@@ -90,11 +90,11 @@ class ApplicationAdmin(admin.ModelAdmin):
     list_filter = ('status', 'submitted_at')
     search_fields = (
         'user__email', 'user__first_name', 'user__last_name',
-        'current_employer', 'job_title',
     )
     ordering = ('-submitted_at',)
     readonly_fields = ('submitted_at', 'reviewed_at', 'reviewed_by', 'user')
     actions = [approve_applications, deny_applications]
+    filter_horizontal = ('work_history',)
 
     fieldsets = (
         ('Applicant', {
@@ -102,9 +102,9 @@ class ApplicationAdmin(admin.ModelAdmin):
         }),
         ('Application Content', {
             'fields': (
-                'current_employer', 'job_title', 'years_experience',
-                'project_types_worked', 'industry_background',
-                'certifications_held', 'additional_info',
+                'work_history',
+                'certifications_held',
+                'additional_info',
             ),
         }),
         ('Review', {

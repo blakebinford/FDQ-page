@@ -9,6 +9,101 @@
 .edit-actions { display: flex; gap: 1rem; align-items: center; margin-top: 1rem; }
 .edit-cancel { font-size: 0.85rem; color: var(--muted); text-decoration: none; }
 .edit-cancel:hover { color: var(--white); }
+.checkbox-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0.6rem;
+  padding: 0.5rem 0;
+}
+.checkbox-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  font-size: 0.88rem;
+  color: var(--text);
+  cursor: pointer;
+  line-height: 1.4;
+}
+.checkbox-item input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  margin-top: 2px;
+  accent-color: var(--amber);
+  cursor: pointer;
+}
+.wh-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--amber);
+  padding: 1.2rem 1.5rem;
+  margin-bottom: 0.8rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+.wh-card-body { flex: 1; }
+.wh-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 1.05rem;
+  text-transform: uppercase;
+  color: var(--white);
+  margin-bottom: 0.2rem;
+}
+.wh-meta {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+.wh-contact { font-size: 0.82rem; color: var(--muted); margin-top: 0.5rem; }
+.wh-delete {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: none;
+  border: 1px solid var(--border);
+  padding: 0.4rem 0.8rem;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+}
+.wh-delete:hover { color: #e57373; border-color: #e57373; }
+.wh-section-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--amber);
+  margin: 2rem 0 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.wh-section-label::before {
+  content: '';
+  display: block;
+  width: 1.5rem;
+  height: 1px;
+  background: var(--amber);
+}
+.wh-add-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 1.5rem;
+  margin-top: 1rem;
+}
+.wh-add-form .form-group { margin: 0; }
+.wh-add-form .form-group.full { grid-column: 1 / -1; }
+@media (max-width: 600px) { .wh-add-form { grid-template-columns: 1fr; } }
 {% endblock %}
 
 {% block content %}
@@ -62,16 +157,27 @@
     </div>
     <div class="form-group">
       <label>Project Types</label>
-      <select name="project_type">
-        <option value="">Select...</option>
+      <div class="checkbox-grid">
         {% for value, display in project_type_choices %}
-          <option value="{{ value }}" {% if user.project_type == value %}selected{% endif %}>{{ display }}</option>
+        <label class="checkbox-item">
+          <input type="checkbox" name="project_types" value="{{ value }}"
+            {% if value in user.project_types_list %}checked{% endif %} />
+          <span>{{ display }}</span>
+        </label>
         {% endfor %}
-      </select>
+      </div>
     </div>
     <div class="form-group">
       <label>Certifications Held</label>
-      <textarea name="certifications_held" placeholder="CWI, NACE, PMP, etc.">{{ user.certifications_held }}</textarea>
+      <div class="checkbox-grid">
+        {% for value, display in certification_choices %}
+        <label class="checkbox-item">
+          <input type="checkbox" name="certifications_held" value="{{ value }}"
+            {% if value in user.certifications_list %}checked{% endif %} />
+          <span>{{ display }}</span>
+        </label>
+        {% endfor %}
+      </div>
     </div>
     <div class="form-group">
       <label>LinkedIn URL</label>
@@ -82,5 +188,93 @@
       <a href="{% url 'accounts:profile' %}" class="edit-cancel">Cancel</a>
     </div>
   </form>
+
+  <!-- WORK HISTORY SECTION -->
+  <div style="max-width: 640px;" class="reveal">
+    <p class="wh-section-label">Work History</p>
+
+    {% for entry in work_history %}
+    <div class="wh-card">
+      <div class="wh-card-body">
+        <p class="wh-title">{{ entry.position_name }} — {{ entry.company_name }}</p>
+        <p class="wh-meta">{{ entry.get_industry_display }} &middot; {{ entry.date_range }}</p>
+        {% if entry.contact_name %}
+        <p class="wh-contact">Reference: {{ entry.contact_name }}{% if entry.contact_position %}, {{ entry.contact_position }}{% endif %}{% if entry.contact_phone %} &middot; {{ entry.contact_phone }}{% endif %}{% if entry.contact_email %} &middot; {{ entry.contact_email }}{% endif %}</p>
+        {% endif %}
+      </div>
+      <form method="POST" action="{% url 'accounts:profile_edit' %}">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="delete_work_history" />
+        <input type="hidden" name="wh_id" value="{{ entry.id }}" />
+        <button type="submit" class="wh-delete">Remove</button>
+      </form>
+    </div>
+    {% empty %}
+    <p style="color: var(--muted); font-size: 0.9rem;">No work history entries yet.</p>
+    {% endfor %}
+
+    <p class="wh-section-label">Add Entry</p>
+    <form method="POST" action="{% url 'accounts:profile_edit' %}" class="wh-add-form">
+      {% csrf_token %}
+      <input type="hidden" name="action" value="add_work_history" />
+      <div class="form-group">
+        <label>Company Name</label>
+        <input type="text" name="wh_company" placeholder="Employer name" required />
+      </div>
+      <div class="form-group">
+        <label>Position / Title</label>
+        <input type="text" name="wh_position" placeholder="Your role" required />
+      </div>
+      <div class="form-group">
+        <label>Industry</label>
+        <select name="wh_industry" required>
+          <option value="">Select...</option>
+          {% for value, display in industry_choices %}
+            <option value="{{ value }}">{{ display }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Start Date</label>
+        <input type="date" name="wh_start_date" required />
+      </div>
+      <div class="form-group" id="end-date-group">
+        <label>End Date</label>
+        <input type="date" name="wh_end_date" />
+      </div>
+      <div class="form-group">
+        <label class="checkbox-item" style="margin-top: 1.2rem;">
+          <input type="checkbox" name="wh_is_current" />
+          <span>I currently work here</span>
+        </label>
+      </div>
+      <div class="form-group">
+        <label>Reference Contact Name</label>
+        <input type="text" name="wh_contact_name" placeholder="Optional" />
+      </div>
+      <div class="form-group">
+        <label>Reference Position</label>
+        <input type="text" name="wh_contact_position" placeholder="Optional" />
+      </div>
+      <div class="form-group">
+        <label>Reference Phone</label>
+        <input type="text" name="wh_contact_phone" placeholder="Optional" />
+      </div>
+      <div class="form-group">
+        <label>Reference Email</label>
+        <input type="email" name="wh_contact_email" placeholder="Optional" />
+      </div>
+      <div class="form-group full">
+        <button type="submit" class="btn-secondary" style="align-self:flex-start;">Add Entry</button>
+      </div>
+    </form>
+  </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+document.querySelector('[name="wh_is_current"]').addEventListener('change', function() {
+  document.getElementById('end-date-group').style.display =
+    this.checked ? 'none' : 'flex';
+});
 {% endblock %}

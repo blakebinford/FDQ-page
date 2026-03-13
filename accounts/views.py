@@ -9,6 +9,8 @@ from django.contrib.auth.views import (
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
 
+from .models import CERTIFICATION_CHOICES, WorkHistory
+
 User = get_user_model()
 
 
@@ -134,7 +136,32 @@ def profile_view(request):
 @login_required
 def profile_edit_view(request):
     user = request.user
+
     if request.method == 'POST':
+        action = request.POST.get('action', '')
+
+        if action == 'add_work_history':
+            WorkHistory.objects.create(
+                user=user,
+                company_name=request.POST.get('wh_company', '').strip(),
+                position_name=request.POST.get('wh_position', '').strip(),
+                industry=request.POST.get('wh_industry', ''),
+                start_date=request.POST.get('wh_start_date'),
+                end_date=request.POST.get('wh_end_date') or None,
+                is_current=request.POST.get('wh_is_current') == 'on',
+                contact_name=request.POST.get('wh_contact_name', '').strip(),
+                contact_position=request.POST.get('wh_contact_position', '').strip(),
+                contact_phone=request.POST.get('wh_contact_phone', '').strip(),
+                contact_email=request.POST.get('wh_contact_email', '').strip(),
+            )
+            return redirect('accounts:profile_edit')
+
+        if action == 'delete_work_history':
+            wh_id = request.POST.get('wh_id')
+            WorkHistory.objects.filter(id=wh_id, user=user).delete()
+            return redirect('accounts:profile_edit')
+
+        # Default: save profile fields
         user.first_name = request.POST.get('first_name', '').strip()
         user.last_name = request.POST.get('last_name', '').strip()
         user.company_name = request.POST.get('company_name', '').strip()
@@ -143,14 +170,17 @@ def profile_edit_view(request):
         user.state = request.POST.get('state', '')
         years = request.POST.get('years_experience', '')
         user.years_experience = int(years) if years else None
-        user.project_type = request.POST.get('project_type', '')
-        user.certifications_held = request.POST.get('certifications_held', '').strip()
+        user.project_types = ','.join(request.POST.getlist('project_types'))
+        user.certifications_held = ','.join(request.POST.getlist('certifications_held'))
         user.linkedin_url = request.POST.get('linkedin_url', '').strip()
         user.profile_complete = True
         user.save()
         return redirect('accounts:profile')
+
     return render(request, 'accounts/profile_edit.html', {
         'profession_choices': User.PROFESSION_CHOICES,
         'industry_choices': User.INDUSTRY_CHOICES,
         'project_type_choices': User.PROJECT_TYPE_CHOICES,
+        'certification_choices': CERTIFICATION_CHOICES,
+        'work_history': user.work_history.all(),
     })

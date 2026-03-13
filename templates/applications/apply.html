@@ -17,6 +17,70 @@
   margin-top: 2rem;
   line-height: 1.6;
 }
+.wh-card {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--amber);
+  padding: 1.2rem 1.5rem;
+  margin-bottom: 0.8rem;
+}
+.wh-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 700;
+  font-size: 1.05rem;
+  text-transform: uppercase;
+  color: var(--white);
+  margin-bottom: 0.2rem;
+}
+.wh-meta {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+.wh-contact { font-size: 0.82rem; color: var(--muted); margin-top: 0.5rem; }
+.wh-section-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--amber);
+  margin: 0 0 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.wh-section-label::before {
+  content: '';
+  display: block;
+  width: 1.5rem;
+  height: 1px;
+  background: var(--amber);
+}
+.wh-edit-link {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--amber);
+  text-decoration: none;
+  margin-top: 0.5rem;
+  display: inline-block;
+}
+.wh-edit-link:hover { color: var(--amber-lt); }
+.wh-notice {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--steel);
+  padding: 1.2rem 1.5rem;
+  margin-bottom: 1.5rem;
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+.wh-notice a { color: var(--amber); text-decoration: none; }
+.wh-notice a:hover { color: var(--amber-lt); }
 {% endblock %}
 
 {% block content %}
@@ -26,44 +90,40 @@
   {% if is_reapply %}
     <p class="page-sub">Update your application below and resubmit for review.</p>
   {% else %}
-    <p class="page-sub">FDQ is a practitioner credential. Tell us about your background and we'll review your application within 1–2 business days.</p>
+    <p class="page-sub">FDQ is a practitioner credential. We'll review your work history and background within 1–2 business days.</p>
   {% endif %}
 </div>
 
 <div class="page-content">
-  <form class="apply-form reveal" action="{% url 'applications:apply' %}" method="POST">
+  <!-- WORK HISTORY (read-only) -->
+  <div style="max-width: 760px;" class="reveal">
+    <p class="wh-section-label">Work History</p>
+
+    {% if has_work_history %}
+      {% for entry in work_history %}
+      <div class="wh-card">
+        <p class="wh-title">{{ entry.position_name }} — {{ entry.company_name }}</p>
+        <p class="wh-meta">{{ entry.get_industry_display }} &middot; {{ entry.date_range }}</p>
+        {% if entry.contact_name %}
+        <p class="wh-contact">Reference: {{ entry.contact_name }}{% if entry.contact_position %}, {{ entry.contact_position }}{% endif %}{% if entry.contact_phone %} &middot; {{ entry.contact_phone }}{% endif %}{% if entry.contact_email %} &middot; {{ entry.contact_email }}{% endif %}</p>
+        {% endif %}
+      </div>
+      {% endfor %}
+      <a href="{% url 'accounts:profile_edit' %}" class="wh-edit-link">Edit Work History in Profile &rarr;</a>
+    {% else %}
+      <div class="wh-notice">
+        No work history on file. <a href="{% url 'accounts:profile_edit' %}">Add work history to your profile</a> before applying. Reviewers use your work history to evaluate your application.
+      </div>
+    {% endif %}
+  </div>
+
+  <form class="apply-form reveal" action="{% url 'applications:apply' %}" method="POST" style="margin-top: 2rem;">
     {% csrf_token %}
 
     <div class="form-group">
-      <label>Current Employer</label>
-      <input type="text" name="current_employer" value="{% if is_reapply %}{{ application.current_employer }}{% endif %}" placeholder="Your company or employer" required />
-    </div>
-
-    <div class="form-group">
-      <label>Job Title</label>
-      <input type="text" name="job_title" value="{% if is_reapply %}{{ application.job_title }}{% endif %}" placeholder="Your current role" required />
-    </div>
-
-    <div class="form-group">
-      <label>Years of Industry Experience</label>
-      <input type="number" name="years_experience" value="{% if is_reapply %}{{ application.years_experience }}{% endif %}" min="0" placeholder="0" required />
-    </div>
-
-    <div class="form-group">
-      <label>Types of Projects</label>
-      <textarea name="project_types_worked" placeholder="Pipeline, facility construction, industrial, civil..." required>{% if is_reapply %}{{ application.project_types_worked }}{% endif %}</textarea>
-      <p class="field-help">List the types of construction projects you have worked on.</p>
-    </div>
-
-    <div class="form-group">
-      <label>Industry Background</label>
-      <textarea name="industry_background" placeholder="Describe your experience in construction quality, inspection, or field operations..." required>{% if is_reapply %}{{ application.industry_background }}{% endif %}</textarea>
-      <p class="field-help">This is the primary field reviewers use to evaluate your application.</p>
-    </div>
-
-    <div class="form-group">
       <label>Current Certifications (Optional)</label>
-      <textarea name="certifications_held" placeholder="CWI, NACE, API 570, PMP...">{% if is_reapply %}{{ application.certifications_held }}{% endif %}</textarea>
+      <textarea name="certifications_held" placeholder="CWI, NACE, API 570, PMP...">{% if is_reapply %}{{ application.certifications_held }}{% else %}{{ profile_certs }}{% endif %}</textarea>
+      <p class="field-help">Pre-populated from your profile. Edit here if needed for this application.</p>
     </div>
 
     <div class="form-group">

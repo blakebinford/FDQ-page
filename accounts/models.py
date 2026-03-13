@@ -1,8 +1,31 @@
+from django.conf import settings
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 from django.utils import timezone
 from localflavor.us.models import USStateField
+
+
+CERTIFICATION_CHOICES = [
+    ('cwi', 'CWI — Certified Welding Inspector'),
+    ('cawi', 'CAWI — Certified Associate Welding Inspector'),
+    ('scwi', 'SCWI — Senior Certified Welding Inspector'),
+    ('nace_l1', 'NACE CIP Level 1'),
+    ('nace_l2', 'NACE CIP Level 2'),
+    ('nace_l3', 'NACE CIP Level 3'),
+    ('api_570', 'API 570 — Piping Inspector'),
+    ('api_653', 'API 653 — Aboveground Storage Tank Inspector'),
+    ('api_580', 'API 580 — Risk-Based Inspection'),
+    ('asnt_l1', 'ASNT NDT Level I'),
+    ('asnt_l2', 'ASNT NDT Level II'),
+    ('asnt_l3', 'ASNT NDT Level III'),
+    ('sspc', 'SSPC — Protective Coatings Inspector'),
+    ('pmp', 'PMP — Project Management Professional'),
+    ('osha_10', 'OSHA 10'),
+    ('osha_30', 'OSHA 30'),
+    ('nccer', 'NCCER Certification'),
+    ('other', 'Other'),
+]
 
 
 class CustomUserManager(BaseUserManager):
@@ -98,15 +121,13 @@ class User(AbstractBaseUser, PermissionsMixin):
         blank=True,
         help_text="Years of industry experience",
     )
-    project_type = models.CharField(
-        max_length=20,
-        choices=PROJECT_TYPE_CHOICES,
+    project_types = models.TextField(
         blank=True,
-        help_text="Primary project type",
+        help_text="Comma-separated list of project types",
     )
     certifications_held = models.TextField(
         blank=True,
-        help_text="Comma-separated list of certifications (e.g. CWI, NACE, PMP)",
+        help_text="Comma-separated list from predefined options",
     )
     linkedin_url = models.URLField(blank=True, help_text="LinkedIn profile URL")
 
@@ -132,6 +153,12 @@ class User(AbstractBaseUser, PermissionsMixin):
         return [c.strip() for c in self.certifications_held.split(',') if c.strip()]
 
     @property
+    def project_types_list(self):
+        if not self.project_types:
+            return []
+        return [p.strip() for p in self.project_types.split(',') if p.strip()]
+
+    @property
     def highest_tier(self):
         certs = [c.upper() for c in self.certifications_list]
         if 'CWI' in certs or 'NACE' in certs:
@@ -139,3 +166,37 @@ class User(AbstractBaseUser, PermissionsMixin):
         if certs:
             return 'Intermediate'
         return 'Entry'
+
+
+class WorkHistory(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='work_history'
+    )
+    company_name = models.CharField(max_length=150)
+    position_name = models.CharField(max_length=100)
+    industry = models.CharField(
+        max_length=20,
+        choices=User.INDUSTRY_CHOICES,
+    )
+    start_date = models.DateField()
+    end_date = models.DateField(null=True, blank=True)
+    is_current = models.BooleanField(default=False)
+
+    # Reference contact at this employer
+    contact_name = models.CharField(max_length=100, blank=True)
+    contact_position = models.CharField(max_length=100, blank=True)
+    contact_phone = models.CharField(max_length=30, blank=True)
+    contact_email = models.EmailField(blank=True)
+
+    class Meta:
+        ordering = ['-is_current', '-start_date']
+
+    def __str__(self):
+        return f"{self.user.email} / {self.company_name} / {self.position_name}"
+
+    @property
+    def date_range(self):
+        end = "Present" if self.is_current else str(self.end_date)
+        return f"{self.start_date} — {end}"

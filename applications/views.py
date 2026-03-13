@@ -34,11 +34,6 @@ def apply_view(request):
 
     if request.method == 'POST':
         form_data = {
-            'current_employer': request.POST.get('current_employer', '').strip(),
-            'job_title': request.POST.get('job_title', '').strip(),
-            'years_experience': int(request.POST.get('years_experience', 0)),
-            'project_types_worked': request.POST.get('project_types_worked', '').strip(),
-            'industry_background': request.POST.get('industry_background', '').strip(),
             'certifications_held': request.POST.get('certifications_held', '').strip(),
             'additional_info': request.POST.get('additional_info', '').strip(),
         }
@@ -53,6 +48,8 @@ def apply_view(request):
             application.reviewed_at = None
             application.reviewed_by = None
             application.save()
+            # Re-attach current work history
+            application.work_history.set(request.user.work_history.all())
             _send_reapply_admin_email(request.user, application)
         else:
             # Create new application
@@ -60,14 +57,23 @@ def apply_view(request):
                 user=request.user,
                 **form_data,
             )
+            # Attach work history entries
+            application.work_history.set(request.user.work_history.all())
             _send_application_received_email(request.user)
             _send_new_application_admin_email(request.user, application)
 
         return redirect('applications:status')
 
+    work_history = request.user.work_history.all()
+    # Pre-populate certifications from profile
+    profile_certs = ', '.join(request.user.certifications_list)
+
     return render(request, 'applications/apply.html', {
         'is_reapply': is_reapply,
         'application': application,
+        'work_history': work_history,
+        'has_work_history': work_history.exists(),
+        'profile_certs': profile_certs,
     })
 
 
@@ -105,15 +111,20 @@ def _send_application_received_email(user):
 def _send_new_application_admin_email(user, application):
     name = user.get_full_name() or user.email
     admin_url = f'{settings.SITE_URL}/admin/applications/application/{application.id}/change/'
+
+    # Build work history summary
+    wh_lines = []
+    for entry in application.work_history.all():
+        wh_lines.append(f'  - {entry.company_name} / {entry.position_name} ({entry.date_range})')
+    wh_summary = '\n'.join(wh_lines) if wh_lines else '  (none)'
+
     try:
         send_mail(
             f'New FDQ application: {user.email}',
             f'New application submitted.\n\n'
             f'Name: {name}\n'
             f'Email: {user.email}\n'
-            f'Employer: {application.current_employer}\n'
-            f'Title: {application.job_title}\n'
-            f'Experience: {application.years_experience} years\n\n'
+            f'Work History:\n{wh_summary}\n\n'
             f'Review at: {admin_url}',
             settings.DEFAULT_FROM_EMAIL,
             [settings.ADMIN_EMAIL],
