@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if is_reapply %}Reapply{% else %}Apply{% endif %} | Field-Driven Quality{% endblock %}
+
+{% block extra_styles %}
+.apply-form { max-width: 760px; display: flex; flex-direction: column; gap: 1.2rem; }
+.field-help {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  margin-top: 0.3rem;
+}
+.apply-footer {
+  font-size: 0.82rem;
+  color: var(--muted);
+  margin-top: 2rem;
+  line-height: 1.6;
+}
+{% endblock %}
+
+{% block content %}
+<div class="page-hero reveal">
+  <p class="page-label">FDQ Application</p>
+  <h1>Apply to <em>get started.</em></h1>
+  {% if is_reapply %}
+    <p class="page-sub">Update your application below and resubmit for review.</p>
+  {% else %}
+    <p class="page-sub">FDQ is a practitioner credential. Tell us about your background and we'll review your application within 1–2 business days.</p>
+  {% endif %}
+</div>
+
+<div class="page-content">
+  <form class="apply-form reveal" action="{% url 'applications:apply' %}" method="POST">
+    {% csrf_token %}
+
+    <div class="form-group">
+      <label>Current Employer</label>
+      <input type="text" name="current_employer" value="{% if is_reapply %}{{ application.current_employer }}{% endif %}" placeholder="Your company or employer" required />
+    </div>
+
+    <div class="form-group">
+      <label>Job Title</label>
+      <input type="text" name="job_title" value="{% if is_reapply %}{{ application.job_title }}{% endif %}" placeholder="Your current role" required />
+    </div>
+
+    <div class="form-group">
+      <label>Years of Industry Experience</label>
+      <input type="number" name="years_experience" value="{% if is_reapply %}{{ application.years_experience }}{% endif %}" min="0" placeholder="0" required />
+    </div>
+
+    <div class="form-group">
+      <label>Types of Projects</label>
+      <textarea name="project_types_worked" placeholder="Pipeline, facility construction, industrial, civil..." required>{% if is_reapply %}{{ application.project_types_worked }}{% endif %}</textarea>
+      <p class="field-help">List the types of construction projects you have worked on.</p>
+    </div>
+
+    <div class="form-group">
+      <label>Industry Background</label>
+      <textarea name="industry_background" placeholder="Describe your experience in construction quality, inspection, or field operations..." required>{% if is_reapply %}{{ application.industry_background }}{% endif %}</textarea>
+      <p class="field-help">This is the primary field reviewers use to evaluate your application.</p>
+    </div>
+
+    <div class="form-group">
+      <label>Current Certifications (Optional)</label>
+      <textarea name="certifications_held" placeholder="CWI, NACE, API 570, PMP...">{% if is_reapply %}{{ application.certifications_held }}{% endif %}</textarea>
+    </div>
+
+    <div class="form-group">
+      <label>Anything Else (Optional)</label>
+      <textarea name="additional_info" placeholder="Anything else you'd like us to know...">{% if is_reapply %}{{ application.additional_info }}{% endif %}</textarea>
+    </div>
+
+    <button type="submit" class="btn-primary" style="align-self:flex-start;">
+      {% if is_reapply %}Resubmit Application{% else %}Submit Application{% endif %}
+    </button>
+  </form>
+
+  <p class="apply-footer">Your application is reviewed by a human. We will contact you at {{ request.user.email }} with a decision.</p>
+</div>
+{% endblock %}

@@ -192,6 +192,20 @@
       background: rgba(76, 175, 80, 0.15); color: #81c784; border: 1px solid rgba(76, 175, 80, 0.3);
     }
 
+    .badge-ineligible {
+      font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; font-weight: 500;
+      letter-spacing: 0.12em; text-transform: uppercase; padding: 0.9rem 2rem;
+      text-align: center; display: block;
+      background: rgba(136, 136, 128, 0.1); color: var(--muted); border: 1px solid var(--border);
+    }
+
+    .badge-prereq {
+      font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; font-weight: 500;
+      letter-spacing: 0.12em; text-transform: uppercase; padding: 0.9rem 2rem;
+      text-align: center; display: block;
+      background: rgba(61, 90, 114, 0.15); color: #6a9abc; border: 1px solid rgba(61, 90, 114, 0.3);
+    }
+
     .btn-continue {
       font-family: 'IBM Plex Mono', monospace; font-size: 0.78rem; font-weight: 500;
       letter-spacing: 0.12em; text-transform: uppercase; padding: 0.9rem 2rem;
@@ -266,12 +280,24 @@
     <p class="tier-desc">{{ item.tier.description }}</p>
     <p class="tier-price">{{ item.price_display }}</p>
 
-    {% if item.certified %}
-      <span class="badge-certified">Certified</span>
-    {% elif item.enrolled %}
-      <a href="{% url 'lms:dashboard' %}" class="btn-continue">Continue Learning</a>
-    {% else %}
-      <a href="{% url 'lms:checkout' item.tier.slug %}" class="btn-primary">Enroll — {{ item.price_display }}</a>
+    {% if item.cta == 'certified' %}
+      <span class="badge-certified">&#10003; Certified</span>
+    {% elif item.cta == 'in_progress' %}
+      <a href="{% url 'lms:dashboard' %}" class="btn-continue">Continue Learning &rarr;</a>
+    {% elif item.cta == 'unauthenticated' %}
+      <a href="{% url 'accounts:register' %}" class="btn-primary">Apply to Enroll</a>
+    {% elif item.cta == 'no_application' %}
+      <a href="{% url 'applications:apply' %}" class="btn-primary">Apply Now</a>
+    {% elif item.cta == 'pending' %}
+      <a href="{% url 'applications:status' %}" class="btn-secondary">Application Under Review</a>
+    {% elif item.cta == 'denied_no_reapply' %}
+      <span class="badge-ineligible">Not Eligible</span>
+    {% elif item.cta == 'denied_can_reapply' %}
+      <a href="{% url 'applications:apply' %}" class="btn-primary">Reapply</a>
+    {% elif item.cta == 'prereq_required' %}
+      <span class="badge-prereq">Complete {{ item.prereq_name }} First</span>
+    {% elif item.cta == 'enroll' %}
+      <a href="{% url 'lms:checkout' item.tier.slug %}" class="btn-primary">Enroll &mdash; {{ item.price_display }}</a>
     {% endif %}
   </div>
   {% endfor %}

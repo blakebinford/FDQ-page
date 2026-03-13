@@ -574,6 +574,9 @@
 <nav>
   <a href="{% url 'home' %}" class="nav-logo">FDQ</a>
   <ul class="nav-links" id="navLinks">
+    {% if not user.is_authenticated %}
+      <li><a href="{% url 'accounts:register' %}">Register</a></li>
+    {% endif %}
     <li><a href="{% url 'about' %}">What is FDQ</a></li>
     <li><a href="{% url 'blog_list' %}">Blog</a></li>
     <li><a href="{% url 'contact' %}">Contact</a></li>

@@ -114,3 +114,4 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 CONTACT_EMAIL = config('CONTACT_EMAIL', default='binford.blake@gmail.com')
+ADMIN_EMAIL = config('ADMIN_EMAIL', default='binford.blake@gmail.com')

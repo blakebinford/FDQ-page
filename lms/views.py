@@ -15,6 +15,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
 from .models import Tier, Enrollment, Certificate
+from applications.models import Application
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 User = get_user_model()
@@ -23,60 +24,116 @@ logger = logging.getLogger(__name__)
 
 def tier_list(request):
     """
-    Public certifications page. Shows all active tiers with pricing and buy buttons.
-    If user is authenticated, shows their enrollment and certificate status per tier.
+    Public certifications page. Shows all tiers with the correct CTA
+    for every possible user/application/enrollment state.
     """
-    tiers = Tier.objects.filter(is_active=True).order_by('order')
-
-    user_enrollments = set()
-    user_certificates = set()
-    if request.user.is_authenticated:
-        user_enrollments = set(
-            request.user.enrollments.filter(is_active=True).values_list('tier_id', flat=True)
-        )
-        user_certificates = set(
-            request.user.certificate_set.values_list('tier_id', flat=True)
-        )
-
+    tiers = Tier.objects.all().order_by('order')
+    user = request.user
     tier_data = []
+
+    # Resolve application state once
+    application = None
+    if user.is_authenticated:
+        try:
+            application = user.application
+        except Exception:
+            pass
+
     for tier in tiers:
+        enrolled = False
+        certified = False
+        prereq_met = True
+
+        if user.is_authenticated:
+            enrolled = Enrollment.objects.filter(user=user, tier=tier).exists()
+            certified = Certificate.objects.filter(user=user, tier=tier).exists()
+            if tier.prerequisite:
+                prereq_met = Certificate.objects.filter(
+                    user=user, tier=tier.prerequisite
+                ).exists()
+
+        # Determine CTA state
+        if not user.is_authenticated:
+            cta = 'unauthenticated'
+        elif certified:
+            cta = 'certified'
+        elif enrolled:
+            cta = 'in_progress'
+        elif application is None:
+            cta = 'no_application'
+        elif application.is_pending:
+            cta = 'pending'
+        elif application.is_denied and application.can_reapply:
+            cta = 'denied_can_reapply'
+        elif application.is_denied and not application.can_reapply:
+            cta = 'denied_no_reapply'
+        elif application.is_approved and not prereq_met:
+            cta = 'prereq_required'
+        elif application.is_approved and prereq_met:
+            cta = 'enroll'
+        else:
+            cta = 'no_application'
+
+        # Format price
+        if tier.price_cents:
+            price_display = f'${tier.price_cents // 100}'
+        else:
+            price_display = 'Free'
+
         tier_data.append({
             'tier': tier,
-            'enrolled': tier.id in user_enrollments,
-            'certified': tier.id in user_certificates,
-            'price_display': f"${tier.price_cents // 100:,}",
+            'cta': cta,
+            'enrolled': enrolled,
+            'certified': certified,
+            'prereq_met': prereq_met,
+            'prereq_name': tier.prerequisite.name if tier.prerequisite else None,
+            'price_display': price_display,
+            'application': application,
         })
 
     return render(request, 'lms/certifications.html', {
         'tier_data': tier_data,
-        'stripe_publishable_key': settings.STRIPE_PUBLISHABLE_KEY,
     })
 
 
 def create_checkout_session(request, tier_slug):
     """
     Creates a Stripe Checkout Session for the given tier.
-
-    Rules:
-    - Tier 1 (no prerequisite): available to unauthenticated users.
-    - Tier 2+: requires login. Prerequisite certificate must exist.
-    - If user is already enrolled, redirect to dashboard.
+    All users must be authenticated and have an approved application.
     """
+    # Must be logged in
+    if not request.user.is_authenticated:
+        return redirect(f"{reverse('accounts:login')}?next={request.path}")
+
     tier = get_object_or_404(Tier, slug=tier_slug, is_active=True)
 
-    # Already enrolled
-    if request.user.is_authenticated:
-        if request.user.enrollments.filter(tier=tier, is_active=True).exists():
-            return redirect('lms:dashboard')
+    # GATE 1: Already enrolled
+    if Enrollment.objects.filter(user=request.user, tier=tier).exists():
+        return redirect('lms:dashboard')
 
-    # Tier requires prerequisite - must be logged in to verify
-    if tier.prerequisite is not None:
-        if not request.user.is_authenticated:
-            return redirect(f"{reverse('accounts:login')}?next={request.path}")
-        has_prereq = request.user.certificate_set.filter(tier=tier.prerequisite).exists()
-        if not has_prereq:
+    # GATE 2: No application exists
+    try:
+        application = request.user.application
+    except Application.DoesNotExist:
+        return redirect('applications:apply')
+
+    # GATE 3: Application pending
+    if application.is_pending:
+        return redirect('applications:status')
+
+    # GATE 4: Application denied
+    if application.is_denied:
+        return redirect('applications:status')
+
+    # GATE 5: Prerequisite tier not completed
+    if tier.prerequisite:
+        prereq_certified = Certificate.objects.filter(
+            user=request.user, tier=tier.prerequisite
+        ).exists()
+        if not prereq_certified:
             return render(request, 'lms/prerequisite_required.html', {'tier': tier})
 
+    # GATE CLEAR: proceed to Stripe
     domain = settings.SITE_URL.rstrip('/')
 
     checkout_kwargs = {
@@ -93,11 +150,8 @@ def create_checkout_session(request, tier_slug):
         },
         'billing_address_collection': 'auto',
         'customer_creation': 'always',
+        'customer_email': request.user.email,
     }
-
-    # Pre-fill email if logged in
-    if request.user.is_authenticated:
-        checkout_kwargs['customer_email'] = request.user.email
 
     try:
         session = stripe.checkout.Session.create(**checkout_kwargs)
