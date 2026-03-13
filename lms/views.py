@@ -223,3 +223,9 @@ def checkout_cancel(request):
 
 def checkout_error(request):
     return render(request, 'lms/checkout_error.html')
+
+
+@login_required
+def dashboard(request):
+    """Stub dashboard view. Will be built out in a future prompt."""
+    return render(request, 'lms/dashboard.html')
