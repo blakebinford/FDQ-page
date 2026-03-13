@@ -43,6 +43,8 @@ class Application(models.Model):
 
     class Meta:
         ordering = ['-submitted_at']
+        verbose_name = 'Application'
+        verbose_name_plural = 'Applications'
 
     def __str__(self):
         return f'{self.user.email} — {self.get_status_display()}'

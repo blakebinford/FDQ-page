@@ -1,0 +1,35 @@
+{% extends "admin/change_form.html" %}
+{% load i18n %}
+
+{% block after_related_objects %}
+  {{ block.super }}
+  {% if original %}
+  <div class="module" style="margin-top: 15px;">
+    <h2>Actions</h2>
+    <div style="padding: 10px 15px; display: flex; gap: 10px; flex-wrap: wrap;">
+      {% if original.status == 'pending' %}
+        <form method="post" action="{% url 'admin:applications_application_approve' original.pk %}" style="display:inline;">
+          {% csrf_token %}
+          <input type="submit" value="Approve Application"
+                 style="background:#2e7d32; color:#fff; border:none; padding:8px 20px;
+                        cursor:pointer; font-weight:600; border-radius:3px;">
+        </form>
+        <form method="post" action="{% url 'admin:applications_application_deny' original.pk %}" style="display:inline;">
+          {% csrf_token %}
+          <input type="submit" value="Deny Application"
+                 style="background:#6d4c41; color:#ddd; border:none; padding:8px 20px;
+                        cursor:pointer; font-weight:600; border-radius:3px;">
+        </form>
+      {% endif %}
+      {% if original.status == 'denied' and not original.can_reapply %}
+        <form method="post" action="{% url 'admin:applications_application_allow_reapply' original.pk %}" style="display:inline;">
+          {% csrf_token %}
+          <input type="submit" value="Allow Reapplication"
+                 style="background:#b8860b; color:#fff; border:none; padding:8px 20px;
+                        cursor:pointer; font-weight:600; border-radius:3px;">
+        </form>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+{% endblock %}

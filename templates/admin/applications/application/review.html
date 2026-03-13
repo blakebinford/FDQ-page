@@ -1,0 +1,149 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block breadcrumbs %}
+  <div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">Home</a>
+    &rsaquo; <a href="{% url 'admin:applications_application_changelist' %}">Applications</a>
+    &rsaquo; {{ title }}
+  </div>
+{% endblock %}
+
+{% block content %}
+<style>
+  .review-section { margin-bottom: 30px; }
+  .review-section h2 { font-size: 14px; text-transform: uppercase; color: #666; border-bottom: 2px solid #ddd; padding-bottom: 6px; margin-bottom: 12px; }
+  .review-table { width: 100%; border-collapse: collapse; }
+  .review-table th { text-align: left; padding: 6px 12px 6px 0; color: #666; font-weight: 600; width: 180px; vertical-align: top; font-size: 13px; }
+  .review-table td { padding: 6px 0; font-size: 13px; }
+  .wh-entry { background: #f8f8f8; border: 1px solid #e0e0e0; padding: 12px 16px; margin-bottom: 8px; border-radius: 3px; }
+  .wh-entry strong { font-size: 14px; }
+  .wh-entry .wh-meta { font-size: 12px; color: #666; margin-top: 4px; }
+  .wh-entry .wh-contact { font-size: 12px; color: #888; margin-top: 6px; border-top: 1px solid #e8e8e8; padding-top: 6px; }
+  .status-badge { display: inline-block; padding: 3px 12px; border-radius: 3px; font-size: 12px; font-weight: 700; text-transform: uppercase; }
+  .status-pending { background: #b8860b; color: #fff; }
+  .status-approved { background: #2e7d32; color: #fff; }
+  .status-denied { background: #6d4c41; color: #ddd; }
+  .action-bar { margin-top: 20px; padding: 15px; background: #f0f0f0; border-radius: 3px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .action-bar .btn { border: none; padding: 8px 22px; cursor: pointer; font-weight: 600; border-radius: 3px; font-size: 13px; }
+  .btn-approve { background: #2e7d32; color: #fff; }
+  .btn-deny { background: #6d4c41; color: #ddd; }
+  .btn-reapply { background: #b8860b; color: #fff; }
+  .btn-back { background: #417690; color: #fff; text-decoration: none; display: inline-block; padding: 8px 22px; border-radius: 3px; font-size: 13px; font-weight: 600; }
+  .empty { color: #999; font-style: italic; }
+</style>
+
+<div class="review-section">
+  <h2>Applicant Profile</h2>
+  <table class="review-table">
+    <tr><th>Name</th><td>{{ applicant.first_name }} {{ applicant.last_name }}</td></tr>
+    <tr><th>Email</th><td><a href="mailto:{{ applicant.email }}">{{ applicant.email }}</a></td></tr>
+    <tr><th>Profession</th><td>{{ profession_display }}</td></tr>
+    <tr><th>Industry</th><td>{{ industry_display }}</td></tr>
+    <tr><th>Company</th><td>{{ applicant.company_name|default:"—" }}</td></tr>
+    <tr><th>State</th><td>{{ applicant.state|default:"—" }}</td></tr>
+    <tr><th>Years Experience</th><td>{{ applicant.years_experience|default:"—" }}</td></tr>
+    <tr>
+      <th>Project Types</th>
+      <td>
+        {% if pt_labels %}
+          {{ pt_labels|join:", " }}
+        {% else %}
+          <span class="empty">None listed</span>
+        {% endif %}
+      </td>
+    </tr>
+    <tr>
+      <th>Certifications (Profile)</th>
+      <td>
+        {% if cert_labels %}
+          {{ cert_labels|join:", " }}
+        {% else %}
+          <span class="empty">None listed</span>
+        {% endif %}
+      </td>
+    </tr>
+    {% if applicant.linkedin_url %}
+    <tr><th>LinkedIn</th><td><a href="{{ applicant.linkedin_url }}" target="_blank" rel="noopener">{{ applicant.linkedin_url }}</a></td></tr>
+    {% endif %}
+  </table>
+</div>
+
+<div class="review-section">
+  <h2>Work History</h2>
+  {% if work_history %}
+    {% for entry in work_history %}
+    <div class="wh-entry">
+      <strong>{{ entry.company_name }}</strong> &mdash; {{ entry.position_name }}
+      <div class="wh-meta">
+        {{ entry.get_industry_display }} &middot; {{ entry.date_range }}
+      </div>
+      {% if entry.contact_name %}
+      <div class="wh-contact">
+        Reference: {{ entry.contact_name }}
+        {% if entry.contact_position %} ({{ entry.contact_position }}){% endif %}
+        {% if entry.contact_phone %} &middot; {{ entry.contact_phone }}{% endif %}
+        {% if entry.contact_email %} &middot; <a href="mailto:{{ entry.contact_email }}">{{ entry.contact_email }}</a>{% endif %}
+      </div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  {% else %}
+    <p class="empty">No work history submitted with this application.</p>
+  {% endif %}
+</div>
+
+<div class="review-section">
+  <h2>Application Submission</h2>
+  <table class="review-table">
+    <tr>
+      <th>Certifications Held</th>
+      <td>{{ application.certifications_held|default:"—" }}</td>
+    </tr>
+    <tr>
+      <th>Additional Info</th>
+      <td>{{ application.additional_info|default:"—" }}</td>
+    </tr>
+    <tr>
+      <th>Submitted</th>
+      <td>{{ application.submitted_at }}</td>
+    </tr>
+  </table>
+</div>
+
+<div class="review-section">
+  <h2>Review Status</h2>
+  <table class="review-table">
+    <tr>
+      <th>Status</th>
+      <td><span class="status-badge status-{{ application.status }}">{{ application.get_status_display }}</span></td>
+    </tr>
+    <tr><th>Reviewed At</th><td>{{ application.reviewed_at|default:"—" }}</td></tr>
+    <tr><th>Reviewed By</th><td>{{ application.reviewed_by|default:"—" }}</td></tr>
+    <tr><th>Can Reapply</th><td>{{ application.can_reapply|yesno:"Yes,No" }}</td></tr>
+    <tr><th>Admin Notes</th><td>{{ application.admin_notes|default:"—" }}</td></tr>
+  </table>
+</div>
+
+<div class="action-bar">
+  {% if application.status == 'pending' %}
+    <form method="post" action="{{ approve_url }}" style="display:inline;">
+      {% csrf_token %}
+      <input type="submit" value="Approve Application" class="btn btn-approve">
+    </form>
+    <form method="post" action="{{ deny_url }}" style="display:inline;">
+      {% csrf_token %}
+      <input type="submit" value="Deny Application" class="btn btn-deny">
+    </form>
+  {% endif %}
+  {% if application.status == 'denied' and not application.can_reapply %}
+    <form method="post" action="{{ allow_reapply_url }}" style="display:inline;">
+      {% csrf_token %}
+      <input type="submit" value="Allow Reapplication" class="btn btn-reapply">
+    </form>
+  {% endif %}
+  <a href="{% url 'admin:applications_application_changelist' %}" class="btn-back">Back to List</a>
+</div>
+{% endblock %}
