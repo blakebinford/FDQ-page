@@ -3,6 +3,12 @@
 
 {% block title %}{{ lesson.title }} | Field-Driven Quality{% endblock %}
 
+{% block extra_head %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700;900&display=swap" rel="stylesheet"/>
+{% endblock %}
+
 {% block extra_styles %}
 #exercise-root {
   width: 100%;
