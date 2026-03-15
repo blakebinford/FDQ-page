@@ -563,11 +563,11 @@ var FORM_ANSWERS = {
 // Fields that must match exactly (case-insensitive)
 // Special matchers for fields that have natural variation
 function checkFormField(key, userVal, correctVal) {
-  var u = userVal.trim().toUpperCase();
-  var c = correctVal.trim().toUpperCase();
-  if (key === "lubricant") return u.includes("G-1000") || u.includes("G1000") || u.includes("MOLYKOTE");
+  var u = userVal.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+  var c = correctVal.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+  if (key === "lubricant") return u.includes("G1000") || u.includes("MOLYKOTE");
   if (key === "gasket_type") return u.includes("SPIRAL") && (u.includes("316") || u.includes("SWG"));
-  if (key === "gasket_std") return u.includes("B16.20");
+  if (key === "gasket_std") return u.includes("B1620");
   if (key === "flange_mat") return u.includes("A105");
   if (key === "bolt_mat") return u.includes("A193") && u.includes("B7");
   if (key === "nut_mat") return u.includes("A194") && u.includes("2H");
