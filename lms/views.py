@@ -419,6 +419,52 @@ def _get_lesson_number(tier, lesson):
     return 1
 
 
+def _get_module_unlock_status(user, tier):
+    """
+    Returns a dict mapping module.pk -> bool (is_unlocked).
+
+    Module 1 is always unlocked. Module N is unlocked if Module N-1
+    is unlocked AND its completion condition is met (gate passed if
+    gate_required, all lessons complete otherwise).
+    """
+    modules = list(Module.objects.filter(tier=tier).order_by('order'))
+    completed_lesson_ids = set(
+        LessonProgress.objects.filter(
+            user=user,
+            lesson__module__tier=tier,
+        ).values_list('lesson_id', flat=True)
+    )
+
+    unlock_status = {}
+    for i, module in enumerate(modules):
+        if i == 0:
+            unlock_status[module.pk] = True
+            continue
+
+        prev_module = modules[i - 1]
+        prev_unlocked = unlock_status.get(prev_module.pk, False)
+
+        if not prev_unlocked:
+            unlock_status[module.pk] = False
+            continue
+
+        if prev_module.gate_required:
+            gate_passed = ExerciseAttempt.objects.filter(
+                user=user,
+                exercise__lesson__module=prev_module,
+                passed=True,
+            ).exists()
+            unlock_status[module.pk] = gate_passed
+        else:
+            prev_lesson_ids = set(
+                prev_module.lessons.values_list('id', flat=True)
+            )
+            all_complete = prev_lesson_ids.issubset(completed_lesson_ids)
+            unlock_status[module.pk] = all_complete
+
+    return unlock_status
+
+
 @login_required
 def dashboard(request):
     """Dashboard showing active and completed enrollments."""
@@ -440,12 +486,24 @@ def dashboard(request):
         all_complete = completed_lessons >= total_lessons and total_lessons > 0
         cert = Certificate.objects.filter(user=request.user, tier=tier).first()
 
+        gated_modules = tier.modules.filter(gate_required=True)
+        all_gates_passed = all(
+            ExerciseAttempt.objects.filter(
+                user=request.user,
+                exercise__lesson__module=m,
+                passed=True,
+            ).exists()
+            for m in gated_modules
+        )
+        ready_for_quiz = all_complete and all_gates_passed
+
         entry = {
             'tier': tier,
             'total_lessons': total_lessons,
             'completed_lessons': completed_lessons,
             'pct': pct,
             'all_complete': all_complete,
+            'ready_for_quiz': ready_for_quiz,
             'certified': cert is not None,
             'certificate': cert,
         }
@@ -485,22 +543,54 @@ def learn(request, tier_slug):
         ).values_list('lesson_id', flat=True)
     )
 
+    # Module unlock status
+    module_unlock_status = _get_module_unlock_status(request.user, tier)
+
     all_lessons = _get_tier_lessons(tier)
     total_lessons = len(all_lessons)
     completed_count = len([l for l in all_lessons if l.pk in completed_ids])
     pct = int((completed_count / total_lessons * 100)) if total_lessons > 0 else 0
 
-    # Find first incomplete lesson
+    # Find first incomplete lesson in an UNLOCKED module
     first_incomplete = None
     for lesson in all_lessons:
-        if lesson.pk not in completed_ids:
+        if lesson.pk not in completed_ids and module_unlock_status.get(lesson.module_id, False):
             first_incomplete = lesson
             break
+
+    # If no first_incomplete found but there's a gated module blocking progress,
+    # find the gate lesson to point the user to
+    gate_cta_lesson = None
+    if not first_incomplete:
+        for module in modules:
+            if not module_unlock_status.get(module.pk, False):
+                # This module is locked — find the gate in the previous module
+                prev_modules = [m for m in modules if m.order < module.order]
+                if prev_modules:
+                    prev = prev_modules[-1]
+                    if prev.gate_required:
+                        gate_cta_lesson = prev.lessons.filter(
+                            content_type='interactive'
+                        ).order_by('order').last()
+                break
 
     # Build module data with lesson numbers
     module_data = []
     lesson_num = 0
     for module in modules:
+        is_locked = not module_unlock_status.get(module.pk, False)
+        gate_lesson = module.lessons.filter(
+            content_type='interactive'
+        ).order_by('order').last() if module.gate_required else None
+
+        gate_passed = False
+        if module.gate_required:
+            gate_passed = ExerciseAttempt.objects.filter(
+                user=request.user,
+                exercise__lesson__module=module,
+                passed=True,
+            ).exists()
+
         lessons_data = []
         for lesson in module.lessons.order_by('order'):
             lesson_num += 1
@@ -508,14 +598,27 @@ def learn(request, tier_slug):
                 'lesson': lesson,
                 'number': lesson_num,
                 'completed': lesson.pk in completed_ids,
+                'is_locked': is_locked,
             })
         module_data.append({
             'module': module,
             'lessons': lessons_data,
+            'is_locked': is_locked,
+            'gate_lesson': gate_lesson,
+            'gate_passed': gate_passed,
+            'gate_lesson_number': _get_lesson_number(tier, gate_lesson) if gate_lesson else None,
         })
 
     # Quiz availability
     all_complete = completed_count >= total_lessons and total_lessons > 0
+    all_gates_passed = all(
+        ExerciseAttempt.objects.filter(
+            user=request.user,
+            exercise__lesson__module=m,
+            passed=True,
+        ).exists()
+        for m in Module.objects.filter(tier=tier, gate_required=True)
+    )
     quiz = Quiz.objects.filter(tier=tier).first()
     best_attempt = None
     if quiz:
@@ -537,8 +640,12 @@ def learn(request, tier_slug):
         'pct': pct,
         'first_incomplete': first_incomplete,
         'first_incomplete_number': _get_lesson_number(tier, first_incomplete) if first_incomplete else None,
+        'gate_cta_lesson': gate_cta_lesson,
+        'gate_cta_number': _get_lesson_number(tier, gate_cta_lesson) if gate_cta_lesson else None,
         'all_complete': all_complete,
+        'all_gates_passed': all_gates_passed,
         'remaining': total_lessons - completed_count,
+        'module_unlock_status': module_unlock_status,
         'quiz': quiz,
         'best_attempt': best_attempt,
         'certificate': certificate,
@@ -561,6 +668,11 @@ def lesson_view(request, tier_slug, lesson_order):
     if idx < 0 or idx >= len(all_lessons):
         return redirect('lms:learn', tier_slug=tier.slug)
     lesson = all_lessons[idx]
+
+    # Check if the lesson's module is accessible
+    module_unlock_status = _get_module_unlock_status(request.user, tier)
+    if not module_unlock_status.get(lesson.module_id, False):
+        return redirect('lms:learn', tier_slug=tier.slug)
 
     if request.method == 'POST':
         # Mark lesson complete
@@ -701,13 +813,24 @@ def quiz_view(request, tier_slug):
     if not Enrollment.objects.filter(user=request.user, tier=tier, is_active=True).exists():
         return redirect('lms:tier_list')
 
-    # Check all lessons complete
+    # Gate 1: all lessons must be complete
     total_lessons = Lesson.objects.filter(module__tier=tier).count()
     completed_lessons = LessonProgress.objects.filter(
         user=request.user, lesson__module__tier=tier
     ).count()
     if completed_lessons < total_lessons or total_lessons == 0:
         return redirect('lms:learn', tier_slug=tier.slug)
+
+    # Gate 2: all module gates must be passed
+    modules_with_gates = Module.objects.filter(tier=tier, gate_required=True)
+    for gated_module in modules_with_gates:
+        gate_passed = ExerciseAttempt.objects.filter(
+            user=request.user,
+            exercise__lesson__module=gated_module,
+            passed=True,
+        ).exists()
+        if not gate_passed:
+            return redirect('lms:learn', tier_slug=tier.slug)
 
     quiz = get_object_or_404(Quiz, tier=tier)
     questions = quiz.questions.order_by('order')

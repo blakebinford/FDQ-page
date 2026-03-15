@@ -155,8 +155,10 @@
       <div class="progress-bar-fill" style="width: {{ entry.pct }}%;"></div>
     </div>
     <div class="tc-actions">
-      {% if entry.all_complete %}
+      {% if entry.ready_for_quiz %}
         <a href="{% url 'lms:quiz' entry.tier.slug %}" class="btn-primary">Take the Quiz</a>
+      {% elif entry.all_complete %}
+        <a href="{% url 'lms:learn' entry.tier.slug %}" class="btn-primary">Complete Module Gates</a>
       {% else %}
         <a href="{% url 'lms:learn' entry.tier.slug %}" class="btn-primary">Continue Learning</a>
       {% endif %}

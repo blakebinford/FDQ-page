@@ -36,6 +36,13 @@ class Module(models.Model):
     tier = models.ForeignKey(Tier, on_delete=models.CASCADE, related_name='modules')
     title = models.CharField(max_length=200)
     order = models.IntegerField()
+    gate_required = models.BooleanField(
+        default=False,
+        help_text=(
+            "If True, the student must pass the interactive exercise "
+            "at the end of this module before the next module unlocks."
+        ),
+    )
 
     class Meta:
         ordering = ['order']

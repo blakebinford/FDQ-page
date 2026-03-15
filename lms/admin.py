@@ -194,6 +194,7 @@ class InteractiveExerciseAdminForm(forms.ModelForm):
 class ModuleInline(admin.TabularInline):
     model = Module
     extra = 1
+    fields = ('title', 'order', 'gate_required')
 
 
 class LessonInline(admin.TabularInline):
@@ -218,7 +219,7 @@ class TierAdmin(admin.ModelAdmin):
 
 @admin.register(Module)
 class ModuleAdmin(admin.ModelAdmin):
-    list_display = ('title', 'tier', 'order')
+    list_display = ('title', 'tier', 'order', 'gate_required')
     list_filter = ('tier',)
     inlines = [LessonInline]
 
