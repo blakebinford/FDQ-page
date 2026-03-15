@@ -1,0 +1,2037 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FDQ Exercise — Torque Log</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700;900&display=swap" rel="stylesheet"/>
+<script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script crossorigin src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body { background: #0e0f0d; overflow: hidden; }
+</style>
+<!-- Load config JSON for standalone testing. In Django, window.EXERCISE_CONFIG is injected by the template. -->
+<script>
+  if (!window.EXERCISE_CONFIG) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', 'torque-config.json', false);
+    xhr.send();
+    if (xhr.status === 200) window.EXERCISE_CONFIG = JSON.parse(xhr.responseText);
+  }
+</script>
+</head>
+<body>
+<div id="root" style="height:100%;"></div>
+<script type="text/babel">
+const { useState, useRef, useEffect } = React;
+
+/* ── Design Tokens ────────────────────────────────────────────── */
+const bg      = '#0e0f0d';
+const surf    = '#161714';
+const surf2   = '#1d1f1b';
+const border  = '#2a2d27';
+const textCol = '#ccc8be';
+const muted   = '#6e6b63';
+const white   = '#ede8df';
+const amber   = '#d4832a';
+const green   = '#52a366';
+const red     = '#c95f5f';
+const steel   = '#3a556a';
+const mono    = "'IBM Plex Mono', monospace";
+
+/* ── Tooltip CSS injection ────────────────────────────────────── */
+(() => {
+  if (document.getElementById('fdq-tooltip-style')) return;
+  const s = document.createElement('style');
+  s.id = 'fdq-tooltip-style';
+  s.textContent = `
+    .tip-wrap { position: relative; display: inline-flex; align-items: center; }
+    .tip-icon {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 13px; height: 13px; border-radius: 50%;
+      background: #1a3040; border: 1px solid #3a5a6a;
+      color: #7a9db0; font-size: 8px; font-weight: 700;
+      cursor: default; flex-shrink: 0; margin-left: 5px;
+      font-style: normal; line-height: 1; font-family: ${mono};
+      user-select: none;
+    }
+    .tip-icon:hover { background: #243a48; border-color: #7a9db0; color: #a0c4d4; }
+    .tip-box {
+      display: none;
+      position: absolute;
+      bottom: calc(100% + 6px);
+      left: 50%; transform: translateX(-50%);
+      min-width: 220px; max-width: 280px;
+      background: #1a2a34;
+      border: 1px solid #3a5a6a;
+      border-left: 2px solid #7a9db0;
+      padding: 6px 9px;
+      font-size: 7.5px; color: #a0c4d4;
+      line-height: 1.6; font-style: italic;
+      font-family: ${mono};
+      z-index: 200; pointer-events: none;
+      white-space: normal; word-break: break-word;
+    }
+    .tip-box::after {
+      content: ''; position: absolute; top: 100%; left: 50%;
+      transform: translateX(-50%);
+      border: 5px solid transparent;
+      border-top-color: #3a5a6a;
+    }
+    .tip-wrap:hover .tip-box { display: block; }
+  `;
+  document.head.appendChild(s);
+})();
+
+/* ── Config from host page ────────────────────────────────────── */
+const CFG = window.EXERCISE_CONFIG;
+
+/* ── checkFormField() — uses config.steps[0].flexible_matchers ─ */
+function checkFormField(key, userVal, correctVal, flexibleMatchers) {
+  const u = userVal.trim().toUpperCase();
+  const c = correctVal.trim().toUpperCase();
+  const matcher = flexibleMatchers && flexibleMatchers[key];
+  if (!matcher) return u === c;
+
+  if (matcher.type === 'contains_any') {
+    return matcher.values.some(v => u.includes(v.toUpperCase()));
+  }
+  if (matcher.type === 'contains_all') {
+    return matcher.values.every(v => u.includes(v.toUpperCase()));
+  }
+  if (matcher.type === 'contains_all_any') {
+    return matcher.groups.every(group =>
+      group.some(v => u.includes(v.toUpperCase()))
+    );
+  }
+  return u === c;
+}
+
+/* ── MTRPanel ─────────────────────────────────────────────────── */
+function MTRPanel({ mtrs }) {
+  const [active, setActive] = useState('bolts');
+
+  const tabs = [
+    ['bolts',    'Bolts (' + (mtrs.bolts.spec || '').split('/')[0].trim().replace('ASTM ','') + ' ' + (mtrs.bolts.grade || '').replace('Grade ','') + ')'],
+    ['nuts',     'Nuts (' + (mtrs.nuts.spec || '').split('/')[0].trim().replace('ASTM ','') + ' ' + (mtrs.nuts.grade || '').replace('Grade ','') + ')'],
+    ['flangesA', 'Flanges Heat A'],
+    ['flangesB', 'Flanges Heat B'],
+    ['gaskets',  'Gasket Cert'],
+  ];
+
+  const m = mtrs[active];
+
+  const MtrTable = ({ data }) => (
+    <table style={{ borderCollapse:'collapse', width:'100%', fontSize:'8.5px', marginTop:'4px', marginBottom:'8px' }}>
+      <thead>
+        <tr style={{ background:'#111410' }}>
+          {data[0].map((h, i) => (
+            <th key={i} style={{
+              padding:'4px 7px', textAlign:'left', color:amber,
+              fontSize:'7.5px', letterSpacing:'0.08em', textTransform:'uppercase',
+              borderBottom:`1px solid ${border}`,
+              borderRight: i < data[0].length - 1 ? `1px solid ${border}` : 'none',
+              fontWeight:700
+            }}>{h}</th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {data.slice(1).map((row, ri) => (
+          <tr key={ri} style={{ background: ri % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.02)' }}>
+            {row.map((cell, ci) => (
+              <td key={ci} style={{
+                padding:'4px 7px',
+                color: ci === 0 ? muted : (ri === data.length - 2 && ci > 0 ? '#8ec89a' : textCol),
+                fontSize:'8.5px',
+                borderBottom:'1px solid #1a1c18',
+                borderRight: ci < row.length - 1 ? `1px solid ${border}` : 'none',
+                fontWeight: ci === 0 ? '600' : '400'
+              }}>{cell}</td>
+            ))}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+
+  const Field = ({ label, value, hi = false, green: isGreen = false }) => (
+    <div style={{ display:'grid', gridTemplateColumns:'130px 1fr', borderBottom:'1px solid #1a1c18', minHeight:'22px' }}>
+      <div style={{
+        padding:'4px 8px', background:surf2, color:textCol,
+        fontSize:'7.5px', letterSpacing:'0.07em', textTransform:'uppercase',
+        borderRight:`1px solid ${border}`, display:'flex', alignItems:'center'
+      }}>{label}</div>
+      <div style={{
+        padding:'4px 8px',
+        color: isGreen ? '#52a366' : hi ? white : textCol,
+        fontSize: hi ? '9.5px' : '8.5px',
+        fontWeight: hi ? '700' : '400',
+        display:'flex', alignItems:'center'
+      }}>{value}</div>
+    </div>
+  );
+
+  return (
+    <div style={{ display:'flex', flexDirection:'column', gap:'0' }}>
+      {/* Sub-tab bar */}
+      <div style={{ display:'flex', flexWrap:'wrap', borderBottom:`1px solid ${border}`, marginBottom:'10px' }}>
+        {tabs.map(([id, label]) => (
+          <button key={id} onClick={() => setActive(id)} style={{
+            background: active === id ? 'rgba(212,131,42,0.1)' : 'none',
+            border:'none',
+            borderBottom: active === id ? `2px solid ${amber}` : '2px solid transparent',
+            color: active === id ? amber : muted,
+            cursor:'pointer', padding:'6px 10px', fontFamily:mono,
+            fontSize:'7.5px', letterSpacing:'0.1em', textTransform:'uppercase'
+          }}>{label}</button>
+        ))}
+      </div>
+
+      {/* MTR body */}
+      <div style={{ border:`1px solid ${border}`, background:surf }}>
+        {/* Title bar */}
+        <div style={{ background:'rgba(212,131,42,0.08)', borderBottom:`1px solid ${border}`, padding:'8px 10px' }}>
+          <div style={{ color:amber, fontSize:'9px', fontWeight:700, letterSpacing:'0.08em', textTransform:'uppercase' }}>
+            {m.title}
+          </div>
+          <div style={{ color:muted, fontSize:'7.5px', marginTop:'2px' }}>{m.manufacturer}</div>
+        </div>
+
+        {/* Two-column header fields */}
+        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', borderBottom:`1px solid ${border}` }}>
+          <div style={{ borderRight:`1px solid ${border}` }}>
+            <Field label="Cert / Lot No." value={active === 'gaskets' ? m.lotNo : m.certNo} hi green />
+            <Field label="Specification" value={m.spec} hi />
+            <Field label="Grade" value={m.grade} hi />
+            <Field label={active === 'gaskets' ? 'Lot No.' : 'Heat No.'} value={active === 'gaskets' ? m.lotNo : m.heatNo} hi />
+          </div>
+          <div>
+            <Field label="PO No." value={m.poNo} />
+            <Field label="Job No." value={m.jobNo} />
+            <Field label="Product" value={m.product} />
+            <Field label={active === 'gaskets' ? '' : 'Heat Treatment'} value={active === 'gaskets' ? '' : m.heatTreatment} />
+          </div>
+        </div>
+
+        {/* Body: sizes, chemistry, mechanical */}
+        <div style={{ padding:'8px 10px' }}>
+          {/* Sizes - always shown */}
+          <div style={{ color:amber, fontSize:'7.5px', letterSpacing:'0.12em', textTransform:'uppercase', marginBottom:'4px' }}>
+            Sizes / Quantities Covered
+          </div>
+          <div style={{ display:'flex', flexWrap:'wrap', gap:'4px', marginBottom:'10px' }}>
+            {m.sizes.map(s => (
+              <span key={s} style={{
+                background:'#111410', border:`1px solid ${border}`,
+                color:textCol, fontSize:'8px', padding:'2px 8px'
+              }}>{s}</span>
+            ))}
+          </div>
+
+          {/* Chemistry / Materials table */}
+          {active === 'gaskets' ? (
+            <>
+              <div style={{ color:amber, fontSize:'7.5px', letterSpacing:'0.12em', textTransform:'uppercase', marginBottom:'2px' }}>
+                Materials
+              </div>
+              <MtrTable data={m.chemistry} />
+              <div style={{ color:amber, fontSize:'7.5px', letterSpacing:'0.12em', textTransform:'uppercase', marginBottom:'2px' }}>
+                Performance Properties
+              </div>
+              <MtrTable data={m.mechanical} />
+            </>
+          ) : (
+            <>
+              <div style={{ color:amber, fontSize:'7.5px', letterSpacing:'0.12em', textTransform:'uppercase', marginBottom:'2px' }}>
+                Chemical Analysis (%)
+              </div>
+              <MtrTable data={m.chemistry} />
+              <div style={{ color:amber, fontSize:'7.5px', letterSpacing:'0.12em', textTransform:'uppercase', marginBottom:'2px' }}>
+                Mechanical Properties
+              </div>
+              <MtrTable data={m.mechanical} />
+            </>
+          )}
+
+          {/* Sour service badge */}
+          {m.sourNote && (
+            <div style={{
+              background:'rgba(82,163,102,0.08)', border:'1px solid rgba(82,163,102,0.25)',
+              padding:'6px 8px', marginBottom:'8px', fontSize:'8.5px', color:'#a0d4a8'
+            }}>
+              <span style={{ color:'#52a366', fontWeight:700, marginRight:'6px' }}>{'\u2713'} SOUR SERVICE</span>
+              {m.sourNote}
+            </div>
+          )}
+
+          {/* Certification statement */}
+          <div style={{ background:'#0d100b', border:`1px solid ${border}`, padding:'8px 10px', marginBottom:'6px' }}>
+            <div style={{ color:muted, fontSize:'7.5px', letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:'3px' }}>
+              Certification Statement
+            </div>
+            <div style={{ color:textCol, fontSize:'8.5px', lineHeight:1.6, fontStyle:'italic' }}>
+              {m.certification}
+            </div>
+          </div>
+
+          {/* Certified By / Date */}
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'0' }}>
+            <div style={{ padding:'4px 0' }}>
+              <span style={{ color:muted, fontSize:'7.5px', letterSpacing:'0.08em', textTransform:'uppercase' }}>Certified By: </span>
+              <span style={{ color:white, fontSize:'8.5px' }}>{m.certifiedBy}</span>
+            </div>
+            <div style={{ padding:'4px 0', textAlign:'right' }}>
+              <span style={{ color:muted, fontSize:'7.5px', letterSpacing:'0.08em', textTransform:'uppercase' }}>Cert Date: </span>
+              <span style={{ color:white, fontSize:'8.5px' }}>{m.certDate}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── CalCertPanel ─────────────────────────────────────────────── */
+function CalCertPanel({ calCert }) {
+  const c = calCert;
+
+  const Field = ({ label, value, hi = false, accent = false, warn = false }) => (
+    <div style={{ display:'grid', gridTemplateColumns:'160px 1fr', borderBottom:'1px solid #1a1c18', minHeight:'22px' }}>
+      <div style={{
+        padding:'4px 8px', background:surf2, color:textCol,
+        fontSize:'7.5px', letterSpacing:'0.07em', textTransform:'uppercase',
+        borderRight:`1px solid ${border}`, display:'flex', alignItems:'center'
+      }}>{label}</div>
+      <div style={{
+        padding:'4px 8px',
+        color: warn ? '#c95f5f' : accent ? amber : hi ? white : textCol,
+        fontSize: hi ? '9.5px' : '8.5px',
+        fontWeight: hi ? '700' : '400',
+        display:'flex', alignItems:'center'
+      }}>{value}</div>
+    </div>
+  );
+
+  return (
+    <div>
+      <div style={{ border:`1px solid ${border}`, background:surf }}>
+        {/* Header with status badge */}
+        <div style={{
+          background:'rgba(212,131,42,0.08)', borderBottom:`2px solid ${amber}`,
+          padding:'8px 10px', display:'flex', justifyContent:'space-between', alignItems:'center'
+        }}>
+          <div>
+            <div style={{ color:amber, fontSize:'9px', fontWeight:700, letterSpacing:'0.08em', textTransform:'uppercase' }}>
+              CALIBRATION CERTIFICATE
+            </div>
+            <div style={{ color:muted, fontSize:'7.5px', marginTop:'2px' }}>{c.calBy}</div>
+          </div>
+          <div style={{ background:'rgba(82,163,102,0.15)', border:'1px solid rgba(82,163,102,0.4)', padding:'4px 10px' }}>
+            <div style={{ color:'#52a366', fontSize:'8px', fontWeight:700, letterSpacing:'0.1em' }}>
+              {c.status}
+            </div>
+          </div>
+        </div>
+
+        {/* Two-column instrument info */}
+        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', borderBottom:`1px solid ${border}` }}>
+          <div style={{ borderRight:`1px solid ${border}` }}>
+            <Field label="Instrument ID" value={c.instrumentId} hi accent />
+            <Field label="Description" value={c.description} hi />
+            <Field label="Manufacturer" value={c.manufacturer} />
+            <Field label="Model No." value={c.model} />
+            <Field label="Serial No." value={c.serialNo} />
+          </div>
+          <div>
+            <Field label="Cert No." value={c.certNo} />
+            <Field label="Calibration Date" value={c.calDate} />
+            <Field label="Calibration Due" value={c.calDue} hi accent />
+            <Field label="Range" value={c.range} />
+            <Field label="Accuracy" value={c.accuracy} />
+          </div>
+        </div>
+
+        {/* Procedure / standard / by / tech */}
+        <div style={{ borderBottom:`1px solid ${border}` }}>
+          <Field label="Cal Procedure" value={c.calProcedure} />
+          <Field label="Reference Standard" value={c.calStandard} />
+          <Field label="Calibrated By" value={c.calBy} />
+          <Field label="Cal Technician" value={c.calTech} />
+        </div>
+
+        {/* Results table */}
+        <div style={{ padding:'10px' }}>
+          <div style={{ color:amber, fontSize:'7.5px', letterSpacing:'0.12em', textTransform:'uppercase', marginBottom:'6px' }}>
+            Calibration Results — As Found / As Left
+          </div>
+          <table style={{ borderCollapse:'collapse', width:'100%', fontSize:'8.5px', marginBottom:'10px' }}>
+            <thead>
+              <tr style={{ background:'#111410' }}>
+                {['Test Point', 'Applied (Reference)', 'Indicated (Wrench)', 'Error', 'Result'].map((h, i) => (
+                  <th key={i} style={{
+                    padding:'4px 8px', textAlign:'left', color:amber,
+                    fontSize:'7px', letterSpacing:'0.08em', textTransform:'uppercase',
+                    borderBottom:`1px solid ${border}`,
+                    borderRight: i < 4 ? `1px solid ${border}` : 'none',
+                    fontWeight:700
+                  }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {c.results.map((row, i) => (
+                <tr key={i} style={{ background: i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.02)' }}>
+                  {row.map((cell, ci) => (
+                    <td key={ci} style={{
+                      padding:'4px 8px',
+                      color: ci === 4 ? '#52a366' : ci === 3 ? textCol : ci === 0 ? muted : textCol,
+                      fontSize:'8.5px',
+                      fontWeight: ci === 4 ? '700' : '400',
+                      borderBottom:'1px solid #1a1c18',
+                      borderRight: ci < 4 ? `1px solid ${border}` : 'none'
+                    }}>{cell}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          {/* Next cal note */}
+          <div style={{
+            background:'rgba(212,131,42,0.06)', border:'1px solid rgba(212,131,42,0.2)',
+            borderLeft:`3px solid ${amber}`, padding:'7px 10px',
+            fontSize:'8.5px', color:textCol, lineHeight:1.6
+          }}>
+            <span style={{ color:amber, fontWeight:700, marginRight:'6px' }}>NOTE:</span>
+            {c.nextCalNote}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── JointForm ────────────────────────────────────────────────── */
+function JointForm({ f, system, spec }) {
+  const Row = ({ label, value, hi = false, accent = false }) => (
+    <div style={{ display:'flex', borderBottom:`1px solid ${border}`, minHeight:'26px' }}>
+      <div style={{
+        width:'148px', flexShrink:0, padding:'5px 8px',
+        background:surf2, color:textCol, fontSize:'8px',
+        letterSpacing:'0.08em', textTransform:'uppercase',
+        borderRight:`1px solid ${border}`, display:'flex', alignItems:'center'
+      }}>{label}</div>
+      <div style={{
+        flex:1, padding:'5px 8px',
+        color: accent ? amber : hi ? white : textCol,
+        fontSize: hi ? '12px' : '10px',
+        fontWeight: hi ? 700 : 400,
+        display:'flex', alignItems:'center'
+      }}>{value}</div>
+    </div>
+  );
+
+  const Divider = ({ label }) => (
+    <div style={{
+      padding:'5px 8px', background:'rgba(212,131,42,0.07)',
+      borderBottom:`1px solid ${border}`, borderTop:`1px solid ${border}`,
+      color:amber, fontSize:'7.5px', letterSpacing:'0.16em',
+      textTransform:'uppercase', marginTop:'2px'
+    }}>{label}</div>
+  );
+
+  return (
+    <div style={{ border:`1px solid ${border}`, background:surf }}>
+      {/* Header */}
+      <div style={{
+        background:'rgba(212,131,42,0.12)', borderBottom:`2px solid ${amber}`,
+        padding:'8px 12px', display:'flex', justifyContent:'space-between', alignItems:'center'
+      }}>
+        <div>
+          <div style={{ color:amber, fontSize:'11px', fontWeight:700, letterSpacing:'0.06em' }}>
+            {f.id} {'\u2014'} {f.location}
+          </div>
+          <div style={{ color:muted, fontSize:'8px', letterSpacing:'0.1em', textTransform:'uppercase', marginTop:'2px' }}>
+            {f.size} {'\u00B7'} {f.cls} {'\u00B7'} {system} {'\u00B7'} {spec}
+          </div>
+        </div>
+        <div style={{ textAlign:'right' }}>
+          <div style={{ fontSize:'9px', color:muted, letterSpacing:'0.1em', textTransform:'uppercase' }}>Result</div>
+          <div style={{ fontSize:'16px', fontWeight:900, color: f.result === 'ACC' ? green : red, letterSpacing:'0.08em' }}>
+            {f.result}
+          </div>
+        </div>
+      </div>
+
+      {/* Torque summary bar */}
+      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr 1fr 1fr', borderBottom:`1px solid ${border}` }}>
+        {[
+          ['Target', f.targetTorque + ' ft-lb', amber],
+          ['Snug Pass', f.snugTorque + ' ft-lb', '#8ab4c4'],
+          ['Mid Pass', f.midTorque + ' ft-lb', '#8ab4c4'],
+          ['Final Pass', f.finalTorque + ' ft-lb', amber],
+          ['Achieved', f.achievedTorque + ' ft-lb', green],
+        ].map(([label, val, color]) => (
+          <div key={label} style={{ padding:'8px 10px', borderRight:`1px solid ${border}`, textAlign:'center' }}>
+            <div style={{ color:muted, fontSize:'7px', letterSpacing:'0.12em', textTransform:'uppercase', marginBottom:'3px' }}>
+              {label}
+            </div>
+            <div style={{ color, fontSize:'13px', fontWeight:700 }}>{val}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Bolt & Nut Data */}
+      <Divider label="Bolt & Nut Data" />
+      <Row label="Bolt Size / Length" value={f.boltSize} hi />
+      <Row label="Bolt Qty" value={f.boltQty + ' bolts'} />
+      <Row label="Bolt Material" value={f.boltMat} />
+      <Row label="Bolt Heat No." value={f.boltHeat} />
+      <Row label="Bolt Cert No." value={f.boltCert} accent />
+      <Row label="Nut Material" value={f.nutMat} />
+      <Row label="Nut Cert No." value={f.nutCert} accent />
+
+      {/* Gasket Data */}
+      <Divider label="Gasket Data" />
+      <Row label="Gasket Type" value={f.gasketType} hi />
+      <Row label="Gasket Std" value={f.gasketStd} />
+      <Row label="Gasket Lot #" value={f.gasketLot} accent />
+
+      {/* Flange Data */}
+      <Divider label="Flange Data" />
+      <Row label="Flange Material" value={f.flangeMat} />
+      <Row label="Flange Heat No." value={f.flangeHeat} />
+      <Row label="Flange Cert No." value={f.flangeCert} accent />
+      <Row label="Surface Finish" value={f.surfaceFinish} />
+      <Row label="Alignment Check" value={f.alignmentCheck} hi />
+
+      {/* Installation */}
+      <Divider label="Installation" />
+      <Row label="Lubricant" value={f.lubricant} />
+      <Row label="Bolt Engagement" value={f.boltEngagement} />
+      <Row label="Pattern" value={f.pattern} hi />
+      <Row label="Passes" value={f.passes} hi />
+      <Row label="Gasket Condition" value={f.gasketCondition} />
+
+      {/* Inspection Record */}
+      <Divider label="Inspection Record" />
+      <Row label="Date" value={f.date} />
+      <Row label="Shift" value={f.shift} />
+      <Row label="Torque Wrench ID" value={f.wrenchId} />
+      <Row label="Wrench Cal. Due" value={f.wrenchCalDue} />
+      <Row label="Inspector" value={f.inspector} />
+      <Row label="Initials" value={f.initials} hi accent />
+
+      {/* Remarks */}
+      <div style={{ padding:'8px 10px', borderTop:`1px solid ${border}` }}>
+        <div style={{ color:muted, fontSize:'7.5px', letterSpacing:'0.12em', textTransform:'uppercase', marginBottom:'4px' }}>
+          Remarks
+        </div>
+        <div style={{ color:textCol, fontSize:'10px', lineHeight:1.6 }}>{f.remarks}</div>
+      </div>
+    </div>
+  );
+}
+
+/* ── IsoMap ───────────────────────────────────────────────────── */
+function IsoMap({ config }) {
+  const bom = config.reference_docs.iso_drawing.bom_rows;
+  return (
+    <svg viewBox="0 0 920 638" width="100%" style={{ display:'block', fontFamily:"IBM Plex Mono, monospace" }}>
+      {/* Background */}
+      <rect width="920" height="490" fill="#0a0b09"/>
+
+      {/* Grid lines */}
+      <g stroke="#1e211a" strokeWidth="0.6" strokeDasharray="3,9">
+        <line x1="0" y1="270" x2="468" y2="0"/>
+        <line x1="0" y1="420" x2="728" y2="0"/>
+        <line x1="173" y1="490" x2="920" y2="49"/>
+        <line x1="381" y1="490" x2="920" y2="169"/>
+        <line x1="588" y1="490" x2="920" y2="298"/>
+        <line x1="0" y1="50" x2="745" y2="490"/>
+        <line x1="0" y1="250" x2="399" y2="490"/>
+        <line x1="347" y1="0" x2="920" y2="331"/>
+        <line x1="693" y1="0" x2="920" y2="131"/>
+        <line x1="230" y1="0" x2="230" y2="490"/>
+        <line x1="460" y1="0" x2="460" y2="490"/>
+        <line x1="690" y1="0" x2="690" y2="490"/>
+      </g>
+
+      {/* Compressor symbol */}
+      <polygon points="10,375 72,340 72,415 10,450" fill="#0f1812" stroke="#1e3828" strokeWidth="1.5"/>
+      <line x1="10" y1="413" x2="72" y2="378" stroke="#1c3024" strokeWidth="0.8" strokeDasharray="4,4"/>
+      <line x1="10" y1="432" x2="72" y2="397" stroke="#1c3024" strokeWidth="0.8" strokeDasharray="4,4"/>
+      <text x="24" y="393" fill="#2d5240" fontSize="8" fontWeight="700" letterSpacing="0.1em">COMP-A</text>
+      <text x="24" y="404" fill="#233d30" fontSize="7">TRAIN A</text>
+
+      {/* Compressor outlet stub */}
+      <line x1="72" y1="390" x2="80" y2="390" stroke={steel} strokeWidth="6"/>
+
+      {/* Discharge header stub */}
+      <line x1="710" y1="60" x2="742" y2="43" stroke={steel} strokeWidth="6"/>
+      <rect x="745" y="24" width="35" height="22" fill="#0f1812" stroke="#1e3828" strokeWidth="1.2"/>
+      <text x="763" y="38" textAnchor="middle" fill="#2d5240" fontSize="7" fontWeight="700">DISCH.</text>
+      <text x="763" y="47" textAnchor="middle" fill="#233d30" fontSize="6">HDR.</text>
+
+      {/* Main pipe run (triple-line) */}
+      <line x1="83.5" y1="426" x2="713.5" y2="66" stroke="#253545" strokeWidth="2"/>
+      <line x1="76.5" y1="414" x2="706.5" y2="54" stroke="#253545" strokeWidth="2"/>
+      <line x1="80" y1="420" x2="710" y2="60" stroke={steel} strokeWidth="5"/>
+      <line x1="80" y1="420" x2="710" y2="60" stroke="#4e7490" strokeWidth="2" opacity="0.25"/>
+
+      {/* Pipe label */}
+      <text transform="translate(230,337) rotate(-30)" fill="#2a4252" fontSize="7.5" letterSpacing="0.08em">
+        6" {'\u00B7'} A106-B {'\u00B7'} P600 {'\u00B7'} SOUR SVC
+      </text>
+
+      {/* Recycle branch pipe */}
+      <line x1="326" y1="276" x2="326" y2="182" stroke="#253545" strokeWidth="1.5"/>
+      <line x1="338" y1="276" x2="338" y2="182" stroke="#253545" strokeWidth="1.5"/>
+      <line x1="332" y1="276" x2="332" y2="182" stroke={steel} strokeWidth="4"/>
+      <line x1="332" y1="276" x2="332" y2="182" stroke="#4e7490" strokeWidth="1.5" opacity="0.25"/>
+      <line x1="322" y1="182" x2="342" y2="182" stroke="#2a4a5a" strokeWidth="2.5"/>
+      <line x1="322" y1="174" x2="322" y2="182" stroke="#2a4a5a" strokeWidth="2"/>
+      <line x1="342" y1="174" x2="342" y2="182" stroke="#2a4a5a" strokeWidth="2"/>
+      <text x="348" y="180" fill="#3a5a68" fontSize="7.5">TO RECYCLE HDR.</text>
+      <text x="348" y="190" fill="#2a4050" fontSize="7">4" {'\u00B7'} P600</text>
+
+      {/* PSV branch pipe */}
+      <line x1="454" y1="204" x2="454" y2="318" stroke="#253545" strokeWidth="1.5"/>
+      <line x1="462" y1="204" x2="462" y2="318" stroke="#253545" strokeWidth="1.5"/>
+      <line x1="458" y1="204" x2="458" y2="318" stroke={steel} strokeWidth="4"/>
+      <line x1="458" y1="204" x2="458" y2="318" stroke="#4e7490" strokeWidth="1.5" opacity="0.25"/>
+
+      {/* PSV symbol */}
+      <polygon points="446,312 470,312 458,324" fill="none" stroke="#3a6a7a" strokeWidth="1.5"/>
+      <polygon points="446,324 470,324 458,312" fill="none" stroke="#3a6a7a" strokeWidth="1.5"/>
+      <line x1="446" y1="318" x2="441" y2="318" stroke="#2a4a5a" strokeWidth="1.5"/>
+      <line x1="470" y1="318" x2="475" y2="318" stroke="#2a4a5a" strokeWidth="1.5"/>
+      <rect x="448" y="330" width="20" height="12" fill="#0f1218" stroke="#2a4050" strokeWidth="1"/>
+      <text x="458" y="340" textAnchor="middle" fill="#3a5a68" fontSize="6" fontWeight="700">PSV</text>
+      <text x="482" y="322" fill="#3a5a68" fontSize="7.5">PSV-101</text>
+      <text x="482" y="332" fill="#2a4050" fontSize="7">3" {'\u00B7'} P600</text>
+
+      {/* Drain branch pipe */}
+      <line x1="618" y1="111" x2="618" y2="52" stroke="#253545" strokeWidth="1.2"/>
+      <line x1="624" y1="111" x2="624" y2="52" stroke="#253545" strokeWidth="1.2"/>
+      <line x1="621" y1="111" x2="621" y2="52" stroke={steel} strokeWidth="3"/>
+      <line x1="621" y1="111" x2="621" y2="52" stroke="#4e7490" strokeWidth="1.2" opacity="0.25"/>
+      <line x1="614" y1="52" x2="628" y2="52" stroke="#3a6a7a" strokeWidth="3"/>
+      <rect x="614" y="44" width="14" height="8" fill="#1a2a34" stroke="#2a5060" strokeWidth="1"/>
+      <text x="631" y="55" fill="#3a5a68" fontSize="7.5">DRAIN</text>
+      <text x="631" y="64" fill="#2a4050" fontSize="7">1.5" {'\u00B7'} P600</text>
+
+      {/* Flow direction arrows */}
+      <polygon points="216,342 197,349 202,356" fill={amber} opacity="0.55"/>
+      <polygon points="549,152 530,159 535,166" fill={amber} opacity="0.55"/>
+
+      {/* FLG-001 flange symbol (suction nozzle) */}
+      <g transform="translate(80,420) rotate(-30)">
+        <line x1="-4.5" y1="-20" x2="-4.5" y2="20" stroke={amber} strokeWidth="2.5"/>
+        <line x1="4.5" y1="-20" x2="4.5" y2="20" stroke={amber} strokeWidth="2.5"/>
+        <circle cx="0" cy="-14" r="2" fill="none" stroke={amber} strokeWidth="1" opacity="0.6"/>
+        <circle cx="0" cy="14" r="2" fill="none" stroke={amber} strokeWidth="1" opacity="0.6"/>
+        <circle cx="-14" cy="0" r="2" fill="none" stroke={amber} strokeWidth="1" opacity="0.6"/>
+        <circle cx="14" cy="0" r="2" fill="none" stroke={amber} strokeWidth="1" opacity="0.6"/>
+      </g>
+
+      {/* FLG-002 flange symbol (discharge nozzle) */}
+      <g transform="translate(710,60) rotate(-30)">
+        <line x1="-4.5" y1="-20" x2="-4.5" y2="20" stroke={amber} strokeWidth="2.5"/>
+        <line x1="4.5" y1="-20" x2="4.5" y2="20" stroke={amber} strokeWidth="2.5"/>
+        <circle cx="0" cy="-14" r="2" fill="none" stroke={amber} strokeWidth="1" opacity="0.6"/>
+        <circle cx="0" cy="14" r="2" fill="none" stroke={amber} strokeWidth="1" opacity="0.6"/>
+        <circle cx="-14" cy="0" r="2" fill="none" stroke={amber} strokeWidth="1" opacity="0.6"/>
+        <circle cx="14" cy="0" r="2" fill="none" stroke={amber} strokeWidth="1" opacity="0.6"/>
+      </g>
+
+      {/* FLG-003 flange symbol (recycle tie-in) */}
+      <g transform="translate(332,225)">
+        <line x1="-18" y1="-4.5" x2="18" y2="-4.5" stroke={amber} strokeWidth="2.5"/>
+        <line x1="-18" y1="4.5" x2="18" y2="4.5" stroke={amber} strokeWidth="2.5"/>
+        <circle cx="-12" cy="0" r="2" fill="none" stroke={amber} strokeWidth="1" opacity="0.6"/>
+        <circle cx="12" cy="0" r="2" fill="none" stroke={amber} strokeWidth="1" opacity="0.6"/>
+      </g>
+
+      {/* FLG-004 flange symbol (PSV inlet) */}
+      <g transform="translate(458,265)">
+        <line x1="-16" y1="-4.5" x2="16" y2="-4.5" stroke={amber} strokeWidth="2"/>
+        <line x1="-16" y1="4.5" x2="16" y2="4.5" stroke={amber} strokeWidth="2"/>
+        <circle cx="-10" cy="0" r="1.5" fill="none" stroke={amber} strokeWidth="1" opacity="0.6"/>
+        <circle cx="10" cy="0" r="1.5" fill="none" stroke={amber} strokeWidth="1" opacity="0.6"/>
+      </g>
+
+      {/* FLG-005 flange symbol (drain) */}
+      <g transform="translate(621,82)">
+        <line x1="-12" y1="-3.5" x2="12" y2="-3.5" stroke={amber} strokeWidth="1.8"/>
+        <line x1="-12" y1="3.5" x2="12" y2="3.5" stroke={amber} strokeWidth="1.8"/>
+      </g>
+
+      {/* FLG-001 callout leader line */}
+      <line x1="80" y1="416" x2="82" y2="340" stroke={amber} strokeWidth="0.8" strokeDasharray="4,4" opacity="0.65"/>
+      <polygon points="82,340 78,352 86,352" fill={amber} opacity="0.65"/>
+
+      {/* FLG-001 callout box */}
+      <rect x="14" y="262" width="130" height="72" fill="#080d0a" stroke={amber} strokeWidth="1" rx="1"/>
+      <rect x="14" y="262" width="130" height="15" fill="rgba(212,131,42,0.15)"/>
+      <line x1="14" y1="277" x2="144" y2="277" stroke={amber} strokeWidth="0.5"/>
+      <text x="20" y="273" fill={amber} fontSize="8.5" fontWeight="700">FLG-001 {'\u00B7'} 6" CL600</text>
+      <text x="20" y="289" fill={white} fontSize="9.5">TQ: 185 ft-lb</text>
+      <text x="20" y="302" fill={textCol} fontSize="8.5">Cross {'\u00B7'} 3-pass</text>
+      <text x="20" y="315" fill={textCol} fontSize="8.5">A193 B7 / A194 2H</text>
+      <text x="20" y="328" fill="#5e5b53" fontSize="7">SUCT. NOZZLE N1</text>
+
+      {/* FLG-002 callout leader line */}
+      <line x1="712" y1="57" x2="730" y2="70" stroke={amber} strokeWidth="0.8" strokeDasharray="4,4" opacity="0.65"/>
+      <polygon points="730,70 720,62 726,74" fill={amber} opacity="0.65"/>
+
+      {/* FLG-002 callout box */}
+      <rect x="730" y="34" width="130" height="72" fill="#080d0a" stroke={amber} strokeWidth="1" rx="1"/>
+      <rect x="730" y="34" width="130" height="15" fill="rgba(212,131,42,0.15)"/>
+      <line x1="730" y1="49" x2="860" y2="49" stroke={amber} strokeWidth="0.5"/>
+      <text x="736" y="45" fill={amber} fontSize="8.5" fontWeight="700">FLG-002 {'\u00B7'} 6" CL600</text>
+      <text x="736" y="61" fill={white} fontSize="9.5">TQ: 185 ft-lb</text>
+      <text x="736" y="74" fill={textCol} fontSize="8.5">Cross {'\u00B7'} 3-pass</text>
+      <text x="736" y="87" fill={textCol} fontSize="8.5">A193 B7 / A194 2H</text>
+      <text x="736" y="100" fill="#5e5b53" fontSize="7">DISCH. NOZZLE N2</text>
+
+      {/* FLG-003 callout leader line */}
+      <line x1="334" y1="218" x2="358" y2="175" stroke={amber} strokeWidth="0.8" strokeDasharray="4,4" opacity="0.65"/>
+      <polygon points="358,175 350,184 363,186" fill={amber} opacity="0.65"/>
+
+      {/* FLG-003 callout box */}
+      <rect x="356" y="97" width="130" height="72" fill="#080d0a" stroke={amber} strokeWidth="1" rx="1"/>
+      <rect x="356" y="97" width="130" height="15" fill="rgba(212,131,42,0.15)"/>
+      <line x1="356" y1="112" x2="486" y2="112" stroke={amber} strokeWidth="0.5"/>
+      <text x="362" y="108" fill={amber} fontSize="8.5" fontWeight="700">FLG-003 {'\u00B7'} 4" CL600</text>
+      <text x="362" y="124" fill={white} fontSize="9.5">TQ: 120 ft-lb</text>
+      <text x="362" y="137" fill={textCol} fontSize="8.5">Cross {'\u00B7'} 3-pass</text>
+      <text x="362" y="150" fill={textCol} fontSize="8.5">A193 B7 / A194 2H</text>
+      <text x="362" y="163" fill="#5e5b53" fontSize="7">RECYCLE TIE-IN</text>
+
+      {/* FLG-004 callout leader line */}
+      <line x1="460" y1="271" x2="498" y2="297" stroke={amber} strokeWidth="0.8" strokeDasharray="4,4" opacity="0.65"/>
+      <polygon points="498,297 486,287 491,300" fill={amber} opacity="0.65"/>
+
+      {/* FLG-004 callout box */}
+      <rect x="496" y="282" width="130" height="72" fill="#080d0a" stroke={amber} strokeWidth="1" rx="1"/>
+      <rect x="496" y="282" width="130" height="15" fill="rgba(212,131,42,0.15)"/>
+      <line x1="496" y1="297" x2="626" y2="297" stroke={amber} strokeWidth="0.5"/>
+      <text x="502" y="293" fill={amber} fontSize="8.5" fontWeight="700">FLG-004 {'\u00B7'} 3" CL600</text>
+      <text x="502" y="309" fill={white} fontSize="9.5">TQ: 120 ft-lb</text>
+      <text x="502" y="322" fill={textCol} fontSize="8.5">Cross {'\u00B7'} 3-pass</text>
+      <text x="502" y="335" fill={textCol} fontSize="8.5">A193 B7 / A194 2H</text>
+      <text x="502" y="348" fill="#5e5b53" fontSize="7">PSV-101 INLET</text>
+
+      {/* FLG-005 callout leader line */}
+      <line x1="622" y1="78" x2="650" y2="135" stroke={amber} strokeWidth="0.8" strokeDasharray="4,4" opacity="0.65"/>
+      <polygon points="650,135 640,126 647,137" fill={amber} opacity="0.65"/>
+
+      {/* FLG-005 callout box */}
+      <rect x="642" y="128" width="130" height="72" fill="#080d0a" stroke={amber} strokeWidth="1" rx="1"/>
+      <rect x="642" y="128" width="130" height="15" fill="rgba(212,131,42,0.15)"/>
+      <line x1="642" y1="143" x2="772" y2="143" stroke={amber} strokeWidth="0.5"/>
+      <text x="648" y="139" fill={amber} fontSize="8.5" fontWeight="700">FLG-005 {'\u00B7'} 1.5" CL600</text>
+      <text x="648" y="155" fill={white} fontSize="9.5">TQ: 65 ft-lb</text>
+      <text x="648" y="168" fill={textCol} fontSize="8.5">Cross {'\u00B7'} 2-pass</text>
+      <text x="648" y="181" fill={textCol} fontSize="8.5">A193 B7 / A194 2H</text>
+      <text x="648" y="194" fill="#5e5b53" fontSize="7">DRAIN CONN.</text>
+
+      {/* Flange number circles */}
+      <circle cx="80" cy="420" r="9" fill="#0a0b09" stroke={amber} strokeWidth="1.2"/>
+      <text x="80" y="424" textAnchor="middle" fill={amber} fontSize="6" fontWeight="700">001</text>
+      <circle cx="710" cy="60" r="9" fill="#0a0b09" stroke={amber} strokeWidth="1.2"/>
+      <text x="710" y="64" textAnchor="middle" fill={amber} fontSize="6" fontWeight="700">002</text>
+      <circle cx="332" cy="225" r="8" fill="#0a0b09" stroke={amber} strokeWidth="1.2"/>
+      <text x="332" y="229" textAnchor="middle" fill={amber} fontSize="6" fontWeight="700">003</text>
+      <circle cx="458" cy="265" r="8" fill="#0a0b09" stroke={amber} strokeWidth="1.2"/>
+      <text x="458" y="269" textAnchor="middle" fill={amber} fontSize="6" fontWeight="700">004</text>
+      <circle cx="621" cy="82" r="7" fill="#0a0b09" stroke={amber} strokeWidth="1.2"/>
+      <text x="621" y="86" textAnchor="middle" fill={amber} fontSize="6" fontWeight="700">005</text>
+
+      {/* Compass rose */}
+      <g transform="translate(856,445)">
+        <line x1="0" y1="0" x2="20" y2="-10" stroke="#3a5060" strokeWidth="1.5"/>
+        <line x1="0" y1="0" x2="-20" y2="-10" stroke="#3a5060" strokeWidth="1.5"/>
+        <line x1="0" y1="0" x2="0" y2="-22" stroke="#3a5060" strokeWidth="1.5"/>
+        <text x="24" y="-8" fill="#3a5060" fontSize="7">E</text>
+        <text x="-32" y="-8" fill="#3a5060" fontSize="7">N</text>
+        <text x="2" y="-24" fill="#3a5060" fontSize="7">U</text>
+      </g>
+
+      {/* Legend bar */}
+      <rect x="10" y="464" width="200" height="20" fill="#080d0a" stroke="#1e211a" strokeWidth="0.8"/>
+      <line x1="18" y1="474" x2="40" y2="474" stroke={steel} strokeWidth="4"/>
+      <text x="44" y="477" fill="#4a5a62" fontSize="7">Pipe</text>
+      <g transform="translate(108,474)">
+        <line x1="-8" y1="-6" x2="8" y2="-6" stroke={amber} strokeWidth="1.8"/>
+        <line x1="-8" y1="6" x2="8" y2="6" stroke={amber} strokeWidth="1.8"/>
+      </g>
+      <text x="120" y="477" fill="#4a5a62" fontSize="7">Flange</text>
+      <polygon points="82,470 70,474 73,478" fill={amber} opacity="0.6"/>
+      <text x="86" y="477" fill="#4a5a62" fontSize="7">Flow</text>
+
+      {/* BOM separator */}
+      <line x1="1" y1="492" x2="919" y2="492" stroke="#2a3d2a" strokeWidth="1.5"/>
+
+      {/* BOM background */}
+      <rect x="1" y="492" width="918" height="145" fill="#080c07"/>
+      <rect x="1" y="492" width="918" height="14" fill="rgba(212,131,42,0.1)"/>
+      <line x1="1" y1="506" x2="919" y2="506" stroke={border} strokeWidth="0.8"/>
+      <text x="8" y="502" fill={amber} fontSize="8" fontWeight="700" letterSpacing="0.2em">BILL OF MATERIALS</text>
+      <text x="580" y="502" fill="#3a5060" fontSize="7" letterSpacing="0.1em">
+        PROJ: MUSTANG CREEK COMPRESSOR STATION  {'\u00B7'}  SYS: DISCH. PIPING TRAIN A  {'\u00B7'}  SPEC: Q-SPEC-2200 REV.3
+      </text>
+
+      {/* BOM column headers row */}
+      <rect x="1" y="506" width="918" height="13" fill="#121610"/>
+      <line x1="1" y1="519" x2="919" y2="519" stroke={border} strokeWidth="0.8"/>
+      {['ITM','QTY','DESCRIPTION','MATERIAL / SPEC','HEAT NO.','CERT / LOT NO.'].map((h, i) => {
+        const xs = [8, 34, 62, 438, 662, 790];
+        return <text key={i} x={xs[i]} y={516} fill={muted} fontSize="6.5" fontWeight="700" letterSpacing="0.1em" textAnchor="start">{h}</text>;
+      })}
+
+      {/* BOM column dividers */}
+      {[30, 58, 434, 658, 786].map(x => (
+        <line key={x} x1={x} y1="492" x2={x} y2="637" stroke={border} strokeWidth="0.6"/>
+      ))}
+
+      {/* BOM data rows from config */}
+      {bom.map((row, i) => {
+        const y = 519 + i * 12;
+        const even = i % 2 === 0;
+        const xs = [8, 34, 62, 438, 662, 790];
+        const vals = [row.item, row.qty, row.description, row.material, row.heatNo || '\u2014', row.certNo];
+        const colors = [amber, white, white, textCol, muted, green];
+        return (
+          <g key={i}>
+            {!even && <rect x="2" y={y} width="916" height="12" fill="rgba(255,255,255,0.015)"/>}
+            <line x1="2" y1={y + 12} x2="918" y2={y + 12} stroke="#1e211a" strokeWidth="0.5"/>
+            {vals.map((val, ci) => (
+              <text key={ci} x={xs[ci]} y={y + 9} fill={colors[ci]} fontSize="7.5" fontFamily="IBM Plex Mono" textAnchor="start" fontWeight={ci <= 1 ? '700' : '400'}>{val}</text>
+            ))}
+          </g>
+        );
+      })}
+
+      {/* Outer border */}
+      <rect x="1" y="1" width="918" height="636" fill="none" stroke="#1e211a" strokeWidth="1"/>
+    </svg>
+  );
+}
+
+/* ── SpecDocument ─────────────────────────────────────────────── */
+function SpecDocument({ config }) {
+
+  const DocHeader = () => (
+    <div style={{ background:'#080d0a', border:`1px solid ${border}`, marginBottom:'0' }}>
+      <div style={{ height:'3px', background:`linear-gradient(90deg, ${amber}, #3a5060)` }}/>
+      <div style={{ display:'grid', gridTemplateColumns:'1fr auto', borderBottom:`1px solid ${border}` }}>
+        <div style={{ padding:'10px 14px', borderRight:`1px solid ${border}` }}>
+          <div style={{ color:'#4a6a52', fontSize:'8px', letterSpacing:'0.22em', textTransform:'uppercase', marginBottom:'4px' }}>
+            Mustang Energy Partners, LLC
+          </div>
+          <div style={{ color:white, fontSize:'13px', fontWeight:700, letterSpacing:'0.04em' }}>
+            PIPING SPECIFICATION
+          </div>
+          <div style={{ color:amber, fontSize:'10px', letterSpacing:'0.08em', marginTop:'2px' }}>
+            Bolted Flange Assembly & Torque Control
+          </div>
+        </div>
+        <div style={{ padding:'8px 14px', display:'grid', gridTemplateColumns:'auto auto', gap:'0', minWidth:'280px' }}>
+          {[['Document No.','MEP-PIP-SPEC-044'],['Revision','3'],['Issue Date','2024-11-15'],['Supersedes','Rev. 2 (2022-06-01)'],['Status','APPROVED \u2014 FOR CONSTRUCTION'],['Applies To','Class 600 & Below, All Services']].map(([l,v]) => (
+            <React.Fragment key={l}>
+              <div style={{ padding:'3px 8px 3px 0', borderBottom:`1px solid ${border}`, color:muted, fontSize:'7.5px', letterSpacing:'0.08em', textTransform:'uppercase', paddingRight:'12px', borderRight:`1px solid ${border}` }}>{l}</div>
+              <div style={{ padding:'3px 0 3px 10px', borderBottom:`1px solid ${border}`, color: v.includes('APPROVED') ? green : v === '3' ? amber : textCol, fontSize:'8px', fontWeight: v === '3' || v.includes('APPROVED') ? '700' : '400' }}>{v}</div>
+            </React.Fragment>
+          ))}
+        </div>
+      </div>
+      <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr 1fr', borderBottom:`1px solid ${border}` }}>
+        {[['Prepared By','T. Okafor / Piping Eng.','2024-11-08'],['Reviewed By','K. Duke / Sr. Eng.','2024-11-10'],['Approved By','M. McDougall / Proj. Dir.','2024-11-15'],['QC Authority','B. Hayes / QC Dir.','2024-11-15']].map(([role,name,date], i) => (
+          <div key={role} style={{ padding:'6px 10px', borderRight: i < 3 ? `1px solid ${border}` : 'none' }}>
+            <div style={{ color:muted, fontSize:'7px', letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:'2px' }}>{role}</div>
+            <div style={{ color:white, fontSize:'8.5px' }}>{name}</div>
+            <div style={{ color:muted, fontSize:'7.5px', marginTop:'1px' }}>{date}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  const Section = ({ num, title, children }) => (
+    <div style={{ marginBottom:'14px' }}>
+      <div style={{ display:'flex', alignItems:'center', gap:'8px', padding:'6px 10px', background:'rgba(212,131,42,0.07)', borderLeft:`2px solid ${amber}`, borderBottom:`1px solid ${border}`, marginBottom:'0' }}>
+        <span style={{ color:amber, fontSize:'9px', fontWeight:700, letterSpacing:'0.14em', minWidth:'28px' }}>{num}</span>
+        <span style={{ color:white, fontSize:'9.5px', fontWeight:700, letterSpacing:'0.06em', textTransform:'uppercase' }}>{title}</span>
+      </div>
+      <div style={{ border:`1px solid ${border}`, borderTop:'none', padding:'10px 12px', background:surf }}>
+        {children}
+      </div>
+    </div>
+  );
+
+  const Clause = ({ id, children, warn = false, note = false }) => (
+    <div style={{ display:'flex', gap:'10px', marginBottom:'7px', paddingBottom:'7px', borderBottom:'1px solid #1a1c18' }}>
+      <span style={{ color: warn ? red : note ? '#8ab4c4' : muted, fontSize:'8px', fontWeight:700, minWidth:'36px', paddingTop:'1px', flexShrink:0, letterSpacing:'0.06em' }}>{id}</span>
+      <span style={{ color: warn ? '#e8b4b0' : note ? '#b4ccd4' : textCol, fontSize:'10px', lineHeight:1.65, fontStyle: note ? 'italic' : 'normal' }}>{children}</span>
+    </div>
+  );
+
+  const TableNote = ({ children }) => (
+    <div style={{ color:'#8ab4c4', fontSize:'8.5px', fontStyle:'italic', marginTop:'5px', lineHeight:1.5, paddingLeft:'4px', borderLeft:'1px solid #2a4050' }}>
+      {children}
+    </div>
+  );
+
+  const Warn = ({ children }) => (
+    <div style={{ background:'rgba(201,95,95,0.08)', border:'1px solid rgba(201,95,95,0.25)', borderLeft:'3px solid #c95f5f', padding:'7px 10px', marginBottom:'10px', marginTop:'4px' }}>
+      <span style={{ color:'#c95f5f', fontSize:'8px', fontWeight:700, letterSpacing:'0.12em', textTransform:'uppercase', marginRight:'8px' }}>{'\u26A0'} WARNING</span>
+      <span style={{ color:'#e8b4b0', fontSize:'9.5px' }}>{children}</span>
+    </div>
+  );
+
+  const specTable = (headers, rows, colColors = []) => (
+    <table style={{ borderCollapse:'collapse', width:'100%', fontSize:'9.5px', marginTop:'8px', marginBottom:'4px' }}>
+      <thead>
+        <tr style={{ background:'#111410' }}>
+          {headers.map((h, i) => (
+            <th key={i} style={{
+              padding:'5px 8px', textAlign:'left', color: colColors[i] || amber,
+              fontSize:'7.5px', letterSpacing:'0.1em', textTransform:'uppercase',
+              borderBottom:`1px solid ${border}`,
+              borderRight: i < headers.length - 1 ? `1px solid ${border}` : 'none',
+              fontWeight:700
+            }}>{h}</th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {rows.map((row, ri) => (
+          <tr key={ri} style={{ background: ri % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.018)' }}>
+            {row.map((cell, ci) => (
+              <td key={ci} style={{
+                padding:'5px 8px',
+                color: ci === 0 ? white : (ci === row.length - 1 && colColors[ci] === green ? green : textCol),
+                fontSize: ci === 0 ? '10px' : '9.5px',
+                fontWeight: ci === 0 ? '700' : '400',
+                borderBottom:'1px solid #1a1c18',
+                borderRight: ci < row.length - 1 ? `1px solid ${border}` : 'none'
+              }}>{cell}</td>
+            ))}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+
+  return (
+    <div style={{ fontFamily:mono, fontSize:'10px', lineHeight:1.6, color:textCol }}>
+      <DocHeader/>
+      <div style={{ padding:'12px 0 0 0' }}>
+
+        <Section num="1.0" title="Purpose & Scope">
+          <Clause id="1.1">
+            This specification establishes the minimum requirements for the assembly, lubrication, torquing, and inspection of bolted flange connections on piping systems designed and constructed under ASME B31.3 <em>(Process Piping)</em> and ASME B31.8 <em>(Gas Transmission and Distribution Piping)</em> within Mustang Energy Partners, LLC facilities and projects.
+          </Clause>
+          <Clause id="1.2">
+            This specification applies to all ASME B16.5 flanged connections in Class 150 through Class 2500 service, including but not limited to: natural gas, condensate, produced water, sour service (H{'\u2082'}S partial pressure {'>'}0.0003 MPa), and hydrocarbon liquid service.
+          </Clause>
+          <Clause id="1.3">
+            Compliance with this specification is mandatory. Where conflicts exist between this document and referenced codes, the more stringent requirement shall govern. Conflicts shall be referred to the designated QC Authority for resolution prior to proceeding.
+          </Clause>
+          <Clause id="1.4" note>
+            Note: This specification supplements, and does not replace, the requirements of ASME PCC-1 <em>Guidelines for Pressure Boundary Bolted Flange Joint Assembly</em>. Personnel performing flange assembly shall be familiar with the current edition of ASME PCC-1.
+          </Clause>
+        </Section>
+
+        <Section num="2.0" title="Referenced Standards & Documents">
+          {specTable(
+            ['Document','Title','Edition / Note'],
+            [
+              ['ASME B31.3','Process Piping','Current edition'],
+              ['ASME B31.8','Gas Transmission & Distribution Piping Systems','Current edition'],
+              ['ASME B16.5','Pipe Flanges and Flanged Fittings NPS \u00BD through 24','Current edition'],
+              ['ASME B16.20','Metallic Gaskets for Pipe Flanges','Current edition'],
+              ['ASME PCC-1','Guidelines for Pressure Boundary Bolted Flange Joint Assembly','Current edition'],
+              ['ASTM A193','Standard Specification for Alloy-Steel and SS Bolting for High-Temp or High-Pressure Service','Grade B7 applies'],
+              ['ASTM A194','Standard Specification for Carbon and Alloy Steel Nuts for Bolts for High-Pressure or High-Temp Service','Grade 2H applies'],
+              ['NACE MR0175 / ISO 15156','Petroleum and Natural Gas Industries \u2014 Materials for Use in H\u2082S-Containing Environments','Sour service only'],
+              ['MEP-QC-PROC-012','Torque Wrench Calibration and Control Procedure','Internal \u2014 mandatory'],
+              ['MEP-QC-FORM-044A','Flange Connection Torque Record','Field documentation form'],
+            ]
+          )}
+        </Section>
+
+        <Section num="3.0" title="Personnel Qualifications">
+          <Clause id="3.1">
+            All personnel performing or supervising bolted flange assembly shall have completed MEP-approved flange assembly training within the preceding 36 months. Training records shall be available on request.
+          </Clause>
+          <Clause id="3.2">
+            QC Inspection of bolted flange assemblies shall be performed by a designated QC Inspector. The inspector shall record their full surname and first initial in ALL CAPS on form MEP-QC-FORM-044A (e.g., <strong style={{ color:amber }}>J. SMITH</strong>). Abbreviated or printed-name-only entries are not acceptable.
+          </Clause>
+          <Clause id="3.3">
+            Torque wrenches used in final assembly shall be calibrated per MEP-QC-PROC-012. The wrench identifier and calibration due date shall be recorded on form MEP-QC-FORM-044A prior to use. An expired calibration shall cause all torquing work performed with that wrench since its last valid calibration to be considered nonconforming.
+          </Clause>
+        </Section>
+
+        <Section num="4.0" title="Material Requirements">
+          <Clause id="4.1">
+            <strong style={{ color:white }}>Bolting {'\u2014'} General.</strong> Unless otherwise specified on the engineering drawing or piping material class, all stud bolts shall conform to ASTM A193 Grade B7 and all heavy hex nuts shall conform to ASTM A194 Grade 2H. No substitution of bolt or nut grade is permitted without written approval from the project Engineer of Record.
+          </Clause>
+          <Clause id="4.2">
+            <strong style={{ color:white }}>Sour Service.</strong> For piping systems designated Sour Service (H{'\u2082'}S service per NACE MR0175 / ISO 15156), ASTM A193 B7 bolting is acceptable provided hardness does not exceed 35 HRC per heat. Mill Test Reports (MTRs) confirming hardness shall be on file prior to installation. Under no circumstances shall B7M or non-heat-treated material be substituted without EOR approval.
+          </Clause>
+          <Clause id="4.3">
+            <strong style={{ color:white }}>Traceability.</strong> All bolts, nuts, and gaskets shall have documented traceability to a mill heat or lot certificate. The heat number (bolts/nuts) and lot number (gaskets) shall be recorded on MEP-QC-FORM-044A. Material installed without traceable certification is nonconforming and shall be removed.
+          </Clause>
+          <Clause id="4.4" note>
+            Note: Mixed bolt grades (e.g., B7 and B8) within a single flange joint are strictly prohibited. All bolts in a joint shall be from the same specification and grade.
+          </Clause>
+          <Warn>Do not use galvanized or coated bolting in Class 600 or above service without explicit engineering approval. Hydrogen embrittlement risk is elevated in high-stress sour service applications.</Warn>
+        </Section>
+
+        <Section num="5.0" title="Gasket Requirements">
+          <Clause id="5.1">
+            <strong style={{ color:white }}>Type.</strong> For ASME B16.5 Class 150 through Class 2500 Raised Face (RF) connections in gas, sour gas, or hydrocarbon service, spiral wound gaskets (SWG) conforming to ASME B16.20 shall be used. SWGs shall be furnished with an outer centering ring and an inner retaining ring.
+          </Clause>
+          <Clause id="5.2">
+            <strong style={{ color:white }}>Winding Material.</strong> For sour service or natural gas service at operating temperatures between -29{'\u00B0'}C and 260{'\u00B0'}C (-20{'\u00B0'}F to 500{'\u00B0'}F), the winding material shall be <strong style={{ color:white }}>316 Stainless Steel / Flexible Graphite</strong> (316SS/FG). Ring material shall be carbon steel per ASME B16.20 unless otherwise specified.
+          </Clause>
+          <Clause id="5.3">
+            <strong style={{ color:white }}>Lot Traceability.</strong> Each gasket lot shall be assigned a manufacturer's lot number. This lot number is a required entry on form MEP-QC-FORM-044A. The inspector shall verify the lot number from the gasket packaging label or certificate and record it verbatim. Do not estimate or interpolate lot numbers from adjacent joints.
+          </Clause>
+          <Clause id="5.4">
+            <strong style={{ color:white }}>Inspection Prior to Installation.</strong> Each gasket shall be visually inspected prior to installation. Gaskets exhibiting crushed windings, separated layers, missing rings, scoring on seating surfaces, or corrosion shall be rejected and replaced. Rejected gaskets shall be marked and quarantined.
+          </Clause>
+          <Clause id="5.5">
+            <strong style={{ color:white }}>Single Use Only.</strong> Spiral wound gaskets are single-use items. A gasket removed from a previously assembled joint shall not be reinstalled under any circumstances, regardless of apparent condition.
+          </Clause>
+          <Clause id="5.6" note>
+            Note: Confirm gasket inner diameter (ID) does not restrict bore. The gasket ID shall be equal to or greater than the pipe bore. Oversized ID gaskets protruding into the flow stream are unacceptable and constitute a nonconformance.
+          </Clause>
+        </Section>
+
+        <Section num="6.0" title="Flange Face Preparation">
+          <Clause id="6.1">
+            Raised face surfaces shall be inspected for pitting, scoring, radial scratches, or mechanical damage prior to assembly. Defects exceeding 0.8 mm (1/32") depth or crossing the gasket seating area are cause for rejection. Engineering disposition is required before proceeding.
+          </Clause>
+          <Clause id="6.2">
+            The required surface finish for raised face flanges in gas and sour service is <strong style={{ color:white }}>125 to 250 AARH (3.2 to 6.3 {'\u00B5'}m Ra)</strong>. Surface finish shall be verified by visual comparison to a reference coupon. Where doubt exists, profilometer measurement is required.
+          </Clause>
+          <Clause id="6.3">
+            Flange faces shall be clean and free of all foreign material, mill scale, paint, oils (other than assembly lubricant), and debris immediately prior to gasket installation. Cleaning shall be performed with a lint-free cloth and a solvent compatible with the service fluid.
+          </Clause>
+          <Clause id="6.4">
+            <strong style={{ color:white }}>Alignment.</strong> Flanges shall be aligned so that the gap between flange faces is parallel (within 1/16" per 12" of pipe diameter) and the bolt holes are in alignment before any bolts are installed. "Spring-loading" a flange connection to achieve alignment is prohibited. Misalignment shall be corrected by spool adjustment, not by bolt load.
+          </Clause>
+        </Section>
+
+        <Section num="7.0" title="Lubrication Requirements">
+          <Clause id="7.1">
+            All bolt threads and bearing faces of nuts shall be lubricated prior to assembly. The approved lubricant for Class 600 and above in sour service applications is <strong style={{ color:white }}>Molykote{'\u00AE'} G-1000 PTFE-based thread paste</strong> or an approved equal as listed on the MEP Qualified Products List (QPL).
+          </Clause>
+          <Clause id="7.2">
+            Lubricant shall be applied to the full engaged thread length and to the underside of the nut bearing face. Excess lubricant shall not be applied such that it contacts the gasket seating face.
+          </Clause>
+          <Clause id="7.3">
+            The nut factor (K) for torque calculations in this specification is based on <strong style={{ color:white }}>K = 0.16</strong>, applicable to lubricated ASTM A193 B7 / A194 2H assemblies. Dry or improperly lubricated assemblies will result in inadequate bolt load despite meeting the torque value {'\u2014'} do not use the torque values in Table 1 without proper lubrication.
+          </Clause>
+          <Clause id="7.4" note>
+            Note: The use of anti-seize compounds containing lead, zinc, or cadmium is prohibited on MEP facilities.
+          </Clause>
+          <Warn>Applying the torque values in Table 1 to dry (unlubricated) bolting will result in approximately 30{'\u2013'}40% less actual bolt load than intended. This constitutes a latent joint integrity risk and is a nonconformance requiring disassembly and proper reassembly.</Warn>
+        </Section>
+
+        <Section num="8.0" title="Bolt Tightening Procedure">
+          <Clause id="8.1">
+            <strong style={{ color:white }}>General.</strong> Bolt tightening shall be performed in accordance with ASME PCC-1 Appendix F (Recommended Bolt Tightening Sequence) using the cross (star) pattern as defined in clause 8.3 of this specification. No other tightening sequence is permitted without written approval from the QC Authority.
+          </Clause>
+          <Clause id="8.2">
+            <strong style={{ color:white }}>Hand Tightening.</strong> Prior to torque application, all bolts shall be run down by hand until snug. Nuts shall turn freely by hand; any binding shall be investigated (misalignment, thread damage, or wrong bolt length) and corrected before proceeding.
+          </Clause>
+          <Clause id="8.3">
+            <strong style={{ color:white }}>Cross (Star) Pattern.</strong> Number bolts sequentially clockwise from the 12 o'clock position (Bolt 1). Apply torque in the following cross sequence: begin at Bolt 1, proceed to the diametrically opposite bolt, then rotate approximately 90{'\u00B0'} clockwise and proceed to its opposite, continuing until all bolts have been torqued once. This completes one pass. Repeat for each subsequent pass.
+          </Clause>
+          <Clause id="8.4">
+            <strong style={{ color:white }}>Multi-Pass Torquing.</strong> All joints shall be torqued in a minimum number of passes as specified in Table 1. Pass torque levels shall be as follows unless Table 1 specifies otherwise:
+          </Clause>
+          {specTable(
+            ['Pass','% of Final Torque','Purpose'],
+            [
+              ['Pass 1 \u2014 Snug','35% of Final','Seat gasket, eliminate gap; cross pattern required'],
+              ['Pass 2 \u2014 Intermediate','70% of Final','Distribute bolt load uniformly; cross pattern required'],
+              ['Pass 3 \u2014 Final','100% of Final','Achieve target bolt load; cross pattern required'],
+            ]
+          )}
+          <TableNote>For NPS 1.5" and smaller in Class 600, a two-pass procedure is permitted: Pass 1 at 50% of final torque, Pass 2 at 100% of final torque, both in cross pattern.</TableNote>
+          <Clause id="8.5">
+            <strong style={{ color:white }}>Achieved Torque.</strong> The achieved torque is the torque value recorded at the completion of the final pass on the final bolt in the sequence. If any bolt in the final pass is found to advance (move) upon application of the final torque value, the full cross-pattern final pass shall be repeated until no bolt advances. The highest stable torque value applied uniformly across all bolts constitutes the achieved torque.
+          </Clause>
+          <Clause id="8.6">
+            <strong style={{ color:white }}>Over-Torquing.</strong> Torque values shall not exceed the maximum values specified in Table 1 footnotes. If a bolt breaks during torquing, the joint shall be disassembled, all bolts and nuts replaced, and the assembly restarted. Broken bolt stubs shall not be used.
+          </Clause>
+          <Warn>Do not use impact wrenches for final torque application. Calibrated torque wrenches (click-type or electronic) with a current calibration per MEP-QC-PROC-012 are required for all passes at and above 50% of final torque value.</Warn>
+        </Section>
+
+        <Section num="9.0" title="Torque Values — Table 1">
+          <Clause id="9.1">
+            The following torque values apply to ASME B16.5 Raised Face flanged joints assembled per this specification using ASTM A193 B7 stud bolts, ASTM A194 2H heavy hex nuts, and Molykote{'\u00AE'} G-1000 lubricant (K = 0.16). Values are in <strong style={{ color:amber }}>ft-lb (foot-pounds)</strong>.
+          </Clause>
+          {specTable(
+            ['NPS','Class','Bolt Size','No. Bolts','Pass 1\nSnug (ft-lb)','Pass 2\nInterm. (ft-lb)','Final Torque\n(ft-lb)','Min. Passes','Max. Torque\u00B9\n(ft-lb)'],
+            [
+              ['\u00BD"','600#','\u00BD" \u00D7 3.25"','4','10','20','28','3','34'],
+              ['\u00BE"','600#','\u00BD" \u00D7 3.50"','4','12','25','35','3','42'],
+              ['1"','600#','5/8" \u00D7 4.00"','4','18','36','50','3','60'],
+              ['1\u00BD"','600#','5/8" \u00D7 4.50"','8','20','\u2014','65','2','78'],
+              ['2"','600#','\u00BE" \u00D7 5.25"','8','28','\u2014','75','2','90'],
+              ['3"','600#','\u00BE" \u00D7 5.75"','12','40','80','120','3','144'],
+              ['4"','600#','7/8" \u00D7 6.25"','16','40','80','120','3','144'],
+              ['6"','600#','1" \u00D7 7.25"','16','65','130','185','3','222'],
+              ['8"','600#','1\u215B" \u00D7 8.00"','20','90','180','270','3','324'],
+              ['10"','600#','1\u00BC" \u00D7 8.75"','24','120','240','360','3','432'],
+              ['12"','600#','1\u00BC" \u00D7 9.25"','24','130','260','390','3','468'],
+            ],
+            [amber, muted, muted, muted, '#8ab4c4', '#8ab4c4', amber, white, muted]
+          )}
+          <TableNote>{'\u00B9'} Maximum torque is 120% of final torque value. Bolts torqued beyond maximum shall be replaced prior to pressure testing. {'\u2014'} Denotes not applicable (2-pass procedure); for 2-pass joints use 50% of Final for Pass 1.</TableNote>
+          <TableNote>This table applies to lubricated assemblies only (K=0.16). Do not apply these values to dry bolting. Class 150 and 300 torque values are in specification MEP-PIP-SPEC-044B.</TableNote>
+        </Section>
+
+        <Section num="10.0" title="Inspection & Documentation">
+          <Clause id="10.1">
+            <strong style={{ color:white }}>Form MEP-QC-FORM-044A</strong> (Flange Connection Torque Record) shall be completed for every bolted flange joint on systems covered by this specification. One form per joint. No joint shall be considered complete for hydrostatic test purposes until its form is signed, dated, and submitted to the project QC file.
+          </Clause>
+          <Clause id="10.2">
+            The QC Inspector shall verify and record the following on MEP-QC-FORM-044A for each joint: (a) joint identification number as shown on the isometric drawing; (b) line size and pressure class; (c) bolt size, material, and heat number; (d) nut material and heat number; (e) gasket type and lot number; (f) lubricant used; (g) torque wrench ID and calibration due date; (h) achieved torque value at final pass; (i) tightening pattern; (j) number of passes; (k) date, shift, and inspector initials.
+          </Clause>
+          <Clause id="10.3">
+            <strong style={{ color:white }}>Result Classification.</strong> A joint shall be classified ACC (Accepted) when: all above items are documented, achieved torque equals the final torque value from Table 1 {'\u00B1'}5%, no bolt was found not to advance during re-check, and no visible leakage or gasket extrusion is present. Any other condition shall be classified REJ (Rejected) pending Engineering disposition.
+          </Clause>
+          <Clause id="10.4">
+            The inspector shall record their identification as <strong style={{ color:amber }}>INITIALS. SURNAME in all capital letters</strong> (e.g., J. SMITH). This format is required for traceability to the individual's qualification record.
+          </Clause>
+          <Clause id="10.5" note>
+            Note: Photocopied, pre-filled, or faxed forms are not acceptable as original quality records. Entries shall be made in permanent ink. Errors shall be crossed out with a single line, corrected, and initialed {'\u2014'} not obliterated with correction fluid.
+          </Clause>
+        </Section>
+
+        <Section num="11.0" title="Re-Torque Requirements">
+          <Clause id="11.1">
+            All Class 600 and above joints in gas, sour gas, or hydrocarbon service shall be re-torqued within 24 hours of initial assembly or following the first thermal cycle above 65{'\u00B0'}C (150{'\u00B0'}F), whichever occurs first. Re-torquing shall use the same final torque value and cross pattern as initial assembly.
+          </Clause>
+          <Clause id="11.2">
+            If any bolt advances (moves) during re-torquing, the full cross-pattern final pass shall be completed until no bolt advances. The re-torque event and result shall be documented on MEP-QC-FORM-044A in the Remarks field.
+          </Clause>
+          <Clause id="11.3" note>
+            Note: Re-torque is not required for Class 150 or 300 ambient-temperature non-cyclic service. Consult the QC Authority for non-standard service conditions.
+          </Clause>
+        </Section>
+
+        <Section num="12.0" title="Nonconformance">
+          <Clause id="12.1">
+            Any joint not meeting the requirements of this specification shall be identified as a Nonconformance (NCR) and shall not be hydrotested or placed in service until the NCR has been dispositioned by the Engineer of Record and QC Authority. Disposition options are: Use-As-Is (requires documented engineering justification), Rework, or Reject/Replace.
+          </Clause>
+          <Clause id="12.2">
+            Common nonconformances include, but are not limited to: missing MTR or gasket lot documentation; achieved torque outside {'\u00B1'}5% of final value; use of un-calibrated torque wrench; misalignment exceeding clause 6.4 tolerance; re-use of a spiral wound gasket; use of unapproved lubricant; and incomplete form MEP-QC-FORM-044A.
+          </Clause>
+        </Section>
+
+        {/* Footer */}
+        <div style={{ borderTop:`1px solid ${border}`, padding:'8px 10px', display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:'8px', background:'#080c07', marginTop:'8px' }}>
+          <div style={{ color:muted, fontSize:'7.5px' }}>
+            MEP-PIP-SPEC-044 Rev. 3<br/>
+            Mustang Energy Partners, LLC
+          </div>
+          <div style={{ color:muted, fontSize:'7.5px', textAlign:'center' }}>
+            CONTROLLED DOCUMENT<br/>
+            Printed copies are uncontrolled
+          </div>
+          <div style={{ color:muted, fontSize:'7.5px', textAlign:'right' }}>
+            Issued: 2024-11-15<br/>
+            Next Review: 2026-11-15
+          </div>
+        </div>
+
+      </div>
+    </div>
+  );
+}
+
+/* ── PreAssemblyForm ─────────────────────────────────────────── */
+function PreAssemblyForm({ config, onComplete }) {
+  const step = config.steps[0];
+  const SCORED_FIELDS = step.scored_fields;
+  const SECTIONS = step.sections;
+  const FORM_ANSWERS = step.answers;
+  const SCORED_JOINT = step.scored_joint;
+  const flexMatchers = step.flexible_matchers;
+  const scenario = config.scenario;
+
+  const [activeJoint, setActiveJoint] = useState(SCORED_JOINT);
+  const [formData, setFormData] = useState(() =>
+    Object.fromEntries(scenario.joints.map(j => [
+      j.id,
+      Object.fromEntries(SCORED_FIELDS.map(f => [f.key, '']))
+    ]))
+  );
+  const [submitted, setSubmitted] = useState(false);
+  const [scores, setScores] = useState(null);
+  const [totalScore, setTotalScore] = useState(null);
+  const inputRefs = useRef({});
+
+  const joint = scenario.joints.find(j => j.id === activeJoint);
+
+  const update = (jid, key, val) =>
+    setFormData(p => ({ ...p, [jid]: { ...p[jid], [key]: val } }));
+
+  const allFilled = SCORED_FIELDS.every(f =>
+    formData[SCORED_JOINT][f.key].trim() !== ''
+  );
+
+  const handleSubmit = () => {
+    let totalCor = 0, totalFields = 0;
+    const sc = {};
+    const j = SCORED_JOINT;
+    sc[j] = {};
+    SCORED_FIELDS.forEach(f => {
+      totalFields++;
+      const ok = checkFormField(f.key, formData[j][f.key], FORM_ANSWERS[j][f.key], flexMatchers);
+      if (ok) totalCor++;
+      sc[j][f.key] = { ok, entered: formData[j][f.key], correct: FORM_ANSWERS[j][f.key] };
+    });
+    setScores(sc);
+    setTotalScore(Math.round((totalCor / totalFields) * 100));
+    setSubmitted(true);
+  };
+
+  const reset = () => {
+    setFormData(Object.fromEntries(scenario.joints.map(j => [
+      j.id,
+      Object.fromEntries(SCORED_FIELDS.map(f => [f.key, '']))
+    ])));
+    setSubmitted(false);
+    setScores(null);
+    setTotalScore(null);
+  };
+
+  const passed = totalScore !== null && totalScore >= config.passing_score;
+
+  const sourceHints = {
+    bolting: '\u2192 See Mill Test Reports (MTR tab)',
+    gasket: '\u2192 See MTR tab (Gasket Cert) and Bill of Materials on ISO Drawing',
+    flange: '\u2192 See Mill Test Reports \u2014 Flanges Heat A or B (note: cert varies by joint)',
+    install: '\u2192 See Company Spec (MEP-PIP-SPEC-044) \u00A77.1, \u00A78.1\u20138.4, Table 1',
+    equip: '\u2192 See Calibration Certificate (Cal Cert tab)',
+  };
+
+  const FormInput = ({ jid, fieldKey, hint }) => {
+    const jidKey = SCORED_JOINT;
+    const ck = `${jidKey}|${fieldKey}`;
+    const fr = submitted && scores?.[jidKey]?.[fieldKey];
+    let bgColor = 'transparent', outline = 'transparent';
+    if (submitted) {
+      bgColor = fr?.ok ? 'rgba(82,163,102,0.08)' : 'rgba(201,95,95,0.08)';
+      outline = fr?.ok ? 'rgba(82,163,102,0.4)' : 'rgba(201,95,95,0.35)';
+    }
+    return (
+      <div style={{ outline:`1.5px solid ${outline}`, background:bgColor }}>
+        <input
+          ref={el => { if (el) inputRefs.current[ck] = el; }}
+          value={formData[jidKey][fieldKey]}
+          disabled={submitted}
+          onChange={e => update(jidKey, fieldKey, e.target.value)}
+          placeholder={hint}
+          style={{
+            width:'100%', background:'transparent', border:'none', outline:'none',
+            color: submitted ? (fr?.ok ? green : red) : white,
+            padding:'5px 8px', fontSize:'10px', fontFamily:mono,
+            cursor: submitted ? 'default' : 'text', boxSizing:'border-box'
+          }}
+        />
+        {submitted && fr && !fr.ok && (
+          <div style={{ padding:'0 8px 4px', fontSize:'8px', color:green }}>
+            {'\u2713'} {fr.correct}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  return (
+    <div style={{ fontFamily:mono }}>
+      {/* Form header */}
+      <div style={{ background:'rgba(212,131,42,0.08)', border:`1px solid ${border}`, borderTop:`2px solid ${amber}`, padding:'8px 12px', marginBottom:'12px' }}>
+        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start' }}>
+          <div>
+            <div style={{ color:amber, fontSize:'8px', letterSpacing:'0.18em', textTransform:'uppercase', marginBottom:'3px' }}>
+              Mustang Energy Partners, LLC
+            </div>
+            <div style={{ color:white, fontSize:'12px', fontWeight:700, letterSpacing:'0.04em' }}>
+              FLANGE CONNECTION TORQUE RECORD
+            </div>
+            <div style={{ color:muted, fontSize:'8px', marginTop:'2px' }}>
+              MEP-QC-FORM-044A Rev. 3 {'\u00B7'} Pre-Assembly Section
+            </div>
+          </div>
+          <div style={{ textAlign:'right' }}>
+            <div style={{ color:muted, fontSize:'7.5px', textTransform:'uppercase', letterSpacing:'0.1em' }}>Form No.</div>
+            <div style={{ color:amber, fontSize:'11px', fontWeight:700 }}>MEP-QC-FORM-044A</div>
+            <div style={{ color:muted, fontSize:'7.5px', marginTop:'2px' }}>{config.project}</div>
+            <div style={{ color:muted, fontSize:'7.5px' }}>{config.system}</div>
+          </div>
+        </div>
+        <div style={{ marginTop:'8px', padding:'6px 8px', background:'rgba(0,0,0,0.3)', border:`1px solid ${border}`, fontSize:'8.5px', color:'#8ab4c4', fontStyle:'italic' }}>
+          <span style={{ color:'#8ab4c4', fontWeight:700, marginRight:'6px' }}>INSTRUCTIONS:</span>
+          Complete all fields below using the ISO Drawing, Bill of Materials, Mill Test Reports, Calibration Certificate, and Company Specification (MEP-PIP-SPEC-044). Do NOT fill in Achieved Torque, Date, or Result {'\u2014'} those are recorded after physical assembly is complete.
+        </div>
+      </div>
+
+      {/* Score banner */}
+      {submitted && (
+        <div style={{
+          background: passed ? 'rgba(82,163,102,0.1)' : 'rgba(201,95,95,0.08)',
+          border: `1px solid ${passed ? 'rgba(82,163,102,0.3)' : 'rgba(201,95,95,0.3)'}`,
+          padding:'9px 12px', marginBottom:'12px',
+          display:'flex', justifyContent:'space-between', alignItems:'center'
+        }}>
+          <span style={{ color: passed ? green : red, fontWeight:700, fontSize:'12px' }}>
+            Step 1 {passed ? '\u2713 PASSED' : '\u2717 NOT PASSED'} {'\u2014'} {totalScore}% on {SCORED_JOINT}
+            <span style={{ color:muted, fontSize:'9px', fontWeight:400, marginLeft:'8px' }}>
+              Min. {config.passing_score}% required. Incorrect fields shown in red with correct answers in green.
+            </span>
+          </span>
+          <div style={{ display:'flex', gap:'8px' }}>
+            {!passed && (
+              <button onClick={reset} style={{
+                background:'none', border:`1px solid ${border}`, color:muted,
+                padding:'5px 10px', cursor:'pointer', fontFamily:mono,
+                fontSize:'8px', letterSpacing:'0.1em', textTransform:'uppercase'
+              }}>Retry</button>
+            )}
+            {passed && (
+              <button onClick={() => onComplete()} style={{
+                background:amber, color:bg, border:'none',
+                padding:'7px 14px', cursor:'pointer', fontFamily:mono,
+                fontSize:'9px', letterSpacing:'0.1em', textTransform:'uppercase', fontWeight:700
+              }}>Proceed to Torque Log {'\u2192'}</button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Joint identification section */}
+      <div style={{ border:`1px solid ${border}`, marginBottom:'8px', background:surf }}>
+        <div style={{ padding:'5px 10px', background:'rgba(255,255,255,0.03)', borderBottom:`1px solid ${border}` }}>
+          <span style={{ color:muted, fontSize:'7.5px', letterSpacing:'0.14em', textTransform:'uppercase' }}>
+            Joint Identification <span style={{ color:muted, marginLeft:'8px' }}>(from Isometric Drawing {'\u2014'} pre-populated)</span>
+          </span>
+        </div>
+        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr 1fr 1fr' }}>
+          {[['Joint ID', joint.id],['Location', joint.location],['Line Size', joint.size],['Pressure Class','600#'],['Fluid Service', config.service]].map(([l,v], i) => (
+            <div key={l} style={{ padding:'6px 10px', borderRight: i < 4 ? `1px solid ${border}` : 'none' }}>
+              <div style={{ color:muted, fontSize:'7px', letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:'2px' }}>{l}</div>
+              <div style={{ color:'#4a6a52', fontSize:'10px', fontWeight:600 }}>{v}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Scored field sections */}
+      {SECTIONS.map(sec => {
+        const fields = SCORED_FIELDS.filter(f => f.section === sec.id);
+        return (
+          <div key={sec.id} style={{ border:`1px solid ${border}`, marginBottom:'8px', background:surf }}>
+            <div style={{ padding:'5px 10px', background:'rgba(255,255,255,0.03)', borderBottom:`1px solid ${border}`, borderLeft:`2px solid ${sec.color}` }}>
+              <span style={{ color:sec.color, fontSize:'7.5px', letterSpacing:'0.14em', textTransform:'uppercase' }}>
+                {sec.label}
+              </span>
+              {sourceHints[sec.id] && (
+                <span style={{ color:'#7a9db0', fontSize:'7px', marginLeft:'10px' }}>
+                  {sourceHints[sec.id]}
+                </span>
+              )}
+            </div>
+            <div>
+              {fields.map((field, fi) => (
+                <div key={field.key} style={{ display:'grid', gridTemplateColumns:'200px 1fr', borderBottom: fi < fields.length - 1 ? '1px solid #1a1c18' : 'none' }}>
+                  <div style={{ padding:'6px 10px', background:surf2, borderRight:`1px solid ${border}` }}>
+                    <div style={{ display:'flex', alignItems:'center' }}>
+                      <span style={{ color:textCol, fontSize:'7.5px', letterSpacing:'0.07em', textTransform:'uppercase', fontWeight:600 }}>
+                        {field.label}
+                      </span>
+                      {field.tooltip && !submitted && (
+                        <span className="tip-wrap">
+                          <span className="tip-icon">i</span>
+                          <span className="tip-box">{field.tooltip}</span>
+                        </span>
+                      )}
+                    </div>
+                    <div style={{ color:'#8a9ea8', fontSize:'7px', lineHeight:1.5, fontStyle:'italic', marginTop:'3px' }}>
+                      {field.hint}
+                    </div>
+                  </div>
+                  <div>
+                    <FormInput jid={activeJoint} fieldKey={field.key} hint=""/>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })}
+
+      {/* Disabled post-assembly section */}
+      <div style={{ border:'1px solid #1a1c18', marginBottom:'12px', background:'#0d100b', opacity:0.5 }}>
+        <div style={{ padding:'5px 10px', borderBottom:'1px solid #1a1c18' }}>
+          <span style={{ color:muted, fontSize:'7.5px', letterSpacing:'0.14em', textTransform:'uppercase' }}>
+            Post-Assembly Section <span style={{ marginLeft:'8px', color:'#3a3d37' }}>(completed after physical assembly {'\u2014'} not part of this exercise)</span>
+          </span>
+        </div>
+        <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr 1fr' }}>
+          {[['Achieved Torque (ft-lb)',''],['Assembly Date',''],['Inspector Initials',''],['Result (ACC/REJ)','']].map(([l], i) => (
+            <div key={l} style={{ padding:'6px 10px', borderRight: i < 3 ? '1px solid #1a1c18' : 'none' }}>
+              <div style={{ color:'#3a3d37', fontSize:'7px', letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:'2px' }}>{l}</div>
+              <div style={{ height:'20px', background:'#0a0b09', border:'1px solid #1a1c18' }}/>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Submit button */}
+      {!submitted && (
+        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
+          <span style={{ color:muted, fontSize:'8px' }}>
+            {allFilled ? 'All fields complete \u2014 ready to submit.' : 'Complete all fields to submit.'}
+          </span>
+          <button
+            onClick={handleSubmit}
+            disabled={!allFilled}
+            style={{
+              background: allFilled ? amber : '#232520',
+              color: allFilled ? bg : '#3d3f39',
+              border:'none', padding:'10px 22px',
+              cursor: allFilled ? 'pointer' : 'not-allowed',
+              fontFamily:mono, fontSize:'11px',
+              letterSpacing:'0.12em', textTransform:'uppercase', fontWeight:600
+            }}
+          >Submit Pre-Assembly Forms</button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ── TorqueLogGrid ─────────────────────────────────────────────── */
+function TorqueLogGrid({ config, onComplete }) {
+  const COLS = config.steps[1].columns;
+  const ANSWERS = config.steps[1].answers;
+  const scenario = config.scenario;
+
+  const [cells, setCells] = useState(() =>
+    Object.fromEntries(scenario.joints.map(j => [
+      j.id,
+      Object.fromEntries(COLS.map(c => [c.key, '']))
+    ]))
+  );
+  const [submitted, setSubmitted] = useState(false);
+  const [score, setScore] = useState(null);
+  const [results, setResults] = useState(null);
+  const [hints, setHints] = useState(false);
+  const [activeCell, setActiveCell] = useState(null);
+  const inputRefs = useRef({});
+
+  const update = (jid, key, val) =>
+    setCells(p => ({ ...p, [jid]: { ...p[jid], [key]: val } }));
+
+  const allFilled = scenario.joints.every(j =>
+    COLS.every(c => cells[j.id][c.key].trim() !== '')
+  );
+
+  const submit = () => {
+    let tot = 0, cor = 0;
+    const r = {};
+    scenario.joints.forEach(j => {
+      r[j.id] = {};
+      COLS.forEach(c => {
+        tot++;
+        const u = cells[j.id][c.key].trim().toUpperCase();
+        const a = ANSWERS[j.id][c.key].toUpperCase();
+        const ok = u === a;
+        if (ok) cor++;
+        r[j.id][c.key] = { ok, u, a };
+      });
+    });
+    setResults(r);
+    setScore(Math.round((cor / tot) * 100));
+    setSubmitted(true);
+  };
+
+  const retry = () => {
+    setCells(Object.fromEntries(scenario.joints.map(j => [
+      j.id,
+      Object.fromEntries(COLS.map(c => [c.key, '']))
+    ])));
+    setSubmitted(false);
+    setScore(null);
+    setResults(null);
+    setHints(false);
+  };
+
+  const passed = score !== null && score >= (config.passing_score || 80);
+
+  const navToNext = (ck) => {
+    const all = scenario.joints.flatMap(j =>
+      COLS.map(c => `${j.id}|${c.key}`)
+    );
+    const next = all[all.indexOf(ck) + 1];
+    if (next && inputRefs.current[next]) inputRefs.current[next].focus();
+  };
+
+  return (
+    <div>
+      {/* Log header */}
+      <div style={{
+        background:surf, border:`1px solid ${border}`, borderTop:`2px solid ${amber}`,
+        padding:'10px 12px', marginBottom:'10px',
+        display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:'8px'
+      }}>
+        {[['Project', config.project],['System', config.system],['Procedure', config.scenario.procedure],
+          ['Spec', config.scenario.spec],['Service', config.service],['Date','___________']].map(([l,v]) => (
+          <div key={l}>
+            <div style={{ color:amber, fontSize:'7px', letterSpacing:'0.14em', textTransform:'uppercase', marginBottom:'1px' }}>{l}</div>
+            <div style={{ color:white, fontSize:'10px' }}>{v}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Score/result banner */}
+      {submitted && (
+        <div style={{
+          background: passed ? 'rgba(82,163,102,0.12)' : 'rgba(201,95,95,0.1)',
+          border: `1px solid ${passed ? 'rgba(82,163,102,0.35)' : 'rgba(201,95,95,0.3)'}`,
+          padding:'9px 12px', marginBottom:'10px',
+          display:'flex', justifyContent:'space-between', alignItems:'center'
+        }}>
+          <span style={{ color: passed ? green : red, fontWeight:700, fontSize:'12px' }}>
+            {passed ? '\u2713 PASSED' : '\u2717 NOT PASSED'} \u2014 {score}%
+            <span style={{ color:muted, fontSize:'10px', fontWeight:400, marginLeft:'8px' }}>
+              {passed ? 'Min. 80% required.' : 'Correct answers shown below cells.'}
+            </span>
+          </span>
+          {!passed && (
+            <button onClick={retry} style={{
+              background:'none', border:`1px solid ${border}`, color:muted,
+              padding:'5px 10px', cursor:'pointer', fontFamily:mono,
+              fontSize:'9px', letterSpacing:'0.1em', textTransform:'uppercase'
+            }}>Retry</button>
+          )}
+        </div>
+      )}
+
+      {/* Table */}
+      <div style={{ overflowX:'auto', background:surf, border:`1px solid ${border}` }}>
+        <table style={{ borderCollapse:'collapse', fontSize:'11px', width:'100%' }}>
+          <thead>
+            <tr style={{ background:surf2 }}>
+              <th style={{
+                padding:'7px 8px', textAlign:'left', color:muted, fontSize:'8px',
+                letterSpacing:'0.08em', textTransform:'uppercase',
+                borderBottom:`2px solid ${border}`, borderRight:`1px solid ${border}`,
+                fontWeight:500, whiteSpace:'nowrap'
+              }}>Joint</th>
+              <th style={{
+                padding:'7px 8px', textAlign:'left', color:muted, fontSize:'8px',
+                letterSpacing:'0.08em', textTransform:'uppercase',
+                borderBottom:`2px solid ${border}`, borderRight:`1px solid ${border}`,
+                fontWeight:500, whiteSpace:'nowrap'
+              }}>Location</th>
+              <th style={{
+                padding:'7px 8px', textAlign:'left', color:muted, fontSize:'8px',
+                letterSpacing:'0.08em', textTransform:'uppercase',
+                borderBottom:`2px solid ${border}`, borderRight:`1px solid ${border}`,
+                fontWeight:500, whiteSpace:'nowrap'
+              }}>Target</th>
+              {COLS.map((col, ci) => (
+                <th key={col.key} style={{
+                  padding:'7px 8px', textAlign:'left', color:amber, fontSize:'8px',
+                  letterSpacing:'0.08em', textTransform:'uppercase',
+                  borderBottom:`2px solid ${amber}`,
+                  borderRight: ci < COLS.length - 1 ? `1px solid ${border}` : 'none',
+                  fontWeight:600, whiteSpace:'pre-line', minWidth:'72px'
+                }}>
+                  {col.label}
+                  {hints && !submitted && (
+                    <div style={{ color:'#3d3f39', fontSize:'7px', fontWeight:400, marginTop:'1px' }}>{col.hint}</div>
+                  )}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {scenario.joints.map((j, ri) => (
+              <tr key={j.id} style={{
+                borderBottom:`1px solid ${border}`,
+                background: ri % 2 === 0 ? 'transparent' : '#1a1c18'
+              }}>
+                <td style={{
+                  padding:'0 8px', height:'42px', color:amber, fontWeight:600,
+                  borderRight:`1px solid ${border}`, whiteSpace:'nowrap', fontSize:'11px'
+                }}>{j.id}</td>
+                <td style={{
+                  padding:'0 8px', color:textCol, fontSize:'11px',
+                  borderRight:`1px solid ${border}`, whiteSpace:'nowrap'
+                }}>{j.location}</td>
+                <td style={{
+                  padding:'0 8px', color:white, fontWeight:600,
+                  borderRight:`1px solid ${border}`, whiteSpace:'nowrap'
+                }}>{j.target} ft\u00b7lb</td>
+                {COLS.map((col, ci) => {
+                  const ck = `${j.id}|${col.key}`;
+                  const fr = submitted && results?.[j.id]?.[col.key];
+                  let outlineColor = 'transparent', cellBg = 'transparent';
+                  if (activeCell === ck && !submitted) {
+                    outlineColor = amber;
+                    cellBg = 'rgba(212,131,42,0.08)';
+                  }
+                  if (submitted) {
+                    cellBg = fr?.ok ? 'rgba(82,163,102,0.1)' : 'rgba(201,95,95,0.08)';
+                    outlineColor = fr?.ok ? 'rgba(82,163,102,0.4)' : 'rgba(201,95,95,0.4)';
+                  }
+                  return (
+                    <td key={col.key} style={{
+                      padding:0,
+                      borderRight: ci < COLS.length - 1 ? `1px solid ${border}` : 'none'
+                    }}>
+                      <div style={{
+                        outline:`2px solid ${outlineColor}`, outlineOffset:'-2px',
+                        background:cellBg, minHeight:'42px',
+                        display:'flex', flexDirection:'column', justifyContent:'center'
+                      }}>
+                        <input
+                          ref={el => { if (el) inputRefs.current[ck] = el; }}
+                          value={cells[j.id][col.key]}
+                          disabled={submitted}
+                          onChange={e => update(j.id, col.key, e.target.value)}
+                          onFocus={() => setActiveCell(ck)}
+                          onBlur={() => setActiveCell(null)}
+                          onKeyDown={e => {
+                            if (e.key === 'Tab' || e.key === 'Enter') {
+                              e.preventDefault();
+                              navToNext(ck);
+                            }
+                          }}
+                          placeholder={hints && !submitted ? col.hint : ''}
+                          style={{
+                            width:'100%', background:'transparent', border:'none', outline:'none',
+                            color: submitted ? (fr?.ok ? green : red) : white,
+                            padding:'8px', fontSize:'11px', fontFamily:mono,
+                            cursor: submitted ? 'default' : 'text', boxSizing:'border-box'
+                          }}
+                        />
+                        {submitted && fr && !fr.ok && (
+                          <div style={{ padding:'0 8px 5px', fontSize:'8px', color:green, letterSpacing:'0.06em' }}>
+                            \u2713 {fr.a}
+                          </div>
+                        )}
+                      </div>
+                    </td>
+                  );
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div style={{ color:'#3d3f39', fontSize:'8px', marginTop:'5px', letterSpacing:'0.1em' }}>
+        TAB or ENTER to advance
+      </div>
+
+      {/* Submit / Complete / Retry */}
+      <div style={{ marginTop:'14px', display:'flex', justifyContent:'flex-end', gap:'10px', alignItems:'center' }}>
+        {!submitted && !allFilled && (
+          <span style={{ color:muted, fontSize:'9px' }}>Fill all cells to submit</span>
+        )}
+        {!submitted && (
+          <button onClick={submit} disabled={!allFilled} style={{
+            background: allFilled ? amber : '#232520',
+            color: allFilled ? bg : '#3d3f39',
+            border:'none', padding:'10px 20px',
+            cursor: allFilled ? 'pointer' : 'not-allowed',
+            fontFamily:mono, fontSize:'11px',
+            letterSpacing:'0.12em', textTransform:'uppercase', fontWeight:600,
+            opacity: allFilled ? 1 : 0.4
+          }}>Submit Log</button>
+        )}
+        {submitted && passed && (
+          <button onClick={() => onComplete(score, true, { cells })} style={{
+            background:green, color:bg, border:'none',
+            padding:'10px 20px', cursor:'pointer',
+            fontFamily:mono, fontSize:'11px',
+            letterSpacing:'0.12em', textTransform:'uppercase', fontWeight:600
+          }}>Exercise Complete \u2713</button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ── RefPanel ──────────────────────────────────────────────────── */
+function RefPanel({ hideJointForms = false, config }) {
+  const [section, setSection] = useState('drawing');
+  const [activeJoint, setActiveJoint] = useState('FLG-001');
+  const scenario = config.scenario;
+
+  const allSubTabs = [
+    ['drawing', 'ISO Drawing'],
+    ['forms', 'Joint Forms'],
+    ['torque', 'Company Spec'],
+    ['mtrs', 'MTRs'],
+    ['calcert', 'Cal Cert'],
+  ];
+  const subTabs = hideJointForms
+    ? allSubTabs.filter(([id]) => id !== 'forms')
+    : allSubTabs;
+
+  useEffect(() => {
+    if (!subTabs.some(([id]) => id === section)) setSection(subTabs[0][0]);
+  }, [hideJointForms]);
+
+  return (
+    <div style={{ display:'flex', flexDirection:'column', height:'100%', overflow:'hidden' }}>
+      {/* Sub-tab bar */}
+      <div style={{
+        display:'flex', borderBottom:`1px solid ${border}`,
+        background:surf2, flexShrink:0, flexWrap:'wrap'
+      }}>
+        {subTabs.map(([id, label]) => (
+          <button key={id} onClick={() => setSection(id)} style={{
+            background:'none', border:'none',
+            borderBottom: section === id ? `2px solid ${amber}` : '2px solid transparent',
+            color: section === id ? amber : muted,
+            cursor:'pointer', padding:'7px 12px',
+            fontFamily:mono, fontSize:'8.5px',
+            letterSpacing:'0.12em', textTransform:'uppercase'
+          }}>{label}</button>
+        ))}
+      </div>
+
+      {/* Content */}
+      <div style={{ flex:1, overflowY:'auto', padding:'10px' }}>
+        {section === 'drawing' && (
+          <div>
+            <div style={{ color:muted, fontSize:'7.5px', letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:'6px' }}>
+              {scenario.system} \u00b7 ASME B31.3 \u00b7 P600 \u00b7 Sour Service
+            </div>
+            <div style={{ background:'#080d0a', border:`1px solid ${border}` }}>
+              <IsoMap config={config} />
+            </div>
+          </div>
+        )}
+
+        {section === 'forms' && (
+          <div>
+            <div style={{ display:'flex', gap:'4px', marginBottom:'10px', flexWrap:'wrap' }}>
+              {scenario.joints.map(j => (
+                <button key={j.id} onClick={() => setActiveJoint(j.id)} style={{
+                  background: activeJoint === j.id ? 'rgba(212,131,42,0.15)' : 'none',
+                  border: `1px solid ${activeJoint === j.id ? amber : border}`,
+                  color: activeJoint === j.id ? amber : muted,
+                  cursor:'pointer', padding:'5px 10px',
+                  fontFamily:mono, fontSize:'8px',
+                  letterSpacing:'0.1em', textTransform:'uppercase'
+                }}>{j.id}</button>
+              ))}
+            </div>
+            <JointForm
+              f={config.reference_docs.joint_forms[activeJoint]}
+              system={config.system}
+              spec={config.scenario.spec}
+            />
+          </div>
+        )}
+
+        {section === 'torque' && <SpecDocument config={config} />}
+
+        {section === 'mtrs' && (
+          <div>
+            <div style={{ color:muted, fontSize:'7.5px', letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:'8px' }}>
+              Mill Test Reports \u00b7 {scenario.project}
+            </div>
+            <MTRPanel mtrs={config.reference_docs.mtrs} />
+          </div>
+        )}
+
+        {section === 'calcert' && (
+          <div>
+            <div style={{ color:muted, fontSize:'7.5px', letterSpacing:'0.1em', textTransform:'uppercase', marginBottom:'8px' }}>
+              Torque Wrench Calibration Certificate
+            </div>
+            <CalCertPanel calCert={config.reference_docs.cal_cert} />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ── TorqueLog (Main App) ──────────────────────────────────────── */
+function TorqueLog() {
+  const [config, setConfig] = useState(null);
+  const [tab, setTab] = useState('brief');
+  const [workStep, setWorkStep] = useState(1);
+  const [step1Complete, setStep1Complete] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [score, setScore] = useState(null);
+
+  useEffect(() => {
+    if (window.EXERCISE_CONFIG) setConfig(window.EXERCISE_CONFIG);
+  }, []);
+
+  if (!config) return (
+    <div style={{ fontFamily:mono, color:muted, display:'flex', alignItems:'center', justifyContent:'center', height:'100vh' }}>
+      Loading exercise configuration\u2026
+    </div>
+  );
+
+  const passed = score !== null && score >= (config.passing_score || 80);
+
+  const Btn = ({ children, onClick, variant = 'primary', disabled = false }) => {
+    const s = {
+      primary: { background:amber, color:bg, border:'none' },
+      ghost:   { background:'none', color:muted, border:`1px solid ${border}` },
+      success: { background:green, color:bg, border:'none' },
+    };
+    return (
+      <button onClick={onClick} disabled={disabled} style={{
+        ...s[variant], padding:'10px 20px',
+        cursor: disabled ? 'not-allowed' : 'pointer',
+        fontFamily:mono, fontSize:'11px',
+        letterSpacing:'0.12em', textTransform:'uppercase',
+        fontWeight:600, opacity: disabled ? 0.4 : 1
+      }}>{children}</button>
+    );
+  };
+
+  const scenario = config.scenario;
+
+  return (
+    <div style={{
+      fontFamily:mono, background:bg, color:textCol,
+      height:'100vh', display:'flex', flexDirection:'column', fontSize:'13px'
+    }}>
+      {/* Header bar */}
+      <div style={{
+        background:surf, borderBottom:`1px solid ${border}`,
+        padding:'10px 20px', display:'flex',
+        justifyContent:'space-between', alignItems:'center', flexShrink:0
+      }}>
+        <div>
+          <div style={{ color:amber, fontSize:'8px', letterSpacing:'0.2em', textTransform:'uppercase', marginBottom:'2px' }}>
+            FDQ Tier 2 \u00b7 Practical Exercise
+          </div>
+          <div style={{ color:white, fontSize:'16px', fontWeight:900, textTransform:'uppercase', letterSpacing:'0.06em' }}>
+            Bolted Flange Torque Log
+          </div>
+        </div>
+        <div style={{ display:'flex', alignItems:'center', gap:'16px' }}>
+          {submitted && (
+            <div style={{ textAlign:'right' }}>
+              <div style={{ fontSize:'28px', fontWeight:900, color: passed ? green : red, lineHeight:1 }}>
+                {score}%
+              </div>
+              <div style={{ fontSize:'8px', color: passed ? green : red, letterSpacing:'0.14em', textTransform:'uppercase' }}>
+                {passed ? '\u2713 PASSED' : '\u2717 NOT PASSED'}
+              </div>
+            </div>
+          )}
+          <div style={{ display:'flex', borderLeft:`1px solid ${border}`, paddingLeft:'16px', gap:'4px' }}>
+            {[['brief','Scenario'],['work','Work View']].map(([id, label]) => (
+              <button key={id} onClick={() => setTab(id)} style={{
+                background: tab === id ? 'rgba(212,131,42,0.12)' : 'none',
+                border: `1px solid ${tab === id ? amber : border}`,
+                color: tab === id ? amber : muted,
+                cursor:'pointer', padding:'6px 14px',
+                fontFamily:mono, fontSize:'9px',
+                letterSpacing:'0.12em', textTransform:'uppercase'
+              }}>{label}</button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Brief tab */}
+      {tab === 'brief' && (
+        <div style={{ flex:1, overflowY:'auto', padding:'20px', maxWidth:'860px', margin:'0 auto', width:'100%' }}>
+          <div style={{
+            background:surf, border:`1px solid ${border}`,
+            borderLeft:`3px solid ${amber}`, padding:'18px 20px', marginBottom:'16px'
+          }}>
+            <div style={{ color:amber, fontSize:'9px', letterSpacing:'0.2em', textTransform:'uppercase', marginBottom:'10px' }}>
+              Exercise Brief
+            </div>
+            <p style={{ fontFamily:'sans-serif', fontSize:'14px', lineHeight:1.85, margin:0 }}>
+              You are the QC Inspector on <strong style={{ color:white }}>{config.project}</strong>.
+              {' '}Bolted flange assembly for <strong style={{ color:white }}>{config.system}</strong> is complete.
+              {' '}Switch to <strong style={{ color:white }}>Work View</strong> to access the isometric drawing,
+              {' '}individual joint torque forms, and Torque Specification \u2014 the Bill of Materials is embedded
+              {' '}on the isometric drawing \u2014 all alongside the fillable log.
+              {' '}Retrieve achieved torque values, gasket lot numbers, and all required data from the joint forms.
+              {' '}Inspector: <strong style={{ color:white }}>{scenario.inspector}</strong> \u2014 enter initials as{' '}
+              <strong style={{ color:white }}>J. REED</strong>.
+            </p>
+          </div>
+
+          <div style={{
+            background:surf, border:`1px solid ${border}`,
+            display:'grid', gridTemplateColumns:'1fr 1fr', marginBottom:'20px'
+          }}>
+            {[['Project', scenario.project],['System', scenario.system],
+              ['Specification', scenario.spec],['Torque Procedure', scenario.procedure],
+              ['Fluid Service', scenario.service],['Gasket Lot #', scenario.gasketLot],
+              ['Inspector on Record', scenario.inspector],['Bolt Material','ASTM A193 B7 / A194 2H']
+            ].map(([l, v], i) => (
+              <div key={l} style={{
+                padding:'10px 14px', borderBottom:`1px solid ${border}`,
+                borderRight: i % 2 === 0 ? `1px solid ${border}` : 'none',
+                display:'flex', gap:'12px'
+              }}>
+                <div style={{ color:amber, fontSize:'8px', letterSpacing:'0.1em', textTransform:'uppercase', width:'120px', flexShrink:0 }}>{l}</div>
+                <div style={{ color:white, fontSize:'12px' }}>{v}</div>
+              </div>
+            ))}
+          </div>
+
+          <Btn onClick={() => setTab('work')}>Open Work View \u2192</Btn>
+        </div>
+      )}
+
+      {/* Work tab */}
+      {tab === 'work' && (
+        <div style={{ flex:1, display:'flex', flexDirection:'column', overflow:'hidden' }}>
+          {/* Step progress tabs */}
+          <div style={{
+            display:'flex', background:surf2,
+            borderBottom:`1px solid ${border}`, flexShrink:0, padding:'0 16px'
+          }}>
+            {[
+              ['1','Step 1 of 2 \u2014 Pre-Assembly Form','Fill MEP-QC-FORM-044A from spec, MTRs & drawing'],
+              ['2','Step 2 of 2 \u2014 Torque Log','Record achieved torque values after assembly'],
+            ].map(([num, label, desc], i) => (
+              <div key={num}
+                onClick={() => {
+                  if (num === '2' && step1Complete) setWorkStep(2);
+                  if (num === '1') setWorkStep(1);
+                }}
+                style={{
+                  display:'flex', alignItems:'center', gap:'8px',
+                  padding:'8px 16px',
+                  cursor: num === '2' && !step1Complete ? 'not-allowed' : 'pointer',
+                  opacity: num === '2' && !step1Complete ? 0.35 : 1,
+                  borderBottom: workStep === parseInt(num) ? `2px solid ${amber}` : '2px solid transparent',
+                  marginBottom:'-1px'
+                }}
+              >
+                <div style={{
+                  width:'18px', height:'18px', borderRadius:'50%',
+                  background: workStep === parseInt(num) ? 'rgba(212,131,42,0.2)' : 'transparent',
+                  border: `1px solid ${workStep === parseInt(num) ? amber : border}`,
+                  display:'flex', alignItems:'center', justifyContent:'center'
+                }}>
+                  <span style={{
+                    color: workStep === parseInt(num) ? amber : muted,
+                    fontSize:'8px', fontWeight:700
+                  }}>{num}</span>
+                </div>
+                <div>
+                  <div style={{
+                    color: workStep === parseInt(num) ? amber : muted,
+                    fontSize:'8.5px', fontWeight:700, letterSpacing:'0.06em'
+                  }}>{label}</div>
+                  <div style={{ color:'#3a3d37', fontSize:'7px', letterSpacing:'0.04em' }}>{desc}</div>
+                </div>
+                {i === 0 && <div style={{ color:border, fontSize:'12px', marginLeft:'8px' }}>{'\u203a'}</div>}
+              </div>
+            ))}
+          </div>
+
+          {/* Split pane */}
+          <div style={{ flex:1, display:'flex', overflow:'hidden' }}>
+            {/* Left pane (52%) */}
+            <div style={{
+              width:'52%', borderRight:`1px solid ${border}`,
+              display:'flex', flexDirection:'column', overflow:'hidden'
+            }}>
+              <div style={{
+                padding:'7px 12px', background:surf2,
+                borderBottom:`1px solid ${border}`, flexShrink:0
+              }}>
+                <span style={{ color:muted, fontSize:'8px', letterSpacing:'0.14em', textTransform:'uppercase' }}>
+                  {workStep === 1
+                    ? 'MEP-QC-FORM-044A \u2014 FLG-001 \u00b7 Suction Nozzle N1'
+                    : `Reference \u00b7 ${scenario.system}`}
+                </span>
+              </div>
+              <div style={{ flex:1, overflowY:'auto', padding:'12px' }}>
+                {workStep === 1
+                  ? <PreAssemblyForm config={config} onComplete={() => { setStep1Complete(true); setWorkStep(2); }} />
+                  : <RefPanel config={config} />
+                }
+              </div>
+            </div>
+
+            {/* Right pane */}
+            <div style={{ flex:1, display:'flex', flexDirection:'column', overflow:'hidden' }}>
+              {workStep === 1 ? (
+                <>
+                  <div style={{
+                    padding:'7px 12px', background:surf2,
+                    borderBottom:`1px solid ${border}`, flexShrink:0
+                  }}>
+                    <span style={{ color:muted, fontSize:'8px', letterSpacing:'0.14em', textTransform:'uppercase' }}>
+                      Reference \u00b7 Spec / MTRs / Cal Cert / ISO Drawing
+                    </span>
+                  </div>
+                  <div style={{ flex:1, overflow:'hidden' }}>
+                    <RefPanel hideJointForms={true} config={config} />
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div style={{
+                    padding:'7px 12px', background:surf2,
+                    borderBottom:`1px solid ${border}`,
+                    display:'flex', justifyContent:'space-between', alignItems:'center',
+                    flexShrink:0
+                  }}>
+                    <span style={{ color:muted, fontSize:'8px', letterSpacing:'0.14em', textTransform:'uppercase' }}>
+                      Torque Log \u00b7 TQ-44A
+                    </span>
+                  </div>
+                  <div style={{ flex:1, overflowY:'auto', padding:'12px' }}>
+                    <TorqueLogGrid config={config} onComplete={(s, p, data) => {
+                      setScore(s);
+                      setSubmitted(true);
+                    }} />
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<TorqueLog />);
+</script>
+</body>
+</html>

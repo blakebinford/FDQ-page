@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FDQ Exercise Engine — Shell</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script crossorigin src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0e0f0d;
+    --surf: #161714;
+    --surf2: #1d1f1b;
+    --border: #2a2d27;
+    --text: #ccc8be;
+    --muted: #6e6b63;
+    --white: #ede8df;
+    --amber: #d4832a;
+    --green: #52a366;
+    --red: #c95f5f;
+  }
+
+  html, body, #root {
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+</style>
+
+<!-- Dev-mode mock data -->
+<script>
+  window.EXERCISE_TYPE = 'torque_form';
+  window.CSRF_TOKEN = 'dev-token';
+  window.SUBMIT_URL = '/certifications/practitioner/lessons/5/exercise/submit/';
+  window.EXERCISE_CONFIG = {
+    title: 'Bolted Joint Torque Verification',
+    total_steps: 2,
+    reference_docs: {
+      spec: {
+        title: 'Company Torque Specification',
+        content: 'SP-TORQ-001 Rev 3 — Bolted Joint Assembly Requirements...'
+      },
+      iso_drawing: {
+        title: 'ISO Drawing P-101-A',
+        content: 'Piping isometric showing flange connections F-101 through F-108...'
+      },
+      cal_cert: {
+        title: 'Calibration Certificate — Torque Wrench TW-042',
+        content: 'Cal date: 2025-11-15, Due: 2026-05-15, Range: 20-250 ft-lbs...'
+      },
+      joint_forms: {
+        title: 'Joint Assembly Forms',
+        content: 'Blank torque log form for recording assembly data...'
+      }
+    },
+    steps: [
+      {
+        label: 'Pre-Assembly Review',
+        hidden_tabs: ['joint_forms'],
+        instructions: 'Review the spec, drawing, and cal cert. Verify the wrench is in cal and identify the target torque for each flange size.'
+      },
+      {
+        label: 'Torque Log Entry',
+        hidden_tabs: [],
+        instructions: 'Complete the torque log for flanges F-101 through F-104 using the correct target values.'
+      }
+    ]
+  };
+</script>
+
+<script type="text/babel" data-type="module">
+const { useState, useEffect, useCallback } = React;
+
+/* ─────────────────────────────────────────────
+   EXERCISE TYPE REGISTRY
+   ───────────────────────────────────────────── */
+
+// ── Stub step components ──
+
+function TorqueFormStep({ config, stepConfig, onStepComplete }) {
+  return (
+    <div style={styles.stubBox}>
+      <div style={styles.stubLabel}>[ Torque Pre-Assembly Form — plug in here ]</div>
+      {stepConfig?.instructions && (
+        <p style={{ color: 'var(--muted)', fontSize: 12, marginTop: 12, maxWidth: 500 }}>
+          {stepConfig.instructions}
+        </p>
+      )}
+      <button style={styles.devBtn} onClick={() => onStepComplete(90, true, {})}>
+        Simulate Pass
+      </button>
+      <button style={{ ...styles.devBtn, background: 'var(--red)' }}
+              onClick={() => onStepComplete(40, false, {})}>
+        Simulate Fail
+      </button>
+    </div>
+  );
+}
+
+function TorqueLogStep({ config, stepConfig, onStepComplete }) {
+  return (
+    <div style={styles.stubBox}>
+      <div style={styles.stubLabel}>[ Torque Log Entry — plug in here ]</div>
+      {stepConfig?.instructions && (
+        <p style={{ color: 'var(--muted)', fontSize: 12, marginTop: 12, maxWidth: 500 }}>
+          {stepConfig.instructions}
+        </p>
+      )}
+      <button style={styles.devBtn} onClick={() => onStepComplete(95, true, {})}>
+        Simulate Pass
+      </button>
+      <button style={{ ...styles.devBtn, background: 'var(--red)' }}
+              onClick={() => onStepComplete(30, false, {})}>
+        Simulate Fail
+      </button>
+    </div>
+  );
+}
+
+// ── Registry ──
+
+const EXERCISE_REGISTRY = {
+  torque_form: {
+    steps: [TorqueFormStep, TorqueLogStep],
+    stepLabels: ['Pre-Assembly Review', 'Torque Log Entry'],
+    refDocTypes: ['spec', 'iso_drawing', 'cal_cert', 'joint_forms'],
+  },
+};
+
+/* ─────────────────────────────────────────────
+   REF PANEL
+   ───────────────────────────────────────────── */
+
+const DOC_TYPE_LABELS = {
+  spec: 'Company Spec',
+  iso_drawing: 'ISO Drawing',
+  mtrs: 'MTRs',
+  cal_cert: 'Cal Cert',
+  joint_forms: 'Joint Forms',
+};
+
+function RefPanel({ referenceDocs, hiddenTabs }) {
+  const docTypes = Object.keys(referenceDocs || {});
+  const visibleTypes = docTypes.filter(t => !(hiddenTabs || []).includes(t));
+  const [activeTab, setActiveTab] = useState(visibleTypes[0] || null);
+
+  useEffect(() => {
+    if (activeTab && (hiddenTabs || []).includes(activeTab)) {
+      setActiveTab(visibleTypes[0] || null);
+    }
+  }, [hiddenTabs]);
+
+  if (visibleTypes.length === 0) {
+    return (
+      <div style={styles.refPanel}>
+        <div style={styles.refEmpty}>No reference documents for this step.</div>
+      </div>
+    );
+  }
+
+  const doc = referenceDocs[activeTab];
+
+  return (
+    <div style={styles.refPanel}>
+      <div style={styles.refTabs}>
+        {visibleTypes.map(type => (
+          <button
+            key={type}
+            onClick={() => setActiveTab(type)}
+            style={{
+              ...styles.refTab,
+              ...(activeTab === type ? styles.refTabActive : {}),
+            }}
+          >
+            {DOC_TYPE_LABELS[type] || type}
+          </button>
+        ))}
+      </div>
+      <div style={styles.refContent}>
+        {doc ? (
+          <>
+            <div style={styles.refDocTitle}>{doc.title || DOC_TYPE_LABELS[activeTab]}</div>
+            <div style={styles.refDocBody}>
+              [ {activeTab} renderer — plug in component here ]
+            </div>
+            {doc.content && (
+              <pre style={styles.refDocPreview}>{doc.content}</pre>
+            )}
+          </>
+        ) : (
+          <div style={styles.refEmpty}>No data for {DOC_TYPE_LABELS[activeTab] || activeTab}.</div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────
+   EXERCISE PLAYER (engine shell)
+   ───────────────────────────────────────────── */
+
+function ExercisePlayer() {
+  const [config] = useState(() => window.EXERCISE_CONFIG || {});
+  const [exerciseType] = useState(() => window.EXERCISE_TYPE || '');
+  const [currentStep, setCurrentStep] = useState(0);
+  const [stepResults, setStepResults] = useState([]);
+  const [overallPassed, setOverallPassed] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [lastFailed, setLastFailed] = useState(false);
+
+  const registration = EXERCISE_REGISTRY[exerciseType];
+
+  if (!registration) {
+    return (
+      <div style={styles.errorBox}>
+        Unknown exercise type: <strong>{exerciseType}</strong>
+      </div>
+    );
+  }
+
+  const totalSteps = registration.steps.length;
+  const isComplete = currentStep >= totalSteps;
+
+  const overallScore = stepResults.length > 0
+    ? Math.round(stepResults.reduce((s, r) => s + r.score, 0) / stepResults.length)
+    : 0;
+
+  const onStepComplete = useCallback(async (score, passed, responseData) => {
+    setSubmitting(true);
+    setLastFailed(false);
+
+    try {
+      const res = await fetch(window.SUBMIT_URL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': window.CSRF_TOKEN,
+        },
+        body: JSON.stringify({
+          step: currentStep + 1,
+          score,
+          passed,
+          response_data: responseData,
+        }),
+      });
+
+      const data = await res.json();
+      console.log('Submit response:', data);
+    } catch (err) {
+      console.warn('Submit failed (dev mode OK):', err.message);
+    }
+
+    if (passed) {
+      const newResults = [...stepResults, { step: currentStep + 1, score, passed }];
+      setStepResults(newResults);
+      const nextStep = currentStep + 1;
+      if (nextStep >= totalSteps) {
+        setOverallPassed(true);
+      }
+      setCurrentStep(nextStep);
+    } else {
+      setLastFailed(true);
+    }
+
+    setSubmitting(false);
+  }, [currentStep, stepResults, totalSteps]);
+
+  const stepConfig = config.steps?.[currentStep] || {};
+  const hiddenTabs = stepConfig.hidden_tabs || [];
+
+  // ── Render ──
+
+  return (
+    <div style={styles.shell}>
+      {/* Header */}
+      <div style={styles.header}>
+        <div style={styles.headerLeft}>
+          <div style={styles.headerTitle}>{config.title || 'Exercise'}</div>
+          <div style={styles.headerMeta}>
+            {exerciseType.replace(/_/g, ' ').toUpperCase()}
+          </div>
+        </div>
+        <div style={styles.headerRight}>
+          {isComplete ? (
+            <div style={styles.scoreBox}>
+              <span style={{ color: overallPassed ? 'var(--green)' : 'var(--red)' }}>
+                {overallScore}%
+              </span>
+            </div>
+          ) : (
+            <div style={styles.stepIndicator}>
+              Step {currentStep + 1} of {totalSteps}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Step progress bar */}
+      <div style={styles.progressTrack}>
+        <div style={{
+          ...styles.progressFill,
+          width: `${(isComplete ? totalSteps : currentStep) / totalSteps * 100}%`,
+          background: isComplete
+            ? (overallPassed ? 'var(--green)' : 'var(--red)')
+            : 'var(--amber)',
+        }} />
+      </div>
+
+      {/* Body */}
+      {isComplete ? (
+        <CompletionScreen
+          score={overallScore}
+          passed={overallPassed}
+          stepResults={stepResults}
+          registration={registration}
+        />
+      ) : (
+        <div style={styles.splitPane}>
+          {/* Left: step component */}
+          <div style={styles.leftPane}>
+            <div style={styles.stepHeader}>
+              <span style={styles.stepLabel}>
+                {registration.stepLabels[currentStep] || `Step ${currentStep + 1}`}
+              </span>
+              {lastFailed && (
+                <span style={styles.retryBadge}>Not passed — try again</span>
+              )}
+            </div>
+            {submitting ? (
+              <div style={styles.stubBox}>
+                <div style={{ color: 'var(--muted)' }}>Submitting...</div>
+              </div>
+            ) : (
+              React.createElement(registration.steps[currentStep], {
+                config,
+                stepConfig,
+                onStepComplete,
+              })
+            )}
+          </div>
+
+          {/* Right: ref panel */}
+          <div style={styles.rightPane}>
+            <RefPanel
+              referenceDocs={config.reference_docs || {}}
+              hiddenTabs={hiddenTabs}
+            />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────
+   COMPLETION SCREEN
+   ───────────────────────────────────────────── */
+
+function CompletionScreen({ score, passed, stepResults, registration }) {
+  return (
+    <div style={styles.completionWrap}>
+      <div style={styles.completionCard}>
+        <div style={{
+          ...styles.completionScore,
+          color: passed ? 'var(--green)' : 'var(--red)',
+        }}>
+          {score}%
+        </div>
+        <div style={{
+          ...styles.completionStatus,
+          color: passed ? 'var(--green)' : 'var(--red)',
+        }}>
+          {passed ? 'PASSED' : 'NOT PASSED'}
+        </div>
+        <div style={styles.completionDetail}>
+          {stepResults.map((r, i) => (
+            <div key={i} style={styles.completionStep}>
+              <span style={{ color: 'var(--muted)' }}>
+                {registration.stepLabels[i] || `Step ${i + 1}`}
+              </span>
+              <span style={{ color: r.passed ? 'var(--green)' : 'var(--red)' }}>
+                {r.score}%
+              </span>
+            </div>
+          ))}
+        </div>
+        {passed && (
+          <div style={styles.completionMsg}>
+            Lesson marked complete. Return to the course to continue.
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────
+   STYLES
+   ───────────────────────────────────────────── */
+
+const styles = {
+  shell: {
+    display: 'flex',
+    flexDirection: 'column',
+    height: '100%',
+    minHeight: '100vh',
+    background: 'var(--bg)',
+  },
+
+  // Header
+  header: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '12px 24px',
+    background: 'var(--surf)',
+    borderBottom: '1px solid var(--border)',
+    flexShrink: 0,
+  },
+  headerLeft: { display: 'flex', flexDirection: 'column', gap: 2 },
+  headerTitle: {
+    fontSize: 15,
+    fontWeight: 600,
+    color: 'var(--white)',
+    letterSpacing: '0.02em',
+  },
+  headerMeta: {
+    fontSize: 10,
+    fontWeight: 500,
+    letterSpacing: '0.14em',
+    textTransform: 'uppercase',
+    color: 'var(--amber)',
+  },
+  headerRight: {},
+  stepIndicator: {
+    fontSize: 11,
+    fontWeight: 500,
+    letterSpacing: '0.1em',
+    textTransform: 'uppercase',
+    color: 'var(--muted)',
+  },
+  scoreBox: {
+    fontSize: 20,
+    fontWeight: 700,
+  },
+
+  // Progress bar
+  progressTrack: {
+    height: 3,
+    background: 'var(--surf2)',
+    flexShrink: 0,
+  },
+  progressFill: {
+    height: '100%',
+    transition: 'width 0.4s ease, background 0.3s ease',
+  },
+
+  // Split pane
+  splitPane: {
+    display: 'flex',
+    flex: 1,
+    overflow: 'hidden',
+  },
+  leftPane: {
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+    overflow: 'auto',
+    borderRight: '1px solid var(--border)',
+  },
+  rightPane: {
+    width: 380,
+    flexShrink: 0,
+    display: 'flex',
+    flexDirection: 'column',
+    overflow: 'hidden',
+  },
+
+  // Step header
+  stepHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 12,
+    padding: '12px 24px',
+    borderBottom: '1px solid var(--border)',
+    background: 'var(--surf)',
+    flexShrink: 0,
+  },
+  stepLabel: {
+    fontSize: 12,
+    fontWeight: 600,
+    letterSpacing: '0.08em',
+    textTransform: 'uppercase',
+    color: 'var(--white)',
+  },
+  retryBadge: {
+    fontSize: 10,
+    fontWeight: 500,
+    letterSpacing: '0.06em',
+    textTransform: 'uppercase',
+    color: 'var(--red)',
+    background: 'rgba(201,95,95,0.12)',
+    border: '1px solid rgba(201,95,95,0.25)',
+    padding: '3px 10px',
+    borderRadius: 2,
+  },
+
+  // Stub boxes
+  stubBox: {
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 16,
+    padding: 40,
+  },
+  stubLabel: {
+    fontSize: 13,
+    fontWeight: 500,
+    color: 'var(--muted)',
+    letterSpacing: '0.04em',
+    border: '1px dashed var(--border)',
+    padding: '20px 32px',
+    textAlign: 'center',
+  },
+  devBtn: {
+    fontFamily: "'IBM Plex Mono', monospace",
+    fontSize: 11,
+    fontWeight: 600,
+    letterSpacing: '0.1em',
+    textTransform: 'uppercase',
+    background: 'var(--green)',
+    color: 'var(--bg)',
+    border: 'none',
+    padding: '8px 20px',
+    cursor: 'pointer',
+  },
+
+  // Ref panel
+  refPanel: {
+    display: 'flex',
+    flexDirection: 'column',
+    height: '100%',
+    background: 'var(--surf)',
+  },
+  refTabs: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    borderBottom: '1px solid var(--border)',
+    flexShrink: 0,
+  },
+  refTab: {
+    fontFamily: "'IBM Plex Mono', monospace",
+    fontSize: 10,
+    fontWeight: 500,
+    letterSpacing: '0.1em',
+    textTransform: 'uppercase',
+    color: 'var(--muted)',
+    background: 'transparent',
+    border: 'none',
+    borderBottom: '2px solid transparent',
+    padding: '10px 14px',
+    cursor: 'pointer',
+    transition: 'color 0.15s, border-color 0.15s',
+  },
+  refTabActive: {
+    color: 'var(--amber)',
+    borderBottomColor: 'var(--amber)',
+  },
+  refContent: {
+    flex: 1,
+    overflow: 'auto',
+    padding: 20,
+  },
+  refDocTitle: {
+    fontSize: 12,
+    fontWeight: 600,
+    letterSpacing: '0.06em',
+    textTransform: 'uppercase',
+    color: 'var(--white)',
+    marginBottom: 12,
+  },
+  refDocBody: {
+    fontSize: 12,
+    color: 'var(--muted)',
+    border: '1px dashed var(--border)',
+    padding: '16px 20px',
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  refDocPreview: {
+    fontSize: 12,
+    color: 'var(--text)',
+    background: 'var(--surf2)',
+    border: '1px solid var(--border)',
+    padding: 16,
+    whiteSpace: 'pre-wrap',
+    wordBreak: 'break-word',
+    lineHeight: 1.6,
+  },
+  refEmpty: {
+    fontSize: 12,
+    color: 'var(--muted)',
+    padding: 20,
+    textAlign: 'center',
+  },
+
+  // Completion
+  completionWrap: {
+    flex: 1,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 40,
+  },
+  completionCard: {
+    background: 'var(--surf)',
+    border: '1px solid var(--border)',
+    padding: '48px 56px',
+    textAlign: 'center',
+    maxWidth: 440,
+    width: '100%',
+  },
+  completionScore: {
+    fontSize: 56,
+    fontWeight: 700,
+    lineHeight: 1,
+    marginBottom: 4,
+  },
+  completionStatus: {
+    fontSize: 13,
+    fontWeight: 700,
+    letterSpacing: '0.16em',
+    textTransform: 'uppercase',
+    marginBottom: 28,
+  },
+  completionDetail: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 8,
+    marginBottom: 24,
+  },
+  completionStep: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    fontSize: 12,
+    padding: '6px 0',
+    borderBottom: '1px solid var(--border)',
+  },
+  completionMsg: {
+    fontSize: 11,
+    color: 'var(--muted)',
+    letterSpacing: '0.04em',
+    marginTop: 8,
+  },
+
+  // Error
+  errorBox: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: '100%',
+    color: 'var(--red)',
+    fontSize: 14,
+    padding: 40,
+  },
+};
+
+/* ─────────────────────────────────────────────
+   MOUNT
+   ───────────────────────────────────────────── */
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<ExercisePlayer />);
+</script>
+</head>
+<body>
+<div id="root"></div>
+</body>
+</html>

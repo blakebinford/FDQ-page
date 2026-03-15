@@ -1,4 +1,5 @@
 import io
+import json
 import stripe
 import logging
 from django.conf import settings
@@ -18,7 +19,11 @@ from reportlab.lib.pagesizes import letter, landscape
 from reportlab.lib.units import inch
 from reportlab.pdfgen import canvas
 
-from .models import Tier, Module, Lesson, Quiz, Question, Enrollment, LessonProgress, QuizAttempt, Certificate
+from .models import (
+    Tier, Module, Lesson, Quiz, Question, Enrollment,
+    LessonProgress, QuizAttempt, Certificate,
+    InteractiveExercise, ExerciseAttempt,
+)
 from applications.models import Application
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -578,7 +583,7 @@ def lesson_view(request, tier_slug, lesson_order):
         user=request.user, lesson__in=module_lessons
     ).count()
 
-    return render(request, 'lms/lesson.html', {
+    context = {
         'tier': tier,
         'lesson': lesson,
         'lesson_number': lesson_order,
@@ -590,6 +595,100 @@ def lesson_view(request, tier_slug, lesson_order):
         'next_number': _get_lesson_number(tier, next_lesson) if next_lesson else None,
         'module_total': len(module_lessons),
         'module_completed': module_completed,
+    }
+
+    # Interactive lessons get their own template
+    if lesson.content_type == 'interactive':
+        try:
+            exercise = lesson.exercise
+        except InteractiveExercise.DoesNotExist:
+            exercise = None
+        context['exercise'] = exercise
+        context['exercise_config_json'] = json.dumps(exercise.config) if exercise else '{}'
+        return render(request, 'lms/lesson_interactive.html', context)
+
+    return render(request, 'lms/lesson.html', context)
+
+
+@login_required
+def exercise_preview(request, tier_slug, lesson_order):
+    """Render exercise in isolation for admin QA — no lesson chrome."""
+    tier = get_object_or_404(Tier, slug=tier_slug)
+    all_lessons = _get_tier_lessons(tier)
+    idx = lesson_order - 1
+    if idx < 0 or idx >= len(all_lessons):
+        return redirect('lms:learn', tier_slug=tier.slug)
+    lesson = all_lessons[idx]
+
+    try:
+        exercise = lesson.exercise
+    except InteractiveExercise.DoesNotExist:
+        return redirect('lms:lesson', tier_slug=tier.slug, lesson_order=lesson_order)
+
+    return render(request, 'lms/exercise_preview.html', {
+        'tier': tier,
+        'lesson': lesson,
+        'lesson_number': lesson_order,
+        'exercise': exercise,
+        'exercise_config_json': json.dumps(exercise.config),
+    })
+
+
+@login_required
+@require_POST
+def submit_exercise_attempt(request, tier_slug, lesson_order):
+    """Accept JSON submission from the interactive exercise engine."""
+    tier = get_object_or_404(Tier, slug=tier_slug)
+
+    if not Enrollment.objects.filter(user=request.user, tier=tier, is_active=True).exists():
+        return JsonResponse({'error': 'Not enrolled'}, status=403)
+
+    all_lessons = _get_tier_lessons(tier)
+    idx = lesson_order - 1
+    if idx < 0 or idx >= len(all_lessons):
+        return JsonResponse({'error': 'Invalid lesson'}, status=404)
+    lesson = all_lessons[idx]
+
+    try:
+        exercise = lesson.exercise
+    except InteractiveExercise.DoesNotExist:
+        return JsonResponse({'error': 'No exercise for this lesson'}, status=404)
+
+    try:
+        data = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'error': 'Invalid JSON'}, status=400)
+
+    step = data.get('step', 1)
+    score = data.get('score', 0)
+    passed = data.get('passed', False)
+    response_data = data.get('response_data', {})
+
+    prev_attempts = ExerciseAttempt.objects.filter(
+        user=request.user, exercise=exercise
+    ).count()
+
+    attempt = ExerciseAttempt.objects.create(
+        user=request.user,
+        exercise=exercise,
+        step=step,
+        score=score,
+        passed=passed,
+        attempt_number=prev_attempts + 1,
+        response_data=response_data,
+    )
+
+    # If passed on final step, mark the lesson complete
+    if passed:
+        total_steps = exercise.config.get('total_steps', 1) if isinstance(exercise.config, dict) else 1
+        if step >= total_steps:
+            LessonProgress.objects.get_or_create(user=request.user, lesson=lesson)
+
+    return JsonResponse({
+        'success': True,
+        'passed': passed,
+        'score': score,
+        'attempt_number': attempt.attempt_number,
     })
 
 

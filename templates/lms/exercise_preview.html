@@ -1,0 +1,30 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Preview: {{ lesson.title }} | FDQ</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700;900&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body, #exercise-root { height: 100%; }
+    body { background: #0e0f0d; overflow: hidden; }
+  </style>
+</head>
+<body>
+
+<div id="exercise-root"></div>
+
+<script>
+  window.EXERCISE_CONFIG = {{ exercise_config_json|safe }};
+  window.EXERCISE_TYPE = "{{ exercise.exercise_type|default:'' }}";
+  window.CSRF_TOKEN = "{{ csrf_token }}";
+  window.SUBMIT_URL = "{% url 'lms:exercise_submit' tier.slug lesson_number %}";
+  window.LESSON_NUMBER = {{ lesson_number }};
+  window.TIER_SLUG = "{{ tier.slug }}";
+</script>
+<script src="{% static 'exercises/bundle.js' %}"></script>
+
+</body>
+</html>

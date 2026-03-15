@@ -23,7 +23,43 @@ class Command(BaseCommand):
                 'is_active': True,
             },
         )
-        self.stdout.write(f'Tier: {"created" if tier_created else "found"} — {tier.name}')
+        self.stdout.write(f'Tier 1: {"created" if tier_created else "found"} — {tier.name}')
+
+        # ── TIER 2 ──
+        tier2, tier2_created = Tier.objects.get_or_create(
+            slug='implementer',
+            defaults={
+                'name': 'Implementer',
+                'description': 'Field quality deployment for QC professionals and operations leads.',
+                'price_cents': 75000,
+                'stripe_price_id': 'price_test_placeholder_t2',
+                'order': 2,
+                'prerequisite': tier,
+                'is_active': True,
+            },
+        )
+        if not tier2_created and tier2.prerequisite != tier:
+            tier2.prerequisite = tier
+            tier2.save()
+        self.stdout.write(f'Tier 2: {"created" if tier2_created else "found"} — {tier2.name}')
+
+        # ── TIER 3 ──
+        tier3, tier3_created = Tier.objects.get_or_create(
+            slug='director',
+            defaults={
+                'name': 'Director',
+                'description': 'Quality program design and leadership for senior quality professionals.',
+                'price_cents': 100000,
+                'stripe_price_id': 'price_test_placeholder_t3',
+                'order': 3,
+                'prerequisite': tier2,
+                'is_active': True,
+            },
+        )
+        if not tier3_created and tier3.prerequisite != tier2:
+            tier3.prerequisite = tier2
+            tier3.save()
+        self.stdout.write(f'Tier 3: {"created" if tier3_created else "found"} — {tier3.name}')
 
         # ── MODULE 1 ──
         mod1, _ = Module.objects.get_or_create(
@@ -397,7 +433,9 @@ class Command(BaseCommand):
 
         self.stdout.write('')
         self.stdout.write(self.style.SUCCESS('── Summary ──'))
-        self.stdout.write(f'Tier: {tier.name} ({"created" if tier_created else "already existed"})')
+        self.stdout.write(f'Tier 1: {tier.name}')
+        self.stdout.write(f'Tier 2: {tier2.name} (prerequisite: {tier2.prerequisite.name})')
+        self.stdout.write(f'Tier 3: {tier3.name} (prerequisite: {tier3.prerequisite.name})')
         self.stdout.write(f'Modules: {module_count}')
         self.stdout.write(f'Lessons: {lesson_count}')
         self.stdout.write(f'Questions: {question_count}')

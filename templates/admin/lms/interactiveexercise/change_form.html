@@ -1,0 +1,69 @@
+{% extends "admin/change_form.html" %}
+{% load i18n %}
+
+{% block after_related_objects %}
+  {{ block.super }}
+  {% if original %}
+  <div class="module" style="margin-top: 15px;">
+    <h2>Actions</h2>
+    <div style="padding: 10px 15px; display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+      {% if preview_url %}
+      <a href="{{ preview_url }}" target="_blank"
+         style="background:#417690; color:#fff; border:none; padding:8px 20px;
+                cursor:pointer; font-weight:600; border-radius:3px;
+                text-decoration:none; font-size:13px; display:inline-block;">
+        Preview Exercise &rarr;
+      </a>
+      <span style="color:#999; font-size:12px;">Opens in a new tab without lesson chrome</span>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="module" style="margin-top: 15px;">
+    <h2>Config JSON (read-only)</h2>
+    <div style="padding: 10px 15px;">
+      <details>
+        <summary style="cursor:pointer; color:#417690; font-weight:600; font-size:13px;">
+          Show assembled config JSON
+        </summary>
+        <pre style="background:#1a1a1a; color:#ccc; padding:12px; margin-top:8px;
+                    font-size:12px; max-height:400px; overflow:auto;
+                    border:1px solid #333; border-radius:3px;
+                    white-space:pre-wrap; word-break:break-word;">{{ config_json }}</pre>
+      </details>
+    </div>
+  </div>
+  {% endif %}
+{% endblock %}
+
+{% block extrahead %}
+  {{ block.super }}
+  <style>
+    /* Make JSON textareas taller and monospaced */
+    .field-cfg_steps textarea,
+    .field-cfg_scenario textarea,
+    .field-cfg_reference_docs textarea,
+    .field-cfg_answers textarea {
+      font-family: 'Courier New', monospace !important;
+      font-size: 12px !important;
+      line-height: 1.5 !important;
+      background: #f8f8f0 !important;
+      tab-size: 2;
+    }
+
+    /* Better checkbox layout for ref docs */
+    .field-cfg_ref_docs ul {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .field-cfg_ref_docs ul li {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+  </style>
+{% endblock %}

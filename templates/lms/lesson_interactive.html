@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ lesson.title }} | Field-Driven Quality{% endblock %}
+
+{% block extra_styles %}
+#exercise-root {
+  width: 100%;
+  min-height: calc(100vh - 60px);
+}
+{% endblock %}
+
+{% block content %}
+<div id="exercise-root"></div>
+
+<script>
+  window.EXERCISE_CONFIG = {{ exercise_config_json|safe }};
+  window.EXERCISE_TYPE = "{{ exercise.exercise_type|default:'' }}";
+  window.CSRF_TOKEN = "{{ csrf_token }}";
+  window.SUBMIT_URL = "{% url 'lms:exercise_submit' tier.slug lesson_number %}";
+  window.LESSON_NUMBER = {{ lesson_number }};
+  window.TIER_SLUG = "{{ tier.slug }}";
+</script>
+<script src="{% static 'exercises/bundle.js' %}"></script>
+{% endblock %}

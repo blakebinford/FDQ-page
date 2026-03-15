@@ -1,0 +1,946 @@
+{
+  "exercise_type": "torque_form",
+  "title": "Bolted Flange Torque Log",
+  "subtitle": "FDQ Tier 2 · Practical Exercise",
+  "project": "Mustang Creek Compressor Station",
+  "system": "Discharge Piping — Train A",
+  "spec": "Q-SPEC-2200 Rev. 3",
+  "procedure": "ASME B16.5 Class 600 / TQ-44A",
+  "service": "Natural Gas — Sour Service",
+  "passing_score": 80,
+  "total_steps": 2,
+
+  "steps": [
+    {
+      "id": "pre_assembly_form",
+      "label": "Step 1 of 2 — Pre-Assembly Form",
+      "description": "Fill MEP-QC-FORM-044A from spec, MTRs & drawing",
+      "hidden_tabs": ["joint_forms"],
+      "scored_joint": "FLG-001",
+      "scored_fields": [
+        {
+          "key": "bolt_size",
+          "label": "Bolt Size / Length",
+          "hint": "Format: diameter × length — match exactly as listed on the MTR (e.g. ½\" × 3.25\")",
+          "tooltip": "Find bolt size for this NPS and class on the MTR. Record diameter × length.",
+          "section": "bolting"
+        },
+        {
+          "key": "bolt_qty",
+          "label": "Bolt Quantity",
+          "hint": "Whole number — count from BOM or MTR for this flange size and class",
+          "tooltip": "Numeric count only. Find the quantity for this specific NPS and class.",
+          "section": "bolting"
+        },
+        {
+          "key": "bolt_mat",
+          "label": "Bolt Material / Spec",
+          "hint": "Format: ASTM AXXXX Grade XX — match the Specification and Grade fields on the MTR exactly",
+          "tooltip": "Copy the Specification and Grade from the bolt MTR verbatim.",
+          "section": "bolting"
+        },
+        {
+          "key": "bolt_heat",
+          "label": "Bolt Heat No.",
+          "hint": "Format: HT-XXXX — copy exactly as printed in the Heat No. field on the MTR",
+          "tooltip": "Located in the header block of the bolt MTR. Do not guess or abbreviate.",
+          "section": "bolting"
+        },
+        {
+          "key": "bolt_cert",
+          "label": "Bolt Cert No. (MTR)",
+          "hint": "Format: MTR-XXXX — copy the Cert No. from the top of the bolt MTR exactly",
+          "tooltip": "This is the document number at the top of the Mill Test Report, not the heat number.",
+          "section": "bolting"
+        },
+        {
+          "key": "nut_mat",
+          "label": "Nut Material / Spec",
+          "hint": "Format: ASTM AXXXX Grade XX — match Specification and Grade on the nut MTR exactly",
+          "tooltip": "Copy from the nut MTR, not the bolt MTR — they are separate documents.",
+          "section": "bolting"
+        },
+        {
+          "key": "nut_cert",
+          "label": "Nut Cert No. (MTR)",
+          "hint": "Format: MTR-XXXX — copy the Cert No. from the nut MTR exactly",
+          "tooltip": "Nut MTR is a separate cert from the bolt MTR. Both are required.",
+          "section": "bolting"
+        },
+        {
+          "key": "gasket_type",
+          "label": "Gasket Type",
+          "hint": "Describe winding material and filler — match the gasket cert Product/Materials fields",
+          "tooltip": "Include both the winding strip material and the filler material as stated on the cert.",
+          "section": "gasket"
+        },
+        {
+          "key": "gasket_std",
+          "label": "Gasket Standard",
+          "hint": "Format: ASME BXX.XX — the manufacturing standard the gasket is certified to",
+          "tooltip": "Found on the gasket cert. This is the standard that governs the gasket construction.",
+          "section": "gasket"
+        },
+        {
+          "key": "gasket_lot",
+          "label": "Gasket Lot No.",
+          "hint": "Format: XX-XXXX — copy the Lot No. exactly from the gasket certificate",
+          "tooltip": "This is the traceability number for this batch of gaskets. Exact match required.",
+          "section": "gasket"
+        },
+        {
+          "key": "flange_mat",
+          "label": "Flange Material / Spec",
+          "hint": "Format: ASTM AXXXX + designation (e.g. normalized suffix) — from the flange MTR Grade field",
+          "tooltip": "Use the Spec field AND Grade field from the flange MTR. There are two flange heats — verify which covers this joint's size.",
+          "section": "flange"
+        },
+        {
+          "key": "flange_cert",
+          "label": "Flange Cert No. (MTR)",
+          "hint": "Format: MTR-XXXX — copy exactly from the flange MTR cert header. Note: cert may differ by flange size.",
+          "tooltip": "There are two flange MTRs (Heat A and Heat B). Check which sizes each covers before selecting.",
+          "section": "flange"
+        },
+        {
+          "key": "lubricant",
+          "label": "Lubricant",
+          "hint": "Brand name and product designation — specified in the company spec §7.1",
+          "tooltip": "The approved lubricant is named in the specification. Record the brand and product name.",
+          "section": "install"
+        },
+        {
+          "key": "pattern",
+          "label": "Tightening Pattern",
+          "hint": "Single word or short phrase — the tightening sequence method required by the spec §8.3",
+          "tooltip": "Named explicitly in the spec. This is the bolt tightening sequence method, not a torque value.",
+          "section": "install"
+        },
+        {
+          "key": "passes",
+          "label": "Number of Passes",
+          "hint": "Whole number — find in spec Table 1 for this NPS. Note: smaller sizes may differ from larger.",
+          "tooltip": "Look up this specific NPS in Table 1. The pass count is in the Min. Passes column.",
+          "section": "install"
+        },
+        {
+          "key": "target",
+          "label": "Target Torque (ft-lb)",
+          "hint": "Whole number, ft-lb — look up this NPS and class in spec Table 1, Final Torque column",
+          "tooltip": "Use the Final Torque column in Table 1. Match NPS exactly — do not interpolate.",
+          "section": "install"
+        },
+        {
+          "key": "wrench_id",
+          "label": "Torque Wrench ID",
+          "hint": "Format: TW-XXX — copy the Instrument ID exactly from the calibration certificate",
+          "tooltip": "Found in the header of the calibration certificate. This ID links the work record to the instrument.",
+          "section": "equip"
+        },
+        {
+          "key": "wrench_cal_due",
+          "label": "Wrench Cal. Due Date",
+          "hint": "Format: MM/DD/YYYY — copy the Calibration Due date from the cal cert exactly",
+          "tooltip": "If this date has passed, the wrench cannot be used. Find it in the cal cert header.",
+          "section": "equip"
+        }
+      ],
+      "sections": [
+        {
+          "id": "bolting",
+          "label": "Bolt & Nut Material Traceability",
+          "color": "#d4832a"
+        },
+        {
+          "id": "gasket",
+          "label": "Gasket Material Traceability",
+          "color": "#8ab4c4"
+        },
+        {
+          "id": "flange",
+          "label": "Flange Material Traceability",
+          "color": "#a0c8a0"
+        },
+        {
+          "id": "install",
+          "label": "Installation Parameters",
+          "color": "#d4832a"
+        },
+        {
+          "id": "equip",
+          "label": "Inspection Equipment",
+          "color": "#c4a882"
+        }
+      ],
+      "answers": {
+        "FLG-001": {
+          "bolt_size": "1\" × 7.25\"",
+          "bolt_qty": "16",
+          "bolt_mat": "ASTM A193 B7",
+          "bolt_heat": "HT-9042",
+          "bolt_cert": "MTR-8801",
+          "nut_mat": "ASTM A194 2H",
+          "nut_cert": "MTR-8802",
+          "gasket_type": "Spiral Wound 316SS/Flex Graphite",
+          "gasket_std": "ASME B16.20",
+          "gasket_lot": "GT-2241",
+          "flange_mat": "ASTM A105N",
+          "flange_cert": "MTR-6612",
+          "lubricant": "Molykote G-1000",
+          "pattern": "Cross",
+          "passes": "3",
+          "target": "185",
+          "wrench_id": "TW-104",
+          "wrench_cal_due": "06/01/2026"
+        },
+        "FLG-002": {
+          "bolt_size": "1\" × 7.25\"",
+          "bolt_qty": "16",
+          "bolt_mat": "ASTM A193 B7",
+          "bolt_heat": "HT-9042",
+          "bolt_cert": "MTR-8801",
+          "nut_mat": "ASTM A194 2H",
+          "nut_cert": "MTR-8802",
+          "gasket_type": "Spiral Wound 316SS/Flex Graphite",
+          "gasket_std": "ASME B16.20",
+          "gasket_lot": "GT-2241",
+          "flange_mat": "ASTM A105N",
+          "flange_cert": "MTR-6612",
+          "lubricant": "Molykote G-1000",
+          "pattern": "Cross",
+          "passes": "3",
+          "target": "185",
+          "wrench_id": "TW-104",
+          "wrench_cal_due": "06/01/2026"
+        },
+        "FLG-003": {
+          "bolt_size": "7/8\" × 6.25\"",
+          "bolt_qty": "16",
+          "bolt_mat": "ASTM A193 B7",
+          "bolt_heat": "HT-9042",
+          "bolt_cert": "MTR-8801",
+          "nut_mat": "ASTM A194 2H",
+          "nut_cert": "MTR-8802",
+          "gasket_type": "Spiral Wound 316SS/Flex Graphite",
+          "gasket_std": "ASME B16.20",
+          "gasket_lot": "GT-2241",
+          "flange_mat": "ASTM A105N",
+          "flange_cert": "MTR-6612",
+          "lubricant": "Molykote G-1000",
+          "pattern": "Cross",
+          "passes": "3",
+          "target": "120",
+          "wrench_id": "TW-104",
+          "wrench_cal_due": "06/01/2026"
+        },
+        "FLG-004": {
+          "bolt_size": "3/4\" × 5.75\"",
+          "bolt_qty": "12",
+          "bolt_mat": "ASTM A193 B7",
+          "bolt_heat": "HT-9042",
+          "bolt_cert": "MTR-8801",
+          "nut_mat": "ASTM A194 2H",
+          "nut_cert": "MTR-8802",
+          "gasket_type": "Spiral Wound 316SS/Flex Graphite",
+          "gasket_std": "ASME B16.20",
+          "gasket_lot": "GT-2241",
+          "flange_mat": "ASTM A105N",
+          "flange_cert": "MTR-6613",
+          "lubricant": "Molykote G-1000",
+          "pattern": "Cross",
+          "passes": "3",
+          "target": "120",
+          "wrench_id": "TW-104",
+          "wrench_cal_due": "06/01/2026"
+        },
+        "FLG-005": {
+          "bolt_size": "5/8\" × 4.50\"",
+          "bolt_qty": "8",
+          "bolt_mat": "ASTM A193 B7",
+          "bolt_heat": "HT-9042",
+          "bolt_cert": "MTR-8801",
+          "nut_mat": "ASTM A194 2H",
+          "nut_cert": "MTR-8802",
+          "gasket_type": "Spiral Wound 316SS/Flex Graphite",
+          "gasket_std": "ASME B16.20",
+          "gasket_lot": "GT-2241",
+          "flange_mat": "ASTM A105N",
+          "flange_cert": "MTR-6613",
+          "lubricant": "Molykote G-1000",
+          "pattern": "Cross",
+          "passes": "2",
+          "target": "65",
+          "wrench_id": "TW-104",
+          "wrench_cal_due": "06/01/2026"
+        }
+      },
+      "flexible_matchers": {
+        "lubricant": {
+          "type": "contains_any",
+          "values": ["G-1000", "G1000", "MOLYKOTE"]
+        },
+        "gasket_type": {
+          "type": "contains_all_any",
+          "groups": [["SPIRAL"], ["316", "SWG"]]
+        },
+        "gasket_std": {
+          "type": "contains_any",
+          "values": ["B16.20"]
+        },
+        "flange_mat": {
+          "type": "contains_any",
+          "values": ["A105"]
+        },
+        "bolt_mat": {
+          "type": "contains_all",
+          "values": ["A193", "B7"]
+        },
+        "nut_mat": {
+          "type": "contains_all",
+          "values": ["A194", "2H"]
+        }
+      }
+    },
+    {
+      "id": "torque_log",
+      "label": "Step 2 of 2 — Torque Log",
+      "description": "Record achieved torque values after assembly",
+      "hidden_tabs": [],
+      "columns": [
+        {
+          "key": "achieved",
+          "label": "Achieved\nTorque (ft-lb)",
+          "hint": "e.g. 185"
+        },
+        {
+          "key": "pattern",
+          "label": "Bolt\nPattern",
+          "hint": "e.g. Cross"
+        },
+        {
+          "key": "passes",
+          "label": "# of\nPasses",
+          "hint": "e.g. 3"
+        },
+        {
+          "key": "gasket",
+          "label": "Gasket\nLot #",
+          "hint": "e.g. GT-2241"
+        },
+        {
+          "key": "initials",
+          "label": "Inspector\nInitials",
+          "hint": "J. REED"
+        },
+        {
+          "key": "result",
+          "label": "Result\nACC/REJ",
+          "hint": "ACC or REJ"
+        }
+      ],
+      "answers": {
+        "FLG-001": {
+          "achieved": "185",
+          "pattern": "Cross",
+          "passes": "3",
+          "gasket": "GT-2241",
+          "initials": "J. REED",
+          "result": "ACC"
+        },
+        "FLG-002": {
+          "achieved": "185",
+          "pattern": "Cross",
+          "passes": "3",
+          "gasket": "GT-2241",
+          "initials": "J. REED",
+          "result": "ACC"
+        },
+        "FLG-003": {
+          "achieved": "120",
+          "pattern": "Cross",
+          "passes": "3",
+          "gasket": "GT-2241",
+          "initials": "J. REED",
+          "result": "ACC"
+        },
+        "FLG-004": {
+          "achieved": "120",
+          "pattern": "Cross",
+          "passes": "3",
+          "gasket": "GT-2241",
+          "initials": "J. REED",
+          "result": "ACC"
+        },
+        "FLG-005": {
+          "achieved": "65",
+          "pattern": "Cross",
+          "passes": "2",
+          "gasket": "GT-2241",
+          "initials": "J. REED",
+          "result": "ACC"
+        }
+      }
+    }
+  ],
+
+  "scenario": {
+    "joints": [
+      {
+        "id": "FLG-001",
+        "location": "Suction Nozzle N1",
+        "size": "6\"",
+        "target": 185,
+        "pattern": "Cross",
+        "passes": 3
+      },
+      {
+        "id": "FLG-002",
+        "location": "Discharge Nozzle N2",
+        "size": "6\"",
+        "target": 185,
+        "pattern": "Cross",
+        "passes": 3
+      },
+      {
+        "id": "FLG-003",
+        "location": "Recycle Line Tie-In",
+        "size": "4\"",
+        "target": 120,
+        "pattern": "Cross",
+        "passes": 3
+      },
+      {
+        "id": "FLG-004",
+        "location": "PSV-101 Inlet",
+        "size": "3\"",
+        "target": 120,
+        "pattern": "Cross",
+        "passes": 3
+      },
+      {
+        "id": "FLG-005",
+        "location": "Drain Connection",
+        "size": "1.5\"",
+        "target": 65,
+        "pattern": "Cross",
+        "passes": 2
+      }
+    ],
+    "gasketLot": "GT-2241",
+    "inspector": "J. Reed"
+  },
+
+  "reference_docs": {
+    "iso_drawing": {
+      "bom_rows": [
+        {
+          "item": "1",
+          "qty": "2",
+          "description": "6\" 600# WN Flange RF, ASME B16.5",
+          "material": "ASTM A105N",
+          "certNo": "MTR-6612"
+        },
+        {
+          "item": "2",
+          "qty": "1",
+          "description": "4\" 600# WN Flange RF, ASME B16.5",
+          "material": "ASTM A105N",
+          "certNo": "MTR-6612"
+        },
+        {
+          "item": "3",
+          "qty": "1",
+          "description": "3\" 600# WN Flange RF, ASME B16.5",
+          "material": "ASTM A105N",
+          "certNo": "MTR-6613"
+        },
+        {
+          "item": "4",
+          "qty": "1",
+          "description": "1.5\" 600# WN Flange RF, ASME B16.5",
+          "material": "ASTM A105N",
+          "certNo": "MTR-6613"
+        },
+        {
+          "item": "5",
+          "qty": "5",
+          "description": "SWG 316SS/Flex Graphite, ASME B16.20",
+          "material": "316SS/Flex Graphite",
+          "certNo": "GT-2241"
+        },
+        {
+          "item": "6",
+          "qty": "32",
+          "description": "Stud Bolt 1\"×7.25\" (6\" 600#)",
+          "material": "ASTM A193 B7",
+          "certNo": "MTR-8801"
+        },
+        {
+          "item": "7",
+          "qty": "16",
+          "description": "Stud Bolt 7/8\"×6.25\" (4\" 600#)",
+          "material": "ASTM A193 B7",
+          "certNo": "MTR-8801"
+        },
+        {
+          "item": "8",
+          "qty": "12",
+          "description": "Stud Bolt 3/4\"×5.75\" (3\" 600#)",
+          "material": "ASTM A193 B7",
+          "certNo": "MTR-8801"
+        },
+        {
+          "item": "9",
+          "qty": "8",
+          "description": "Stud Bolt 5/8\"×4.50\" (1.5\" 600#)",
+          "material": "ASTM A193 B7",
+          "certNo": "MTR-8801"
+        },
+        {
+          "item": "10",
+          "qty": "64",
+          "description": "Heavy Hex Nut (all sizes)",
+          "material": "ASTM A194 2H",
+          "certNo": "MTR-8802"
+        }
+      ]
+    },
+    "torque_spec": [
+      {
+        "size": "6\"",
+        "boltQty": "16",
+        "boltSize": "1\" × 7.25\"",
+        "snug": "65",
+        "mid": "130",
+        "final": "185",
+        "passes": "3"
+      },
+      {
+        "size": "4\"",
+        "boltQty": "16",
+        "boltSize": "7/8\" × 6.25\"",
+        "snug": "40",
+        "mid": "80",
+        "final": "120",
+        "passes": "3"
+      },
+      {
+        "size": "3\"",
+        "boltQty": "12",
+        "boltSize": "3/4\" × 5.75\"",
+        "snug": "40",
+        "mid": "80",
+        "final": "120",
+        "passes": "3"
+      },
+      {
+        "size": "1.5\"",
+        "boltQty": "8",
+        "boltSize": "5/8\" × 4.50\"",
+        "snug": "20",
+        "mid": "45",
+        "final": "65",
+        "passes": "2"
+      }
+    ],
+    "mtrs": {
+      "bolts": {
+        "title": "MILL TEST REPORT — STUD BOLTS",
+        "certNo": "MTR-8801",
+        "manufacturer": "Lone Star Fastener Co., Houston TX 77042",
+        "spec": "ASTM A193 / A193M",
+        "grade": "Grade B7",
+        "heatNo": "HT-9042",
+        "poNo": "PO-44812",
+        "jobNo": "MCK-2026-001",
+        "product": "Fully Threaded Stud Bolt, Heavy Hex",
+        "sizes": [
+          "5/8\" dia × 4.50\" L (8 pcs)",
+          "3/4\" dia × 5.75\" L (12 pcs)",
+          "7/8\" dia × 6.25\" L (16 pcs)",
+          "1\" dia × 7.25\" L (32 pcs)"
+        ],
+        "heatTreatment": "Quench & Temper per ASTM A193 §S1",
+        "chemistry": [
+          ["Element", "C", "Mn", "P", "S", "Si", "Cr", "Mo", "Ni"],
+          ["Required", "0.37–0.49", "0.65–1.10", "≤0.035", "≤0.040", "0.15–0.35", "0.75–1.20", "0.15–0.25", "—"],
+          ["Actual", "0.41", "0.82", "0.018", "0.012", "0.24", "1.04", "0.21", "0.09"]
+        ],
+        "mechanical": [
+          ["Property", "Requirement", "Actual"],
+          ["Tensile Strength", "≥125 ksi (862 MPa)", "138 ksi"],
+          ["Yield Strength (0.2%)", "≥105 ksi (724 MPa)", "119 ksi"],
+          ["Elongation in 2\"", "≥16%", "21%"],
+          ["Reduction of Area", "≥50%", "63%"],
+          ["Hardness", "≤35 HRC", "28 HRC"]
+        ],
+        "certification": "We hereby certify that the material described herein has been manufactured, sampled, tested, and inspected in accordance with ASTM A193/A193M Grade B7 and that the results meet all the requirements of said specification.",
+        "certifiedBy": "R. Whitfield, QA Manager",
+        "certDate": "2025-10-14",
+        "sourNote": "Hardness confirmed ≤35 HRC per NACE MR0175 / ISO 15156 requirements for sour service."
+      },
+      "nuts": {
+        "title": "MILL TEST REPORT — HEAVY HEX NUTS",
+        "certNo": "MTR-8802",
+        "manufacturer": "Lone Star Fastener Co., Houston TX 77042",
+        "spec": "ASTM A194 / A194M",
+        "grade": "Grade 2H",
+        "heatNo": "HT-9043",
+        "poNo": "PO-44812",
+        "jobNo": "MCK-2026-001",
+        "product": "Heavy Hex Nut, per ASME B18.2.2",
+        "sizes": [
+          "5/8\"-11 UNC",
+          "3/4\"-10 UNC",
+          "7/8\"-9 UNC",
+          "1\"-8 UNC"
+        ],
+        "heatTreatment": "Quench & Temper",
+        "chemistry": [
+          ["Element", "C", "Mn", "P", "S"],
+          ["Required", "0.40–0.53", "0.57–0.90", "≤0.040", "≤0.050"],
+          ["Actual", "0.46", "0.74", "0.021", "0.018"]
+        ],
+        "mechanical": [
+          ["Property", "Requirement", "Actual"],
+          ["Proof Load Stress", "175 ksi", "182 ksi"],
+          ["Hardness", "C24–C36", "C29"]
+        ],
+        "certification": "We hereby certify that the material described herein conforms to ASTM A194/A194M Grade 2H. All chemical and mechanical test results meet specification requirements.",
+        "certifiedBy": "R. Whitfield, QA Manager",
+        "certDate": "2025-10-14",
+        "sourNote": null
+      },
+      "flangesA": {
+        "title": "MILL TEST REPORT — WELD NECK FLANGES (Heat A)",
+        "certNo": "MTR-6612",
+        "manufacturer": "Gulf Coast Forgings LLC, Beaumont TX 77703",
+        "spec": "ASTM A105 / A105M",
+        "grade": "Normalized (A105N)",
+        "heatNo": "HT-3821A",
+        "poNo": "PO-44789",
+        "jobNo": "MCK-2026-001",
+        "product": "Weld Neck Flange RF, ASME B16.5 Class 600",
+        "sizes": [
+          "4\" 600# WN RF (1 pc)",
+          "6\" 600# WN RF (2 pcs)"
+        ],
+        "heatTreatment": "Normalized at 1650°F, Air Cooled",
+        "chemistry": [
+          ["Element", "C", "Mn", "P", "S", "Si", "Cu", "Ni", "Cr", "Mo", "V"],
+          ["Required", "≤0.35", "0.60–1.05", "≤0.035", "≤0.040", "0.10–0.35", "≤0.40", "≤0.40", "≤0.30", "≤0.12", "≤0.08"],
+          ["Actual", "0.28", "0.88", "0.014", "0.009", "0.22", "0.06", "0.07", "0.08", "0.04", "0.02"]
+        ],
+        "mechanical": [
+          ["Property", "Requirement", "Actual"],
+          ["Tensile Strength", "≥70 ksi (485 MPa)", "78 ksi"],
+          ["Yield Strength (0.2%)", "≥36 ksi (250 MPa)", "52 ksi"],
+          ["Elongation in 2\"", "≥22%", "29%"],
+          ["Reduction of Area", "≥30%", "48%"],
+          ["Charpy Impact (−20°F)", "15 ft-lb avg", "22 ft-lb avg"]
+        ],
+        "certification": "We hereby certify that all material described herein was manufactured, heat treated, tested, and inspected in accordance with ASTM A105/A105M. All results conform to specification requirements.",
+        "certifiedBy": "D. Tanner, Metallurgical QA",
+        "certDate": "2025-09-22",
+        "sourNote": null
+      },
+      "flangesB": {
+        "title": "MILL TEST REPORT — WELD NECK FLANGES (Heat B)",
+        "certNo": "MTR-6613",
+        "manufacturer": "Gulf Coast Forgings LLC, Beaumont TX 77703",
+        "spec": "ASTM A105 / A105M",
+        "grade": "Normalized (A105N)",
+        "heatNo": "HT-3821B",
+        "poNo": "PO-44789",
+        "jobNo": "MCK-2026-001",
+        "product": "Weld Neck Flange RF, ASME B16.5 Class 600",
+        "sizes": [
+          "1.5\" 600# WN RF (1 pc)",
+          "3\" 600# WN RF (1 pc)"
+        ],
+        "heatTreatment": "Normalized at 1650°F, Air Cooled",
+        "chemistry": [
+          ["Element", "C", "Mn", "P", "S", "Si", "Cu", "Ni", "Cr", "Mo", "V"],
+          ["Required", "≤0.35", "0.60–1.05", "≤0.035", "≤0.040", "0.10–0.35", "≤0.40", "≤0.40", "≤0.30", "≤0.12", "≤0.08"],
+          ["Actual", "0.26", "0.91", "0.016", "0.011", "0.19", "0.08", "0.05", "0.07", "0.03", "0.01"]
+        ],
+        "mechanical": [
+          ["Property", "Requirement", "Actual"],
+          ["Tensile Strength", "≥70 ksi (485 MPa)", "74 ksi"],
+          ["Yield Strength (0.2%)", "≥36 ksi (250 MPa)", "49 ksi"],
+          ["Elongation in 2\"", "≥22%", "31%"],
+          ["Reduction of Area", "≥30%", "51%"],
+          ["Charpy Impact (−20°F)", "15 ft-lb avg", "19 ft-lb avg"]
+        ],
+        "certification": "We hereby certify that all material described herein was manufactured, heat treated, tested, and inspected in accordance with ASTM A105/A105M. All results conform to specification requirements.",
+        "certifiedBy": "D. Tanner, Metallurgical QA",
+        "certDate": "2025-09-22",
+        "sourNote": null
+      },
+      "gaskets": {
+        "title": "CERTIFICATE OF CONFORMANCE — SPIRAL WOUND GASKETS",
+        "certNo": "GT-2241",
+        "manufacturer": "Flexseal Gasket Industries, Inc., Deer Park TX 77536",
+        "spec": "ASME B16.20",
+        "grade": "Spiral Wound — 316SS / Flexible Graphite",
+        "heatNo": "N/A",
+        "lotNo": "GT-2241",
+        "poNo": "PO-44801",
+        "jobNo": "MCK-2026-001",
+        "product": "Spiral Wound Gasket with Centering Ring & Inner Retaining Ring",
+        "sizes": [
+          "1.5\" 600# RF SWG (4 pcs)",
+          "3\" 600# RF SWG (6 pcs)",
+          "4\" 600# RF SWG (6 pcs)",
+          "6\" 600# RF SWG (6 pcs)"
+        ],
+        "heatTreatment": "N/A",
+        "chemistry": [
+          ["Component", "Specification", "Material"],
+          ["Winding Strip", "316 Stainless Steel", "UNS S31600"],
+          ["Filler", "Flexible Graphite", "ASTM C782 Grade"],
+          ["Outer Centering Ring", "Carbon Steel", "ASTM A36"],
+          ["Inner Retaining Ring", "Carbon Steel", "ASTM A36"]
+        ],
+        "mechanical": [
+          ["Property", "Value"],
+          ["Max. Operating Temp.", "500°F (260°C)"],
+          ["Max. Operating Pressure", "2220 psi (Class 600 rating at 100°F)"],
+          ["Seating Stress", "10,000 psi min."],
+          ["Density (filler)", "≥1.0 g/cm³"]
+        ],
+        "certification": "Flexseal Gasket Industries certifies that the gaskets in Lot GT-2241 were manufactured and tested in accordance with ASME B16.20. Winding material, filler material, and ring dimensions comply with specification. These gaskets are suitable for sour gas and natural gas service per NACE MR0175.",
+        "certifiedBy": "M. Santos, Quality Director",
+        "certDate": "2025-11-03",
+        "sourNote": "Confirmed suitable for sour service (H₂S) per NACE MR0175 / ISO 15156."
+      }
+    },
+    "cal_cert": {
+      "instrumentId": "TW-104",
+      "description": "Click-Type Torque Wrench, 3/4\" Drive",
+      "manufacturer": "Snap-on Industrial",
+      "model": "TECH3FR250",
+      "serialNo": "SN-TW-104-2019",
+      "range": "50 – 500 ft-lb",
+      "resolution": "1 ft-lb",
+      "accuracy": "±3% of reading (clockwise)",
+      "calProcedure": "MEP-QC-PROC-012 Rev. 4 / ASME B107.300",
+      "calStandard": "NIST-Traceable Torque Standard, Cal Lab Ref. STD-TQ-009",
+      "calDate": "12/01/2025",
+      "calDue": "06/01/2026",
+      "calBy": "Precision Cal Services LLC, Pasadena TX 77504",
+      "calTech": "A. Nguyen, Lead Calibration Technician",
+      "certNo": "PCAL-2025-10482",
+      "results": [
+        ["25% (125 ft-lb)", "125 ft-lb", "123.8 ft-lb", "-0.96%", "PASS"],
+        ["50% (250 ft-lb)", "250 ft-lb", "248.1 ft-lb", "-0.76%", "PASS"],
+        ["75% (375 ft-lb)", "375 ft-lb", "373.2 ft-lb", "-0.48%", "PASS"],
+        ["100% (500 ft-lb)", "500 ft-lb", "497.6 ft-lb", "-0.48%", "PASS"]
+      ],
+      "status": "CALIBRATED — IN TOLERANCE",
+      "nextCalNote": "Return for calibration by 06/01/2026. Do not use after this date without recalibration. Tag wrench with calibration label #PCL-104."
+    },
+    "joint_forms": {
+      "FLG-001": {
+        "id": "FLG-001",
+        "location": "Suction Nozzle N1",
+        "size": "6\"",
+        "cls": "600#",
+        "boltSize": "1\" dia × 7.25\" L",
+        "boltQty": "16",
+        "boltMat": "ASTM A193 B7",
+        "boltHeat": "HT-9042",
+        "boltCert": "MTR-8801",
+        "nutMat": "ASTM A194 2H",
+        "nutHeat": "HT-9043",
+        "nutCert": "MTR-8802",
+        "gasketType": "Spiral Wound 316SS/Flex Graphite",
+        "gasketStd": "ASME B16.20",
+        "gasketLot": "GT-2241",
+        "flangeMat": "ASTM A105N",
+        "flangeHeat": "HT-3821A",
+        "flangeCert": "MTR-6612",
+        "lubricant": "Molykote® G-1000 PTFE Thread Paste",
+        "targetTorque": "185",
+        "achievedTorque": "185",
+        "snugTorque": "65",
+        "midTorque": "130",
+        "finalTorque": "185",
+        "pattern": "Cross (Star)",
+        "passes": "3",
+        "alignmentCheck": "PASS",
+        "gasketCondition": "Good — no scoring or damage",
+        "boltEngagement": "Full thread engagement verified all 16 bolts",
+        "surfaceFinish": "125–250 AARH verified both flanges",
+        "date": "03/14/2026",
+        "shift": "Day",
+        "wrenchId": "TW-104",
+        "wrenchCalDue": "06/01/2026",
+        "inspector": "J. Reed",
+        "initials": "J. REED",
+        "result": "ACC",
+        "remarks": "All bolts torqued per TQ-44A. Cross pattern maintained. No leaks. Gasket seated properly."
+      },
+      "FLG-002": {
+        "id": "FLG-002",
+        "location": "Discharge Nozzle N2",
+        "size": "6\"",
+        "cls": "600#",
+        "boltSize": "1\" dia × 7.25\" L",
+        "boltQty": "16",
+        "boltMat": "ASTM A193 B7",
+        "boltHeat": "HT-9042",
+        "boltCert": "MTR-8801",
+        "nutMat": "ASTM A194 2H",
+        "nutHeat": "HT-9043",
+        "nutCert": "MTR-8802",
+        "gasketType": "Spiral Wound 316SS/Flex Graphite",
+        "gasketStd": "ASME B16.20",
+        "gasketLot": "GT-2241",
+        "flangeMat": "ASTM A105N",
+        "flangeHeat": "HT-3821A",
+        "flangeCert": "MTR-6612",
+        "lubricant": "Molykote® G-1000 PTFE Thread Paste",
+        "targetTorque": "185",
+        "achievedTorque": "185",
+        "snugTorque": "65",
+        "midTorque": "130",
+        "finalTorque": "185",
+        "pattern": "Cross (Star)",
+        "passes": "3",
+        "alignmentCheck": "PASS",
+        "gasketCondition": "Good — no scoring or damage",
+        "boltEngagement": "Full thread engagement verified all 16 bolts",
+        "surfaceFinish": "125–250 AARH verified both flanges",
+        "date": "03/14/2026",
+        "shift": "Day",
+        "wrenchId": "TW-104",
+        "wrenchCalDue": "06/01/2026",
+        "inspector": "J. Reed",
+        "initials": "J. REED",
+        "result": "ACC",
+        "remarks": "Discharge nozzle. All bolts torqued per TQ-44A. Verified flange face parallelism prior to bolt-up."
+      },
+      "FLG-003": {
+        "id": "FLG-003",
+        "location": "Recycle Line Tie-In",
+        "size": "4\"",
+        "cls": "600#",
+        "boltSize": "7/8\" dia × 6.25\" L",
+        "boltQty": "16",
+        "boltMat": "ASTM A193 B7",
+        "boltHeat": "HT-9042",
+        "boltCert": "MTR-8801",
+        "nutMat": "ASTM A194 2H",
+        "nutHeat": "HT-9043",
+        "nutCert": "MTR-8802",
+        "gasketType": "Spiral Wound 316SS/Flex Graphite",
+        "gasketStd": "ASME B16.20",
+        "gasketLot": "GT-2241",
+        "flangeMat": "ASTM A105N",
+        "flangeHeat": "HT-3821A",
+        "flangeCert": "MTR-6612",
+        "lubricant": "Molykote® G-1000 PTFE Thread Paste",
+        "targetTorque": "120",
+        "achievedTorque": "120",
+        "snugTorque": "40",
+        "midTorque": "80",
+        "finalTorque": "120",
+        "pattern": "Cross (Star)",
+        "passes": "3",
+        "alignmentCheck": "PASS",
+        "gasketCondition": "Good — no scoring or damage",
+        "boltEngagement": "Full thread engagement verified all 16 bolts",
+        "surfaceFinish": "125–250 AARH verified both flanges",
+        "date": "03/14/2026",
+        "shift": "Day",
+        "wrenchId": "TW-104",
+        "wrenchCalDue": "06/01/2026",
+        "inspector": "J. Reed",
+        "initials": "J. REED",
+        "result": "ACC",
+        "remarks": "Recycle tie-in. Verified spool alignment prior to bolt-up. No springback observed."
+      },
+      "FLG-004": {
+        "id": "FLG-004",
+        "location": "PSV-101 Inlet",
+        "size": "3\"",
+        "cls": "600#",
+        "boltSize": "3/4\" dia × 5.75\" L",
+        "boltQty": "12",
+        "boltMat": "ASTM A193 B7",
+        "boltHeat": "HT-9042",
+        "boltCert": "MTR-8801",
+        "nutMat": "ASTM A194 2H",
+        "nutHeat": "HT-9043",
+        "nutCert": "MTR-8802",
+        "gasketType": "Spiral Wound 316SS/Flex Graphite",
+        "gasketStd": "ASME B16.20",
+        "gasketLot": "GT-2241",
+        "flangeMat": "ASTM A105N",
+        "flangeHeat": "HT-3821B",
+        "flangeCert": "MTR-6613",
+        "lubricant": "Molykote® G-1000 PTFE Thread Paste",
+        "targetTorque": "120",
+        "achievedTorque": "120",
+        "snugTorque": "40",
+        "midTorque": "80",
+        "finalTorque": "120",
+        "pattern": "Cross (Star)",
+        "passes": "3",
+        "alignmentCheck": "PASS",
+        "gasketCondition": "Good — no scoring or damage",
+        "boltEngagement": "Full thread engagement verified all 12 bolts",
+        "surfaceFinish": "125–250 AARH verified both flanges",
+        "date": "03/14/2026",
+        "shift": "Day",
+        "wrenchId": "TW-104",
+        "wrenchCalDue": "06/01/2026",
+        "inspector": "J. Reed",
+        "initials": "J. REED",
+        "result": "ACC",
+        "remarks": "PSV-101 inlet nozzle. Valve orientation confirmed correct prior to bolt-up. All bolts per TQ-44A."
+      },
+      "FLG-005": {
+        "id": "FLG-005",
+        "location": "Drain Connection",
+        "size": "1.5\"",
+        "cls": "600#",
+        "boltSize": "5/8\" dia × 4.50\" L",
+        "boltQty": "8",
+        "boltMat": "ASTM A193 B7",
+        "boltHeat": "HT-9042",
+        "boltCert": "MTR-8801",
+        "nutMat": "ASTM A194 2H",
+        "nutHeat": "HT-9043",
+        "nutCert": "MTR-8802",
+        "gasketType": "Spiral Wound 316SS/Flex Graphite",
+        "gasketStd": "ASME B16.20",
+        "gasketLot": "GT-2241",
+        "flangeMat": "ASTM A105N",
+        "flangeHeat": "HT-3821B",
+        "flangeCert": "MTR-6613",
+        "lubricant": "Molykote® G-1000 PTFE Thread Paste",
+        "targetTorque": "65",
+        "achievedTorque": "65",
+        "snugTorque": "20",
+        "midTorque": "45",
+        "finalTorque": "65",
+        "pattern": "Cross (Star)",
+        "passes": "2",
+        "alignmentCheck": "PASS",
+        "gasketCondition": "Good — no scoring or damage",
+        "boltEngagement": "Full thread engagement verified all 8 bolts",
+        "surfaceFinish": "125–250 AARH verified both flanges",
+        "date": "03/14/2026",
+        "shift": "Day",
+        "wrenchId": "TW-104",
+        "wrenchCalDue": "06/01/2026",
+        "inspector": "J. Reed",
+        "initials": "J. REED",
+        "result": "ACC",
+        "remarks": "Drain valve connection. 2-pass per TQ-44A for 1.5\" CL600. Blind flange confirmed installed."
+      }
+    }
+  }
+}

@@ -48,15 +48,15 @@ class Lesson(models.Model):
     CONTENT_TYPE_CHOICES = [
         ('reading', 'Reading'),
         ('video', 'Video'),
+        ('interactive', 'Interactive'),
     ]
     module = models.ForeignKey(Module, on_delete=models.CASCADE, related_name='lessons')
     title = models.CharField(max_length=200)
     order = models.IntegerField()
     content_type = models.CharField(
-        max_length=10,
+        max_length=15,
         choices=CONTENT_TYPE_CHOICES,
         default='reading',
-        help_text="Phase 1 uses reading only. Video is reserved for future use."
     )
     video_url = models.URLField(blank=True)
     body = CKEditor5Field(blank=True, help_text='Rich text content for reading lessons.', config_name='default')
@@ -159,3 +159,33 @@ class Certificate(models.Model):
 
     def __str__(self):
         return f"Cert {self.certificate_id} / {self.user.email} / {self.tier.name}"
+
+
+class InteractiveExercise(models.Model):
+    lesson = models.OneToOneField(Lesson, on_delete=models.CASCADE, related_name='exercise')
+    exercise_type = models.CharField(max_length=50)
+    config = models.JSONField()
+    passing_score = models.IntegerField(default=80)
+    version = models.CharField(max_length=20, default='1.0')
+
+    def __str__(self):
+        return f"{self.lesson.title} / {self.exercise_type}"
+
+
+class ExerciseAttempt(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='exercise_attempts'
+    )
+    exercise = models.ForeignKey(InteractiveExercise, on_delete=models.CASCADE, related_name='attempts')
+    step = models.IntegerField(default=1)
+    score = models.IntegerField()
+    passed = models.BooleanField()
+    attempt_number = models.IntegerField(default=1)
+    response_data = models.JSONField(default=dict)
+    attempted_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-attempted_at']
+
+    def __str__(self):
+        return f"{self.user.email} / {self.exercise.exercise_type} / Attempt {self.attempt_number} / {self.score}%"
