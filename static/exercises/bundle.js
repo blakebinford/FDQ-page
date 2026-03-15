@@ -4816,4 +4816,48 @@ function TorqueLog() {
     }
   }, "Exercise Complete \u2713"))))))));
 }
-ReactDOM.createRoot(document.getElementById('exercise-root')).render(React.createElement(TorqueLog));
+(function() {
+  var mountEl = document.getElementById('exercise-root') || document.getElementById('root');
+  var root = ReactDOM.createRoot(mountEl);
+  var exerciseType = window.EXERCISE_TYPE || 'torque_form';
+  if (exerciseType === 'weld_log') {
+    root.render(
+      React.createElement('div', {
+        style: {
+          fontFamily: "'IBM Plex Mono', monospace",
+          background: '#0e0f0d',
+          color: '#d4832a',
+          height: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '16px'
+        }
+      },
+        React.createElement('div', {
+          style: { fontSize: '11px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#6e6b63' }
+        }, 'FDQ Tier 1 · Module 3 Gate Exercise'),
+        React.createElement('div', {
+          style: { fontSize: '22px', fontWeight: 900, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#ede8df' }
+        }, 'Weld Inspection Log'),
+        React.createElement('div', {
+          style: {
+            marginTop: '24px',
+            padding: '16px 24px',
+            background: '#161714',
+            border: '1px solid #2a2d27',
+            borderLeft: '3px solid #d4832a',
+            fontSize: '13px',
+            color: '#6e6b63',
+            maxWidth: '480px',
+            textAlign: 'center',
+            lineHeight: 1.7
+          }
+        }, 'This exercise is under construction. The scenario data is loaded and ready — the React component will be built in the next development session.')
+      )
+    );
+  } else {
+    root.render(React.createElement(TorqueLog));
+  }
+})();
