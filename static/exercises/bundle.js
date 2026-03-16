@@ -4838,34 +4838,14 @@ function WeldLog() {
   var stepFields = CFG.step_fields || {};
   var answers = CFG.answers || {};
 
-  var STEP4_COLS = [
-    { key: 'us_od', label: 'Upstream\nPipe OD', hint: 'e.g. 12.750"' },
-    { key: 'us_wt', label: 'Upstream\nPipe WT', hint: 'e.g. 0.375"' },
-    { key: 'us_grade', label: 'Upstream\nPipe Grade', hint: 'e.g. API 5L X65' },
-    { key: 'us_heat', label: 'Upstream\nPipe HT#', hint: 'e.g. HT-P-2244' },
-    { key: 'ds_od', label: 'Downstream\nPipe OD', hint: 'e.g. 12.750"' },
-    { key: 'ds_wt', label: 'Downstream\nPipe WT', hint: 'e.g. 0.375"' },
-    { key: 'ds_grade', label: 'Downstream\nPipe Grade', hint: 'e.g. API 5L X65' },
-    { key: 'ds_heat', label: 'Downstream\nPipe HT#', hint: 'e.g. HT-P-2244' },
-    { key: 'wps_no', label: 'Applicable\nWPS No.', hint: 'e.g. WPS-CS-001 Rev.4' },
-    { key: 'preheat_min', label: 'Min.\nPreheat', hint: 'e.g. 100\u00B0F' },
-    { key: 'interpass_max', label: 'Max.\nInterpass', hint: 'e.g. 400\u00B0F' },
-    { key: 'filler_root', label: 'Filler Metal\nRoot Pass', hint: 'e.g. E7018-H4' },
-    { key: 'filler_fill', label: 'Filler Metal\nFill/Cap', hint: 'e.g. E71T-1M-H8' },
-    { key: 'pwht', label: 'PWHT\nRequired', hint: 'Yes or No' },
-    { key: 'welder_root', label: 'Welder\nStencil Root', hint: 'e.g. W-042' },
-    { key: 'welder_fill', label: 'Welder\nStencil Fill', hint: 'e.g. W-042' },
-    { key: 'welder_cap', label: 'Welder\nStencil Cap', hint: 'e.g. W-042' },
-    { key: 'weld_date', label: 'Weld\nDate', hint: 'e.g. 03/14/2026' }
-  ];
+  var STEP4_COLS = (stepFields.in_process_log && stepFields.in_process_log.length > 0)
+    ? stepFields.in_process_log
+    : [];
+  var STEP5_COLS = (stepFields.final_inspection && stepFields.final_inspection.length > 0)
+    ? stepFields.final_inspection
+    : [];
 
-  var STEP4_ANSWERS = {
-    'WLD-001': { us_od:'12.750"', us_wt:'0.375"', us_grade:'API 5L X65', us_heat:'HT-P-2244', ds_od:'12.750"', ds_wt:'0.375"', ds_grade:'API 5L X65', ds_heat:'HT-P-2244', wps_no:'WPS-CS-001 Rev.4', preheat_min:'100\u00B0F', interpass_max:'400\u00B0F', filler_root:'E7018-H4', filler_fill:'E71T-1M-H8', pwht:'No', welder_root:'W-042', welder_fill:'W-042', welder_cap:'W-042', weld_date:'03/14/2026' },
-    'WLD-002': { us_od:'12.750"', us_wt:'0.375"', us_grade:'API 5L X65', us_heat:'HT-P-2244', ds_od:'12.750"', ds_wt:'0.375"', ds_grade:'API 5L X65', ds_heat:'HT-P-2244', wps_no:'WPS-CS-001 Rev.4', preheat_min:'100\u00B0F', interpass_max:'400\u00B0F', filler_root:'E7018-H4', filler_fill:'E71T-1M-H8', pwht:'No', welder_root:'W-019', welder_fill:'W-019', welder_cap:'W-019', weld_date:'03/14/2026' },
-    'WLD-003': { us_od:'8.625"', us_wt:'0.322"', us_grade:'API 5L X65', us_heat:'HT-P-2244', ds_od:'8.625"', ds_wt:'0.322"', ds_grade:'API 5L X65', ds_heat:'HT-P-2244', wps_no:'WPS-CS-002 Rev.2', preheat_min:'100\u00B0F', interpass_max:'400\u00B0F', filler_root:'E7018-H4', filler_fill:'E7018-H4', pwht:'No', welder_root:'W-042', welder_fill:'W-042', welder_cap:'W-042', weld_date:'03/14/2026' },
-    'WLD-004': { us_od:'6.625"', us_wt:'0.280"', us_grade:'API 5L X65', us_heat:'HT-P-2245', ds_od:'6.625"', ds_wt:'0.280"', ds_grade:'API 5L X65', ds_heat:'HT-P-2245', wps_no:'WPS-CS-002 Rev.2', preheat_min:'100\u00B0F', interpass_max:'400\u00B0F', filler_root:'E7018-H4', filler_fill:'E7018-H4', pwht:'No', welder_root:'W-031', welder_fill:'W-031', welder_cap:'W-031', weld_date:'03/14/2026' },
-    'WLD-005': { us_od:'12.750"', us_wt:'0.375"', us_grade:'API 5L X65', us_heat:'HT-P-2244', ds_od:'12.750"', ds_wt:'0.375"', ds_grade:'API 5L X65', ds_heat:'HT-P-2244', wps_no:'WPS-CS-001 Rev.4', preheat_min:'100\u00B0F', interpass_max:'400\u00B0F', filler_root:'E7018-H4', filler_fill:'E71T-1M-H8', pwht:'No', welder_root:'W-019', welder_fill:'W-019', welder_cap:'W-019', weld_date:'03/14/2026' }
-  };
+  var STEP4_ANSWERS = (answers.in_process_log) ? answers.in_process_log : {};
 
   // ── State ────────────────────────────────────────────────────
   var _s1 = useState("brief"),
@@ -4887,13 +4867,12 @@ function WeldLog() {
           var fields = stepFields[st.id] || [];
           fields.forEach(function (f) { d[st.id]["WLD-001"][f.key] = ""; });
         } else {
-          var pipeExtra = [
-            { key: "pipe_grade" }, { key: "pipe_od" }, { key: "pipe_wt" }
-          ];
+          var tableCols = (st.id === "in_process_log") ? STEP4_COLS
+            : (st.id === "final_inspection") ? STEP5_COLS
+            : (stepFields[st.id] || []);
           welds.forEach(function (w) {
             d[st.id][w.id] = {};
-            var fields = (st.id === "in_process_log") ? STEP4_COLS : pipeExtra.concat(stepFields[st.id] || []);
-            fields.forEach(function (f) { d[st.id][w.id][f.key] = ""; });
+            tableCols.forEach(function (f) { d[st.id][w.id][f.key] = ""; });
           });
         }
       });
@@ -5018,25 +4997,18 @@ function WeldLog() {
     return map[section] || amber;
   }
 
-  var pipeExtraColsDef = [
-    { key: "pipe_grade", label: "Pipe\nGrade", hint: "e.g. API 5L X65" },
-    { key: "pipe_od", label: "Pipe\nOD", hint: 'e.g. 12.750"' },
-    { key: "pipe_wt", label: "Wall\nThickness", hint: 'e.g. 0.375"' }
-  ];
-
   var getFieldsForStep = function (stepId) {
     if (stepId === "in_process_log") {
       return STEP4_COLS;
+    }
+    if (stepId === "final_inspection") {
+      return STEP5_COLS;
     }
     var fields = stepFields[stepId] || [];
     if (stepId === "wps_verification") {
       return fields.filter(function (f) {
         return f.key !== "positions_covered" && f.key !== "od_range" && f.key !== "wall_range";
       });
-    }
-    var st = getStep(stepId);
-    if (st.scope === "table") {
-      return pipeExtraColsDef.concat(fields);
     }
     return fields;
   };
@@ -5081,20 +5053,13 @@ function WeldLog() {
         sc[wId][f.key] = { ok: ok, entered: userVal, correct: correctVal };
       });
     } else {
-      var pipeAnswerMap = { pipe_grade: "pipe_spec", pipe_od: "od", pipe_wt: "wt" };
-      var tableAns = (stepId === "in_process_log") ? STEP4_ANSWERS : ans;
       welds.forEach(function (w) {
         sc[w.id] = {};
-        var wAns = tableAns[w.id] || {};
+        var wAns = (ans[w.id] || {});
         fields.forEach(function (f) {
           totalFields++;
           var userVal = (formData[stepId][w.id][f.key] || "").trim();
-          var correctVal;
-          if (pipeAnswerMap[f.key]) {
-            correctVal = (w[pipeAnswerMap[f.key]] || "").toString();
-          } else {
-            correctVal = (wAns[f.key] || "").toString();
-          }
+          var correctVal = (wAns[f.key] || "").toString();
           var ok = checkFormField(f.key, userVal, correctVal);
           if (ok) totalCor++;
           sc[w.id][f.key] = { ok: ok, entered: userVal, correct: correctVal };
