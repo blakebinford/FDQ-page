@@ -313,7 +313,10 @@ class Command(BaseCommand):
                 'config': exercise_config,
             },
         )
-        if not ex_created and exercise.config != exercise_config:
+        if not ex_created:
+            exercise.exercise_type = 'torque_form'
+            exercise.passing_score = 80
+            exercise.version = '1.0'
             exercise.config = exercise_config
             exercise.save()
 
