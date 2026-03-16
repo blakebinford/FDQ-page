@@ -4838,6 +4838,35 @@ function WeldLog() {
   var stepFields = CFG.step_fields || {};
   var answers = CFG.answers || {};
 
+  var STEP4_COLS = [
+    { key: 'us_od', label: 'Upstream\nPipe OD', hint: 'e.g. 12.750"' },
+    { key: 'us_wt', label: 'Upstream\nPipe WT', hint: 'e.g. 0.375"' },
+    { key: 'us_grade', label: 'Upstream\nPipe Grade', hint: 'e.g. API 5L X65' },
+    { key: 'us_heat', label: 'Upstream\nPipe HT#', hint: 'e.g. HT-P-2244' },
+    { key: 'ds_od', label: 'Downstream\nPipe OD', hint: 'e.g. 12.750"' },
+    { key: 'ds_wt', label: 'Downstream\nPipe WT', hint: 'e.g. 0.375"' },
+    { key: 'ds_grade', label: 'Downstream\nPipe Grade', hint: 'e.g. API 5L X65' },
+    { key: 'ds_heat', label: 'Downstream\nPipe HT#', hint: 'e.g. HT-P-2244' },
+    { key: 'wps_no', label: 'Applicable\nWPS No.', hint: 'e.g. WPS-CS-001 Rev.4' },
+    { key: 'preheat_min', label: 'Min.\nPreheat', hint: 'e.g. 100\u00B0F' },
+    { key: 'interpass_max', label: 'Max.\nInterpass', hint: 'e.g. 400\u00B0F' },
+    { key: 'filler_root', label: 'Filler Metal\nRoot Pass', hint: 'e.g. E7018-H4' },
+    { key: 'filler_fill', label: 'Filler Metal\nFill/Cap', hint: 'e.g. E71T-1M-H8' },
+    { key: 'pwht', label: 'PWHT\nRequired', hint: 'Yes or No' },
+    { key: 'welder_root', label: 'Welder\nStencil Root', hint: 'e.g. W-042' },
+    { key: 'welder_fill', label: 'Welder\nStencil Fill', hint: 'e.g. W-042' },
+    { key: 'welder_cap', label: 'Welder\nStencil Cap', hint: 'e.g. W-042' },
+    { key: 'weld_date', label: 'Weld\nDate', hint: 'e.g. 03/14/2026' }
+  ];
+
+  var STEP4_ANSWERS = {
+    'WLD-001': { us_od:'12.750"', us_wt:'0.375"', us_grade:'API 5L X65', us_heat:'HT-P-2244', ds_od:'12.750"', ds_wt:'0.375"', ds_grade:'API 5L X65', ds_heat:'HT-P-2244', wps_no:'WPS-CS-001 Rev.4', preheat_min:'100\u00B0F', interpass_max:'400\u00B0F', filler_root:'E7018-H4', filler_fill:'E71T-1M-H8', pwht:'No', welder_root:'W-042', welder_fill:'W-042', welder_cap:'W-042', weld_date:'03/14/2026' },
+    'WLD-002': { us_od:'12.750"', us_wt:'0.375"', us_grade:'API 5L X65', us_heat:'HT-P-2244', ds_od:'12.750"', ds_wt:'0.375"', ds_grade:'API 5L X65', ds_heat:'HT-P-2244', wps_no:'WPS-CS-001 Rev.4', preheat_min:'100\u00B0F', interpass_max:'400\u00B0F', filler_root:'E7018-H4', filler_fill:'E71T-1M-H8', pwht:'No', welder_root:'W-019', welder_fill:'W-019', welder_cap:'W-019', weld_date:'03/14/2026' },
+    'WLD-003': { us_od:'8.625"', us_wt:'0.322"', us_grade:'API 5L X65', us_heat:'HT-P-2244', ds_od:'8.625"', ds_wt:'0.322"', ds_grade:'API 5L X65', ds_heat:'HT-P-2244', wps_no:'WPS-CS-002 Rev.2', preheat_min:'100\u00B0F', interpass_max:'400\u00B0F', filler_root:'E7018-H4', filler_fill:'E7018-H4', pwht:'No', welder_root:'W-042', welder_fill:'W-042', welder_cap:'W-042', weld_date:'03/14/2026' },
+    'WLD-004': { us_od:'6.625"', us_wt:'0.280"', us_grade:'API 5L X65', us_heat:'HT-P-2245', ds_od:'6.625"', ds_wt:'0.280"', ds_grade:'API 5L X65', ds_heat:'HT-P-2245', wps_no:'WPS-CS-002 Rev.2', preheat_min:'100\u00B0F', interpass_max:'400\u00B0F', filler_root:'E7018-H4', filler_fill:'E7018-H4', pwht:'No', welder_root:'W-031', welder_fill:'W-031', welder_cap:'W-031', weld_date:'03/14/2026' },
+    'WLD-005': { us_od:'12.750"', us_wt:'0.375"', us_grade:'API 5L X65', us_heat:'HT-P-2244', ds_od:'12.750"', ds_wt:'0.375"', ds_grade:'API 5L X65', ds_heat:'HT-P-2244', wps_no:'WPS-CS-001 Rev.4', preheat_min:'100\u00B0F', interpass_max:'400\u00B0F', filler_root:'E7018-H4', filler_fill:'E71T-1M-H8', pwht:'No', welder_root:'W-019', welder_fill:'W-019', welder_cap:'W-019', weld_date:'03/14/2026' }
+  };
+
   // ── State ────────────────────────────────────────────────────
   var _s1 = useState("brief"),
     _s1a = _slicedToArray(_s1, 2),
@@ -4863,7 +4892,7 @@ function WeldLog() {
           ];
           welds.forEach(function (w) {
             d[st.id][w.id] = {};
-            var fields = pipeExtra.concat(stepFields[st.id] || []);
+            var fields = (st.id === "in_process_log") ? STEP4_COLS : pipeExtra.concat(stepFields[st.id] || []);
             fields.forEach(function (f) { d[st.id][w.id][f.key] = ""; });
           });
         }
@@ -4904,7 +4933,7 @@ function WeldLog() {
     refTab = _s9a[0],
     setRefTab = _s9a[1];
 
-  var _s10 = useState(wpss.length > 0 ? wpss[0].id || "wps_0" : "wps_0"),
+  var _s10 = useState(wpss.length > 0 ? wpss[0].id || wpss[0].wps_no || "wps_0" : "wps_0"),
     _s10a = _slicedToArray(_s10, 2),
     activeWps = _s10a[0],
     setActiveWps = _s10a[1];
@@ -4965,29 +4994,30 @@ function WeldLog() {
     return !!stepPassed[prev.id];
   };
 
-  var currentStep = getStep(activeStep);
-  var currentFields = getFieldsForStep(activeStep);
-  var currentAnswers = answers[activeStep] || {};
-
-  // Group fields by section for single-weld steps
-  var fieldSections = [];
-  if (currentStep.scope === "single") {
-    var sMap = {};
-    var sOrder = [];
-    currentFields.forEach(function (f) {
-      var sec = f.section || "general";
-      if (!sMap[sec]) {
-        sMap[sec] = [];
-        sOrder.push(sec);
-      }
-      sMap[sec].push(f);
-    });
-    sOrder.forEach(function (sec) {
-      fieldSections.push({ id: sec, label: sec.replace(/_/g, " "), fields: sMap[sec] });
-    });
+  function getWeldById(id) {
+    return welds.find(function (w) { return w.id === id; }) || {};
   }
 
-  // ── Scoring ──────────────────────────────────────────────────
+  function getAnswerForField(stepId, weldId, fieldKey) {
+    var stepAns = answers[stepId] || {};
+    var weldAns = stepAns[weldId] || stepAns["WLD-001"] || {};
+    return weldAns[fieldKey] || "";
+  }
+
+  function getSectionColor(section) {
+    var map = {
+      identification: amber,
+      coverage: "#3a556a",
+      parameters: green,
+      pipe: amber,
+      filler: "#3a556a",
+      welder: green,
+      fitup: amber,
+      preweld: "#3a556a"
+    };
+    return map[section] || amber;
+  }
+
   var pipeExtraColsDef = [
     { key: "pipe_grade", label: "Pipe\nGrade", hint: "e.g. API 5L X65" },
     { key: "pipe_od", label: "Pipe\nOD", hint: 'e.g. 12.750"' },
@@ -4995,6 +5025,9 @@ function WeldLog() {
   ];
 
   var getFieldsForStep = function (stepId) {
+    if (stepId === "in_process_log") {
+      return STEP4_COLS;
+    }
     var fields = stepFields[stepId] || [];
     if (stepId === "wps_verification") {
       return fields.filter(function (f) {
@@ -5007,6 +5040,10 @@ function WeldLog() {
     }
     return fields;
   };
+
+  var currentStep = getStep(activeStep);
+  var currentFields = getFieldsForStep(activeStep);
+  var currentAnswers = answers[activeStep] || {};
 
   var allFilledForStep = function (stepId) {
     var st = getStep(stepId);
@@ -5045,9 +5082,10 @@ function WeldLog() {
       });
     } else {
       var pipeAnswerMap = { pipe_grade: "pipe_spec", pipe_od: "od", pipe_wt: "wt" };
+      var tableAns = (stepId === "in_process_log") ? STEP4_ANSWERS : ans;
       welds.forEach(function (w) {
         sc[w.id] = {};
-        var wAns = ans[w.id] || {};
+        var wAns = tableAns[w.id] || {};
         fields.forEach(function (f) {
           totalFields++;
           var userVal = (formData[stepId][w.id][f.key] || "").trim();
@@ -5190,78 +5228,139 @@ function WeldLog() {
 
   // ── Weld Map SVG ─────────────────────────────────────────────
   var renderWeldMap = function () {
-    var weldPositions = [
-      { x: 200, y: 80, label: welds[0] ? welds[0].id : "WLD-001" },
-      { x: 620, y: 80, label: welds[1] ? welds[1].id : "WLD-002" },
-      { x: 120, y: 280, label: welds[2] ? welds[2].id : "WLD-003" },
-      { x: 460, y: 320, label: welds[3] ? welds[3].id : "WLD-004" },
-      { x: 700, y: 280, label: welds[4] ? welds[4].id : "WLD-005" }
+    var weldData = [
+      { id: 'WLD-001', cx: 160, cy: 300, bx: 95, by: 210, pos: 'above',
+        l1: 'WLD-001 \u00B7 12" 6G SMAW/FCAW', l2: 'MTR-001 / HT-P-2244', l3: 'WPS-CS-001 Rev.4 \u00B7 W-042' },
+      { id: 'WLD-002', cx: 400, cy: 300, bx: 335, by: 210, pos: 'above',
+        l1: 'WLD-002 \u00B7 12" 6G SMAW/FCAW', l2: 'MTR-001 / HT-P-2244', l3: 'WPS-CS-001 Rev.4 \u00B7 W-019' },
+      { id: 'WLD-003', cx: 300, cy: 370, bx: 340, by: 345, pos: 'right',
+        l1: 'WLD-003 \u00B7 8" 6G SMAW', l2: 'MTR-001 / HT-P-2244', l3: 'WPS-CS-002 Rev.2 \u00B7 W-042' },
+      { id: 'WLD-004', cx: 500, cy: 270, bx: 540, by: 225, pos: 'right',
+        l1: 'WLD-004 \u00B7 6" 2G SMAW', l2: 'MTR-002 / HT-P-2245', l3: 'WPS-CS-002 Rev.2 \u00B7 W-031' },
+      { id: 'WLD-005', cx: 780, cy: 300, bx: 715, by: 320, pos: 'below',
+        l1: 'WLD-005 \u00B7 12" 6G SMAW/FCAW', l2: 'MTR-001 / HT-P-2244', l3: 'WPS-CS-001 Rev.4 \u00B7 W-019' }
     ];
+    var bomRows = [
+      ['1', '12" CS Pipe', 'API 5L', '12.750"', '0.375"', 'X65', 'HT-P-2244', 'MTR-001'],
+      ['2', '8" CS Pipe', 'API 5L', '8.625"', '0.322"', 'X65', 'HT-P-2244', 'MTR-001'],
+      ['3', '6" CS Pipe', 'API 5L', '6.625"', '0.280"', 'X65', 'HT-P-2245', 'MTR-002'],
+      ['4', '12" WN Flange', 'ASME B16.5', '12.750"', '\u2014', 'A105', 'HT-F-3301', 'MTR-003'],
+      ['5', 'Filler E7018-H4', 'AWS A5.1', '\u2014', '\u2014', '\u2014', 'LOT-7018-A', 'FC-001'],
+      ['6', 'Filler E71T-1M-H8', 'AWS A5.20', '\u2014', '\u2014', '\u2014', 'LOT-71T1-B', 'FC-002']
+    ];
+    var bomHeaders = ['ITM', 'DESCRIPTION', 'SPEC', 'OD', 'WT', 'GRADE', 'HEAT', 'CERT'];
+
     return React.createElement("svg", {
-      viewBox: "0 0 860 440",
+      viewBox: "0 0 960 660",
       width: "100%",
       style: { display: "block", fontFamily: "IBM Plex Mono, monospace" }
     },
       // Background
-      React.createElement("rect", { width: "860", height: "440", fill: "#0a0b09" }),
+      React.createElement("rect", { width: "960", height: "660", fill: "#080d0a" }),
       // Grid
       React.createElement("g", { stroke: "#1e211a", strokeWidth: "0.5", strokeDasharray: "3,9" },
-        React.createElement("line", { x1: "0", y1: "110", x2: "860", y2: "110" }),
-        React.createElement("line", { x1: "0", y1: "220", x2: "860", y2: "220" }),
-        React.createElement("line", { x1: "0", y1: "330", x2: "860", y2: "330" }),
-        React.createElement("line", { x1: "215", y1: "0", x2: "215", y2: "440" }),
-        React.createElement("line", { x1: "430", y1: "0", x2: "430", y2: "440" }),
-        React.createElement("line", { x1: "645", y1: "0", x2: "645", y2: "440" })
+        React.createElement("line", { x1: "0", y1: "150", x2: "960", y2: "150" }),
+        React.createElement("line", { x1: "0", y1: "300", x2: "960", y2: "300" }),
+        React.createElement("line", { x1: "0", y1: "450", x2: "960", y2: "450" }),
+        React.createElement("line", { x1: "240", y1: "0", x2: "240", y2: "490" }),
+        React.createElement("line", { x1: "480", y1: "0", x2: "480", y2: "490" }),
+        React.createElement("line", { x1: "720", y1: "0", x2: "720", y2: "490" })
       ),
+      // Main 12" header pipe
+      React.createElement("line", { x1: "60", y1: "300", x2: "860", y2: "300", stroke: "#3a556a", strokeWidth: "6" }),
+      React.createElement("line", { x1: "60", y1: "300", x2: "860", y2: "300", stroke: "#4e7490", strokeWidth: "2", opacity: "0.3" }),
+      // Pipe labels
+      React.createElement("text", { x: "465", y: "293", fill: "#3a556a", fontSize: "7", letterSpacing: "0.1em", textAnchor: "middle" }, '12" CS HEADER'),
       // Compressor box
-      React.createElement("rect", { x: "350", y: "160", width: "160", height: "100", fill: "#0f1812", stroke: "#1e3828", strokeWidth: "1.5", rx: "3" }),
-      React.createElement("line", { x1: "350", y1: "190", x2: "510", y2: "190", stroke: "#1c3024", strokeWidth: "0.8", strokeDasharray: "4,4" }),
-      React.createElement("line", { x1: "350", y1: "230", x2: "510", y2: "230", stroke: "#1c3024", strokeWidth: "0.8", strokeDasharray: "4,4" }),
-      React.createElement("text", { x: "395", y: "215", fill: "#2d5240", fontSize: "10", fontWeight: "700", letterSpacing: "0.1em" }, "COMP-A"),
-      React.createElement("text", { x: "400", y: "227", fill: "#233d30", fontSize: "8" }, "TRAIN A"),
-      // Pipe runs
-      React.createElement("line", { x1: "80", y1: "120", x2: "350", y2: "120", stroke: steel, strokeWidth: "4" }),
-      React.createElement("line", { x1: "510", y1: "120", x2: "780", y2: "120", stroke: steel, strokeWidth: "4" }),
-      React.createElement("line", { x1: "80", y1: "320", x2: "350", y2: "320", stroke: steel, strokeWidth: "4" }),
-      React.createElement("line", { x1: "510", y1: "320", x2: "780", y2: "320", stroke: steel, strokeWidth: "4" }),
-      React.createElement("line", { x1: "350", y1: "210", x2: "80", y2: "210", stroke: steel, strokeWidth: "3", strokeDasharray: "8,4" }),
-      // Weld callout boxes
-      weldPositions.map(function (wp, i) {
-        var w = welds[i];
-        var desc = w ? (w.size || "") + " " + (w.type || "") : "";
-        return React.createElement("g", { key: wp.label },
-          // Leader line
+      React.createElement("rect", { x: "60", y: "270", width: "80", height: "60", fill: "#0f1812", stroke: "#1e3828", strokeWidth: "1.5", rx: "3" }),
+      React.createElement("text", { x: "100", y: "298", fill: "#2d5240", fontSize: "9", fontWeight: "700", letterSpacing: "0.1em", textAnchor: "middle" }, "COMP-A"),
+      React.createElement("text", { x: "100", y: "312", fill: "#233d30", fontSize: "7", textAnchor: "middle" }, "TRAIN A"),
+      // Recycle branch (8" vertical down from header)
+      React.createElement("line", { x1: "300", y1: "300", x2: "300", y2: "440", stroke: "#3a556a", strokeWidth: "4" }),
+      React.createElement("text", { x: "310", y: "425", fill: "#3a556a", fontSize: "6.5", letterSpacing: "0.08em" }, '8" RECYCLE'),
+      // PSV branch (6" vertical up to header)
+      React.createElement("line", { x1: "500", y1: "240", x2: "500", y2: "300", stroke: "#3a556a", strokeWidth: "3" }),
+      React.createElement("text", { x: "510", y: "252", fill: "#3a556a", fontSize: "6.5", letterSpacing: "0.08em" }, '6" PSV'),
+      // WN flange branch (vertical down from header)
+      React.createElement("line", { x1: "780", y1: "300", x2: "780", y2: "400", stroke: "#3a556a", strokeWidth: "4" }),
+      React.createElement("text", { x: "790", y: "390", fill: "#3a556a", fontSize: "6.5", letterSpacing: "0.08em" }, '12" WN FLG'),
+      // Weld circles and callout boxes
+      weldData.map(function (wd) {
+        return React.createElement("g", { key: wd.id },
+          // Leader line from circle to callout
           React.createElement("line", {
-            x1: wp.x + 40, y1: wp.y + 40,
-            x2: wp.x + 40, y2: wp.y < 200 ? wp.y + 60 : wp.y - 10,
+            x1: wd.cx, y1: wd.cy, x2: wd.bx + 65, y2: wd.by + 30,
             stroke: "#3a556a", strokeWidth: "0.8", strokeDasharray: "2,3"
           }),
-          // Diamond symbol
-          React.createElement("polygon", {
-            points: (wp.x + 40) + "," + (wp.y < 200 ? wp.y + 60 : wp.y - 10) + " " + (wp.x + 44) + "," + (wp.y < 200 ? wp.y + 66 : wp.y - 16) + " " + (wp.x + 40) + "," + (wp.y < 200 ? wp.y + 72 : wp.y - 22) + " " + (wp.x + 36) + "," + (wp.y < 200 ? wp.y + 66 : wp.y - 16),
-            fill: "none", stroke: amber, strokeWidth: "1"
-          }),
+          // Weld circle
+          React.createElement("circle", { cx: wd.cx, cy: wd.cy, r: "10", fill: "none", stroke: amber, strokeWidth: "2" }),
+          React.createElement("circle", { cx: wd.cx, cy: wd.cy, r: "3", fill: amber }),
           // Callout box
           React.createElement("rect", {
-            x: wp.x, y: wp.y, width: 80, height: 38,
-            fill: "rgba(22,23,20,0.95)", stroke: amber, strokeWidth: "1", rx: "2"
+            x: wd.bx, y: wd.by, width: 130, height: 60,
+            fill: "#080d0a", stroke: "#d4832a", strokeWidth: "1", rx: "2"
           }),
+          // Line 1: amber 8.5px bold
           React.createElement("text", {
-            x: wp.x + 40, y: wp.y + 15,
-            fill: amber, fontSize: "9", fontWeight: "700", textAnchor: "middle", letterSpacing: "0.08em"
-          }, wp.label),
+            x: wd.bx + 65, y: wd.by + 17,
+            fill: amber, fontSize: "8.5", fontWeight: "700", textAnchor: "middle", letterSpacing: "0.04em"
+          }, wd.l1),
+          // Line 2: white 8px
           React.createElement("text", {
-            x: wp.x + 40, y: wp.y + 28,
+            x: wd.bx + 65, y: wd.by + 33,
+            fill: white, fontSize: "8", textAnchor: "middle"
+          }, wd.l2),
+          // Line 3: muted 7px
+          React.createElement("text", {
+            x: wd.bx + 65, y: wd.by + 48,
             fill: muted, fontSize: "7", textAnchor: "middle"
-          }, desc)
+          }, wd.l3)
         );
       }),
+      // Legend at y=480
+      React.createElement("g", { transform: "translate(60,480)" },
+        React.createElement("line", { x1: "0", y1: "5", x2: "20", y2: "5", stroke: "#3a556a", strokeWidth: "3" }),
+        React.createElement("text", { x: "25", y: "8", fill: muted, fontSize: "7.5" }, "Pipe"),
+        React.createElement("circle", { cx: "75", cy: "5", r: "5", fill: "none", stroke: amber, strokeWidth: "1.5" }),
+        React.createElement("text", { x: "85", y: "8", fill: muted, fontSize: "7.5" }, "Weld"),
+        React.createElement("rect", { x: "120", y: "0", width: "14", height: "10", fill: "#0f1812", stroke: "#1e3828", strokeWidth: "1" }),
+        React.createElement("text", { x: "139", y: "8", fill: muted, fontSize: "7.5" }, "Equipment")
+      ),
+      // BOM table at y=500
+      React.createElement("text", { x: "60", y: "515", fill: amber, fontSize: "8", fontWeight: "700", letterSpacing: "0.14em" }, "BILL OF MATERIALS"),
+      // BOM header row
+      React.createElement("g", null,
+        bomHeaders.map(function (h, hi) {
+          var colX = 60 + hi * 105;
+          return React.createElement("text", {
+            key: 'bh' + hi, x: colX, y: "535",
+            fill: amber, fontSize: "7", fontWeight: "600", letterSpacing: "0.08em"
+          }, h);
+        })
+      ),
+      React.createElement("line", { x1: "60", y1: "538", x2: "900", y2: "538", stroke: border, strokeWidth: "0.5" }),
+      // BOM data rows
+      React.createElement("g", null,
+        bomRows.map(function (row, ri) {
+          return React.createElement("g", { key: 'br' + ri },
+            row.map(function (cell, ci) {
+              return React.createElement("text", {
+                key: 'bc' + ri + '_' + ci,
+                x: 60 + ci * 105,
+                y: 552 + ri * 16,
+                fill: ci === 0 ? muted : textCol,
+                fontSize: "7.5"
+              }, cell);
+            })
+          );
+        })
+      ),
       // Title block
-      React.createElement("rect", { x: "580", y: "370", width: "260", height: "55", fill: "#111410", stroke: "#1e211a", strokeWidth: "1" }),
-      React.createElement("text", { x: "595", y: "388", fill: muted, fontSize: "7", letterSpacing: "0.1em" }, "WELD MAP"),
-      React.createElement("text", { x: "595", y: "400", fill: white, fontSize: "9", fontWeight: "700" }, CFG.scenario ? CFG.scenario.project || "" : ""),
-      React.createElement("text", { x: "595", y: "412", fill: muted, fontSize: "7" }, CFG.scenario ? CFG.scenario.system || "" : ""),
-      React.createElement("text", { x: "595", y: "422", fill: "#2d5240", fontSize: "6.5" }, welds.length + " WELDS IDENTIFIED")
+      React.createElement("rect", { x: "700", y: "600", width: "240", height: "45", fill: "#111410", stroke: "#1e211a", strokeWidth: "1" }),
+      React.createElement("text", { x: "715", y: "616", fill: muted, fontSize: "7", letterSpacing: "0.1em" }, "WELD MAP"),
+      React.createElement("text", { x: "715", y: "628", fill: white, fontSize: "9", fontWeight: "700" }, CFG.project || ""),
+      React.createElement("text", { x: "715", y: "640", fill: muted, fontSize: "7" }, CFG.system || ""),
+      React.createElement("text", { x: "880", y: "640", fill: "#2d5240", fontSize: "6.5", textAnchor: "end" }, welds.length + " WELDS")
     );
   };
 
@@ -5555,7 +5654,7 @@ function WeldLog() {
       React.createElement("div", { style: { flex: 1, overflowY: "auto", padding: "10px" } },
         refTab === "weldmap" ? React.createElement("div", null,
           React.createElement("div", { style: { color: muted, fontSize: "7.5px", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "6px" } },
-            (CFG.scenario && CFG.scenario.system ? CFG.scenario.system : "System") + " \u00B7 Weld Location Map"
+            (CFG.system || "System") + " \u00B7 Weld Location Map"
           ),
           React.createElement("div", { style: { background: "#080d0a", border: "1px solid " + border } }, renderWeldMap())
         ) : null,
@@ -5812,12 +5911,13 @@ function WeldLog() {
         style: { background: surf, border: "1px solid " + border, borderTop: "2px solid " + amber, padding: "10px 12px", marginBottom: "10px", display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px" }
       },
         [
-          ["Project", CFG.scenario ? CFG.scenario.project || "" : ""],
-          ["System", CFG.scenario ? CFG.scenario.system || "" : ""],
+          ["Project", CFG.project || ""],
+          ["System", CFG.system || ""],
           ["Step", currentStep.label || ""],
-          ["Code", CFG.scenario ? CFG.scenario.code || "" : ""],
-          ["Service", CFG.scenario ? CFG.scenario.service || "" : ""],
-          ["Date", "___________"]
+          ["Code", CFG.spec || ""],
+          ["Service", CFG.service || ""],
+          ["Inspector", (CFG.scenario && CFG.scenario.inspector) || ""],
+          ["Date", (CFG.scenario && CFG.scenario.date) || "03/14/2026"]
         ].map(function (pair) {
           return React.createElement("div", { key: pair[0] },
             React.createElement("div", { style: { color: amber, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", marginBottom: "1px" } }, pair[0]),
@@ -6026,9 +6126,9 @@ function WeldLog() {
         React.createElement("div", { style: { color: amber, fontSize: "9px", letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: "10px" } }, "Exercise Brief"),
         React.createElement("p", { style: { fontFamily: "sans-serif", fontSize: "14px", lineHeight: 1.85, margin: 0 } },
           "You are the QC Inspector on ",
-          React.createElement("strong", { style: { color: white } }, CFG.scenario ? CFG.scenario.project || "" : ""),
+          React.createElement("strong", { style: { color: white } }, CFG.project || ""),
           ". Welding for ",
-          React.createElement("strong", { style: { color: white } }, CFG.scenario ? CFG.scenario.system || "" : ""),
+          React.createElement("strong", { style: { color: white } }, CFG.system || ""),
           " is complete. Switch to ",
           React.createElement("strong", { style: { color: white } }, "Work View"),
           " to access the weld map, WPS documents, welder qualifications, weld travelers, and material test reports \u2014 all alongside the fillable inspection log. Complete each step in sequence: review weld data, verify procedures, confirm materials, then inspect all welds. Inspector: ",
@@ -6041,12 +6141,12 @@ function WeldLog() {
         style: { background: surf, border: "1px solid " + border, display: "grid", gridTemplateColumns: "1fr 1fr", marginBottom: "20px" }
       },
         [
-          ["Project", CFG.scenario ? CFG.scenario.project || "" : ""],
-          ["System", CFG.scenario ? CFG.scenario.system || "" : ""],
-          ["Code", CFG.scenario ? CFG.scenario.code || "" : ""],
-          ["Service", CFG.scenario ? CFG.scenario.service || "" : ""],
-          ["Contractor", CFG.scenario ? CFG.scenario.contractor || "" : ""],
-          ["Inspector", CFG.scenario ? CFG.scenario.inspector || "" : ""],
+          ["Project", CFG.project || ""],
+          ["System", CFG.system || ""],
+          ["Code", CFG.spec || ""],
+          ["Service", CFG.service || ""],
+          ["Contractor", (CFG.scenario && CFG.scenario.contractor) || ""],
+          ["Inspector", (CFG.scenario && CFG.scenario.inspector) || ""],
           ["Total Welds", String(welds.length)],
           ["Steps", String(steps.length)]
         ].map(function (pair, i) {
