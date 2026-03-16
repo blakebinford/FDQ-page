@@ -31,18 +31,26 @@ var _React = React,
   s.id = 'fdq-input-style';
   s.textContent = [
     '.fdq-form-input::placeholder {',
-    '  color: #3a5a4a;',
+    '  color: #52a366;',
     '  font-style: italic;',
     '  font-size: 9px;',
+    '  opacity: 0.7;',
     '}',
-    '.fdq-form-input:focus {',
-    '  outline: none;',
+    '.fdq-form-input:focus { outline: none; }',
+    '.fdq-form-input-wrap {',
+    '  outline: 1px solid #2a4a2a;',
+    '  background: rgba(42,74,42,0.06);',
+    '  border-left: 2px solid #3a6a3a;',
     '}',
     '.fdq-form-input-wrap:focus-within {',
     '  outline: 1px solid #52a366 !important;',
-    '  background: rgba(42,74,42,0.15) !important;',
+    '  background: rgba(42,74,42,0.14) !important;',
+    '  border-left-color: #52a366 !important;',
+    '}',
+    '.fdq-form-input {',
+    '  caret-color: #52a366;',
     '}'
-  ].join('\n');
+  ].join("\n");
   document.head.appendChild(s);
 })();
 var SCENARIO = {
@@ -4816,47 +4824,1371 @@ function TorqueLog() {
     }
   }, "Exercise Complete \u2713"))))))));
 }
+
+// ── WELD INSPECTION LOG ──────────────────────────────────────
+function WeldLog() {
+  var CFG = window.EXERCISE_CONFIG || {};
+  var steps = CFG.steps || [];
+  var welds = (CFG.scenario && CFG.scenario.welds) || [];
+  var wpss = (CFG.scenario && CFG.scenario.wpss) || [];
+  var welders = (CFG.scenario && CFG.scenario.welders) || [];
+  var pipeMtrs = (CFG.scenario && CFG.scenario.pipe_mtrs) || [];
+  var fillerCerts = (CFG.scenario && CFG.scenario.filler_certs) || [];
+  var travelers = (CFG.scenario && CFG.scenario.travelers) || [];
+  var stepFields = CFG.step_fields || {};
+  var answers = CFG.answers || {};
+
+  // ── State ────────────────────────────────────────────────────
+  var _s1 = useState("brief"),
+    _s1a = _slicedToArray(_s1, 2),
+    tab = _s1a[0],
+    setTab = _s1a[1];
+
+  var _s2 = useState(steps.length > 0 ? steps[0].id : "step_1"),
+    _s2a = _slicedToArray(_s2, 2),
+    activeStep = _s2a[0],
+    setActiveStep = _s2a[1];
+
+  var _s3 = useState(function () {
+      var d = {};
+      steps.forEach(function (st) {
+        d[st.id] = {};
+        if (st.scope === "single") {
+          d[st.id]["WLD-001"] = {};
+          var fields = stepFields[st.id] || [];
+          fields.forEach(function (f) { d[st.id]["WLD-001"][f.key] = ""; });
+        } else {
+          var pipeExtra = [
+            { key: "pipe_grade" }, { key: "pipe_od" }, { key: "pipe_wt" }
+          ];
+          welds.forEach(function (w) {
+            d[st.id][w.id] = {};
+            var fields = pipeExtra.concat(stepFields[st.id] || []);
+            fields.forEach(function (f) { d[st.id][w.id][f.key] = ""; });
+          });
+        }
+      });
+      return d;
+    }),
+    _s3a = _slicedToArray(_s3, 2),
+    formData = _s3a[0],
+    setFormData = _s3a[1];
+
+  var _s4 = useState({}),
+    _s4a = _slicedToArray(_s4, 2),
+    submitted = _s4a[0],
+    setSubmitted = _s4a[1];
+
+  var _s5 = useState({}),
+    _s5a = _slicedToArray(_s5, 2),
+    scores = _s5a[0],
+    setScores = _s5a[1];
+
+  var _s6 = useState({}),
+    _s6a = _slicedToArray(_s6, 2),
+    stepScores = _s6a[0],
+    setStepScores = _s6a[1];
+
+  var _s7 = useState({}),
+    _s7a = _slicedToArray(_s7, 2),
+    stepPassed = _s7a[0],
+    setStepPassed = _s7a[1];
+
+  var _s8 = useState(null),
+    _s8a = _slicedToArray(_s8, 2),
+    activeCell = _s8a[0],
+    setActiveCell = _s8a[1];
+
+  var _s9 = useState("weldmap"),
+    _s9a = _slicedToArray(_s9, 2),
+    refTab = _s9a[0],
+    setRefTab = _s9a[1];
+
+  var _s10 = useState(wpss.length > 0 ? wpss[0].id || "wps_0" : "wps_0"),
+    _s10a = _slicedToArray(_s10, 2),
+    activeWps = _s10a[0],
+    setActiveWps = _s10a[1];
+
+  var _s11 = useState(welders.length > 0 ? welders[0].id || "welder_0" : "welder_0"),
+    _s11a = _slicedToArray(_s11, 2),
+    activeWelder = _s11a[0],
+    setActiveWelder = _s11a[1];
+
+  var _s12 = useState(travelers.length > 0 ? travelers[0].weld_id || "WLD-001" : "WLD-001"),
+    _s12a = _slicedToArray(_s12, 2),
+    activeTraveler = _s12a[0],
+    setActiveTraveler = _s12a[1];
+
+  var _s13 = useState(pipeMtrs.length > 0 ? pipeMtrs[0].id || "mtr_0" : "mtr_0"),
+    _s13a = _slicedToArray(_s13, 2),
+    activePipeMtr = _s13a[0],
+    setActivePipeMtr = _s13a[1];
+
+  var _s14 = useState(fillerCerts.length > 0 ? fillerCerts[0].id || "fc_0" : "fc_0"),
+    _s14a = _slicedToArray(_s14, 2),
+    activeFillerCert = _s14a[0],
+    setActiveFillerCert = _s14a[1];
+
+  var _s15 = useState(false),
+    _s15a = _slicedToArray(_s15, 2),
+    exerciseDone = _s15a[0],
+    setExerciseDone = _s15a[1];
+
+  var inputRefs = useRef({});
+
+  // ── Helpers ──────────────────────────────────────────────────
+  var updateField = function (stepId, weldId, key, val) {
+    setFormData(function (prev) {
+      var copy = _objectSpread({}, prev);
+      copy[stepId] = _objectSpread({}, copy[stepId]);
+      copy[stepId][weldId] = _objectSpread({}, copy[stepId][weldId]);
+      copy[stepId][weldId][key] = val;
+      return copy;
+    });
+  };
+
+  var getStep = function (id) {
+    return steps.find(function (s) { return s.id === id; }) || {};
+  };
+
+  var stepIndex = function (id) {
+    for (var i = 0; i < steps.length; i++) {
+      if (steps[i].id === id) return i;
+    }
+    return 0;
+  };
+
+  var isStepUnlocked = function (id) {
+    var idx = stepIndex(id);
+    if (idx === 0) return true;
+    var prev = steps[idx - 1];
+    return !!stepPassed[prev.id];
+  };
+
+  var currentStep = getStep(activeStep);
+  var currentFields = getFieldsForStep(activeStep);
+  var currentAnswers = answers[activeStep] || {};
+
+  // Group fields by section for single-weld steps
+  var fieldSections = [];
+  if (currentStep.scope === "single") {
+    var sMap = {};
+    var sOrder = [];
+    currentFields.forEach(function (f) {
+      var sec = f.section || "general";
+      if (!sMap[sec]) {
+        sMap[sec] = [];
+        sOrder.push(sec);
+      }
+      sMap[sec].push(f);
+    });
+    sOrder.forEach(function (sec) {
+      fieldSections.push({ id: sec, label: sec.replace(/_/g, " "), fields: sMap[sec] });
+    });
+  }
+
+  // ── Scoring ──────────────────────────────────────────────────
+  var pipeExtraColsDef = [
+    { key: "pipe_grade", label: "Pipe\nGrade", hint: "e.g. API 5L X65" },
+    { key: "pipe_od", label: "Pipe\nOD", hint: 'e.g. 12.750"' },
+    { key: "pipe_wt", label: "Wall\nThickness", hint: 'e.g. 0.375"' }
+  ];
+
+  var getFieldsForStep = function (stepId) {
+    var fields = stepFields[stepId] || [];
+    if (stepId === "wps_verification") {
+      return fields.filter(function (f) {
+        return f.key !== "positions_covered" && f.key !== "od_range" && f.key !== "wall_range";
+      });
+    }
+    var st = getStep(stepId);
+    if (st.scope === "table") {
+      return pipeExtraColsDef.concat(fields);
+    }
+    return fields;
+  };
+
+  var allFilledForStep = function (stepId) {
+    var st = getStep(stepId);
+    var fields = getFieldsForStep(stepId);
+    if (st.scope === "single") {
+      return fields.every(function (f) {
+        return formData[stepId] && formData[stepId]["WLD-001"] && formData[stepId]["WLD-001"][f.key] && formData[stepId]["WLD-001"][f.key].trim() !== "";
+      });
+    } else {
+      return welds.every(function (w) {
+        return fields.every(function (f) {
+          return formData[stepId] && formData[stepId][w.id] && formData[stepId][w.id][f.key] && formData[stepId][w.id][f.key].trim() !== "";
+        });
+      });
+    }
+  };
+
+  var handleSubmitStep = function (stepId) {
+    var st = getStep(stepId);
+    var fields = getFieldsForStep(stepId);
+    var ans = answers[stepId] || {};
+    var totalCor = 0, totalFields = 0;
+    var sc = {};
+
+    if (st.scope === "single") {
+      var wId = "WLD-001";
+      sc[wId] = {};
+      var wAns = ans[wId] || ans;
+      fields.forEach(function (f) {
+        totalFields++;
+        var userVal = (formData[stepId][wId][f.key] || "").trim();
+        var correctVal = (wAns[f.key] || "").toString();
+        var ok = checkFormField(f.key, userVal, correctVal);
+        if (ok) totalCor++;
+        sc[wId][f.key] = { ok: ok, entered: userVal, correct: correctVal };
+      });
+    } else {
+      var pipeAnswerMap = { pipe_grade: "pipe_spec", pipe_od: "od", pipe_wt: "wt" };
+      welds.forEach(function (w) {
+        sc[w.id] = {};
+        var wAns = ans[w.id] || {};
+        fields.forEach(function (f) {
+          totalFields++;
+          var userVal = (formData[stepId][w.id][f.key] || "").trim();
+          var correctVal;
+          if (pipeAnswerMap[f.key]) {
+            correctVal = (w[pipeAnswerMap[f.key]] || "").toString();
+          } else {
+            correctVal = (wAns[f.key] || "").toString();
+          }
+          var ok = checkFormField(f.key, userVal, correctVal);
+          if (ok) totalCor++;
+          sc[w.id][f.key] = { ok: ok, entered: userVal, correct: correctVal };
+        });
+      });
+    }
+
+    var pct = totalFields > 0 ? Math.round(totalCor / totalFields * 100) : 0;
+    var pass = pct >= 80;
+
+    setScores(function (prev) {
+      return _objectSpread(_objectSpread({}, prev), _defineProperty({}, stepId, sc));
+    });
+    setStepScores(function (prev) {
+      return _objectSpread(_objectSpread({}, prev), _defineProperty({}, stepId, pct));
+    });
+    setSubmitted(function (prev) {
+      return _objectSpread(_objectSpread({}, prev), _defineProperty({}, stepId, true));
+    });
+    setStepPassed(function (prev) {
+      return _objectSpread(_objectSpread({}, prev), _defineProperty({}, stepId, pass));
+    });
+  };
+
+  var handleRetry = function (stepId) {
+    var st = getStep(stepId);
+    var fields = stepFields[stepId] || [];
+    setFormData(function (prev) {
+      var copy = _objectSpread({}, prev);
+      copy[stepId] = {};
+      if (st.scope === "single") {
+        copy[stepId]["WLD-001"] = {};
+        fields.forEach(function (f) { copy[stepId]["WLD-001"][f.key] = ""; });
+      } else {
+        welds.forEach(function (w) {
+          copy[stepId][w.id] = {};
+          fields.forEach(function (f) { copy[stepId][w.id][f.key] = ""; });
+        });
+      }
+      return copy;
+    });
+    setSubmitted(function (prev) {
+      var c = _objectSpread({}, prev);
+      delete c[stepId];
+      return c;
+    });
+    setScores(function (prev) {
+      var c = _objectSpread({}, prev);
+      delete c[stepId];
+      return c;
+    });
+    setStepScores(function (prev) {
+      var c = _objectSpread({}, prev);
+      delete c[stepId];
+      return c;
+    });
+    setStepPassed(function (prev) {
+      var c = _objectSpread({}, prev);
+      delete c[stepId];
+      return c;
+    });
+  };
+
+  // Tab navigation for table steps
+  var navToNext = function (stepId, ck) {
+    var fields = stepFields[stepId] || [];
+    var all = welds.flatMap(function (w) {
+      return fields.map(function (f) {
+        return w.id + "|" + f.key;
+      });
+    });
+    var idx = all.indexOf(ck);
+    var next = all[idx + 1];
+    if (next && inputRefs.current[stepId + "|" + next]) {
+      inputRefs.current[stepId + "|" + next].focus();
+    }
+  };
+
+  // Exercise complete handler
+  var handleExerciseComplete = function () {
+    if (!window.SUBMIT_URL) return;
+    setExerciseDone(true);
+    var lastStep = steps[steps.length - 1];
+    fetch(window.SUBMIT_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRFToken": window.CSRF_TOKEN || ""
+      },
+      body: JSON.stringify({
+        step: steps.length,
+        score: stepScores[lastStep.id],
+        passed: true,
+        response_data: {}
+      })
+    })
+    .then(function (r) { return r.json(); })
+    .then(function () {
+      var tierSlug = window.TIER_SLUG || "practitioner";
+      window.location.href = "/certifications/" + tierSlug + "/learn/";
+    })
+    .catch(function () {
+      var tierSlug = window.TIER_SLUG || "practitioner";
+      window.location.href = "/certifications/" + tierSlug + "/learn/";
+    });
+  };
+
+  // ── Button helper ────────────────────────────────────────────
+  var Btn = function (props) {
+    var variant = props.variant || "primary";
+    var s = {
+      primary: { background: amber, color: bg, border: "none" },
+      ghost: { background: "none", color: muted, border: "1px solid " + border },
+      success: { background: green, color: bg, border: "none" }
+    };
+    return React.createElement("button", {
+      onClick: props.onClick,
+      disabled: props.disabled || false,
+      style: _objectSpread(_objectSpread({}, s[variant] || s.primary), {
+        padding: "10px 20px",
+        cursor: props.disabled ? "not-allowed" : "pointer",
+        fontFamily: mono,
+        fontSize: "11px",
+        letterSpacing: "0.12em",
+        textTransform: "uppercase",
+        fontWeight: 600,
+        opacity: props.disabled ? 0.4 : 1
+      })
+    }, props.children);
+  };
+
+  // ── Weld Map SVG ─────────────────────────────────────────────
+  var renderWeldMap = function () {
+    var weldPositions = [
+      { x: 200, y: 80, label: welds[0] ? welds[0].id : "WLD-001" },
+      { x: 620, y: 80, label: welds[1] ? welds[1].id : "WLD-002" },
+      { x: 120, y: 280, label: welds[2] ? welds[2].id : "WLD-003" },
+      { x: 460, y: 320, label: welds[3] ? welds[3].id : "WLD-004" },
+      { x: 700, y: 280, label: welds[4] ? welds[4].id : "WLD-005" }
+    ];
+    return React.createElement("svg", {
+      viewBox: "0 0 860 440",
+      width: "100%",
+      style: { display: "block", fontFamily: "IBM Plex Mono, monospace" }
+    },
+      // Background
+      React.createElement("rect", { width: "860", height: "440", fill: "#0a0b09" }),
+      // Grid
+      React.createElement("g", { stroke: "#1e211a", strokeWidth: "0.5", strokeDasharray: "3,9" },
+        React.createElement("line", { x1: "0", y1: "110", x2: "860", y2: "110" }),
+        React.createElement("line", { x1: "0", y1: "220", x2: "860", y2: "220" }),
+        React.createElement("line", { x1: "0", y1: "330", x2: "860", y2: "330" }),
+        React.createElement("line", { x1: "215", y1: "0", x2: "215", y2: "440" }),
+        React.createElement("line", { x1: "430", y1: "0", x2: "430", y2: "440" }),
+        React.createElement("line", { x1: "645", y1: "0", x2: "645", y2: "440" })
+      ),
+      // Compressor box
+      React.createElement("rect", { x: "350", y: "160", width: "160", height: "100", fill: "#0f1812", stroke: "#1e3828", strokeWidth: "1.5", rx: "3" }),
+      React.createElement("line", { x1: "350", y1: "190", x2: "510", y2: "190", stroke: "#1c3024", strokeWidth: "0.8", strokeDasharray: "4,4" }),
+      React.createElement("line", { x1: "350", y1: "230", x2: "510", y2: "230", stroke: "#1c3024", strokeWidth: "0.8", strokeDasharray: "4,4" }),
+      React.createElement("text", { x: "395", y: "215", fill: "#2d5240", fontSize: "10", fontWeight: "700", letterSpacing: "0.1em" }, "COMP-A"),
+      React.createElement("text", { x: "400", y: "227", fill: "#233d30", fontSize: "8" }, "TRAIN A"),
+      // Pipe runs
+      React.createElement("line", { x1: "80", y1: "120", x2: "350", y2: "120", stroke: steel, strokeWidth: "4" }),
+      React.createElement("line", { x1: "510", y1: "120", x2: "780", y2: "120", stroke: steel, strokeWidth: "4" }),
+      React.createElement("line", { x1: "80", y1: "320", x2: "350", y2: "320", stroke: steel, strokeWidth: "4" }),
+      React.createElement("line", { x1: "510", y1: "320", x2: "780", y2: "320", stroke: steel, strokeWidth: "4" }),
+      React.createElement("line", { x1: "350", y1: "210", x2: "80", y2: "210", stroke: steel, strokeWidth: "3", strokeDasharray: "8,4" }),
+      // Weld callout boxes
+      weldPositions.map(function (wp, i) {
+        var w = welds[i];
+        var desc = w ? (w.size || "") + " " + (w.type || "") : "";
+        return React.createElement("g", { key: wp.label },
+          // Leader line
+          React.createElement("line", {
+            x1: wp.x + 40, y1: wp.y + 40,
+            x2: wp.x + 40, y2: wp.y < 200 ? wp.y + 60 : wp.y - 10,
+            stroke: "#3a556a", strokeWidth: "0.8", strokeDasharray: "2,3"
+          }),
+          // Diamond symbol
+          React.createElement("polygon", {
+            points: (wp.x + 40) + "," + (wp.y < 200 ? wp.y + 60 : wp.y - 10) + " " + (wp.x + 44) + "," + (wp.y < 200 ? wp.y + 66 : wp.y - 16) + " " + (wp.x + 40) + "," + (wp.y < 200 ? wp.y + 72 : wp.y - 22) + " " + (wp.x + 36) + "," + (wp.y < 200 ? wp.y + 66 : wp.y - 16),
+            fill: "none", stroke: amber, strokeWidth: "1"
+          }),
+          // Callout box
+          React.createElement("rect", {
+            x: wp.x, y: wp.y, width: 80, height: 38,
+            fill: "rgba(22,23,20,0.95)", stroke: amber, strokeWidth: "1", rx: "2"
+          }),
+          React.createElement("text", {
+            x: wp.x + 40, y: wp.y + 15,
+            fill: amber, fontSize: "9", fontWeight: "700", textAnchor: "middle", letterSpacing: "0.08em"
+          }, wp.label),
+          React.createElement("text", {
+            x: wp.x + 40, y: wp.y + 28,
+            fill: muted, fontSize: "7", textAnchor: "middle"
+          }, desc)
+        );
+      }),
+      // Title block
+      React.createElement("rect", { x: "580", y: "370", width: "260", height: "55", fill: "#111410", stroke: "#1e211a", strokeWidth: "1" }),
+      React.createElement("text", { x: "595", y: "388", fill: muted, fontSize: "7", letterSpacing: "0.1em" }, "WELD MAP"),
+      React.createElement("text", { x: "595", y: "400", fill: white, fontSize: "9", fontWeight: "700" }, CFG.scenario ? CFG.scenario.project || "" : ""),
+      React.createElement("text", { x: "595", y: "412", fill: muted, fontSize: "7" }, CFG.scenario ? CFG.scenario.system || "" : ""),
+      React.createElement("text", { x: "595", y: "422", fill: "#2d5240", fontSize: "6.5" }, welds.length + " WELDS IDENTIFIED")
+    );
+  };
+
+  // ── Reference Panel: WPS Docs ──────────────────────────────
+  var renderWpsDocs = function () {
+    var wps = wpss.find(function (w) { return (w.id || w.wps_no) === activeWps; }) || wpss[0] || {};
+    var wpsFields = [];
+    Object.keys(wps).forEach(function (k) {
+      if (k !== "id" && k !== "chemistry" && k !== "mechanical") {
+        wpsFields.push([k.replace(/_/g, " "), wps[k]]);
+      }
+    });
+    return React.createElement("div", null,
+      React.createElement("div", { style: { display: "flex", gap: "4px", marginBottom: "10px", flexWrap: "wrap" } },
+        wpss.map(function (w) {
+          var wid = w.id || w.wps_no || "wps";
+          return React.createElement("button", {
+            key: wid,
+            onClick: function () { setActiveWps(wid); },
+            style: {
+              background: activeWps === wid ? "rgba(212,131,42,0.15)" : "none",
+              border: "1px solid " + (activeWps === wid ? amber : border),
+              color: activeWps === wid ? amber : muted,
+              cursor: "pointer", padding: "5px 10px", fontFamily: mono,
+              fontSize: "8px", letterSpacing: "0.1em", textTransform: "uppercase"
+            }
+          }, w.wps_no || wid);
+        })
+      ),
+      React.createElement("div", { style: { background: surf, border: "1px solid " + border } },
+        wpsFields.map(function (pair, i) {
+          return React.createElement("div", {
+            key: i,
+            style: {
+              display: "grid", gridTemplateColumns: "160px 1fr",
+              borderBottom: i < wpsFields.length - 1 ? "1px solid " + border : "none"
+            }
+          },
+            React.createElement("div", {
+              style: { padding: "5px 10px", background: surf2, borderRight: "1px solid " + border, color: muted, fontSize: "8px", letterSpacing: "0.06em", textTransform: "uppercase", fontWeight: 600 }
+            }, pair[0]),
+            React.createElement("div", {
+              style: { padding: "5px 10px", color: white, fontSize: "10px" }
+            }, typeof pair[1] === "object" ? JSON.stringify(pair[1]) : String(pair[1] || ""))
+          );
+        })
+      )
+    );
+  };
+
+  // ── Reference Panel: WQRs ──────────────────────────────────
+  var renderWqrs = function () {
+    var welder = welders.find(function (w) { return (w.id || w.stamp) === activeWelder; }) || welders[0] || {};
+    var welderFields = [];
+    Object.keys(welder).forEach(function (k) {
+      if (k !== "id") {
+        welderFields.push([k.replace(/_/g, " "), welder[k]]);
+      }
+    });
+    return React.createElement("div", null,
+      React.createElement("div", { style: { display: "flex", gap: "4px", marginBottom: "10px", flexWrap: "wrap" } },
+        welders.map(function (w) {
+          var wid = w.id || w.stamp || "welder";
+          return React.createElement("button", {
+            key: wid,
+            onClick: function () { setActiveWelder(wid); },
+            style: {
+              background: activeWelder === wid ? "rgba(212,131,42,0.15)" : "none",
+              border: "1px solid " + (activeWelder === wid ? amber : border),
+              color: activeWelder === wid ? amber : muted,
+              cursor: "pointer", padding: "5px 10px", fontFamily: mono,
+              fontSize: "8px", letterSpacing: "0.1em", textTransform: "uppercase"
+            }
+          }, w.name || w.stamp || wid);
+        })
+      ),
+      React.createElement("div", { style: { background: surf, border: "1px solid " + border } },
+        welderFields.map(function (pair, i) {
+          return React.createElement("div", {
+            key: i,
+            style: {
+              display: "grid", gridTemplateColumns: "160px 1fr",
+              borderBottom: i < welderFields.length - 1 ? "1px solid " + border : "none"
+            }
+          },
+            React.createElement("div", {
+              style: { padding: "5px 10px", background: surf2, borderRight: "1px solid " + border, color: muted, fontSize: "8px", letterSpacing: "0.06em", textTransform: "uppercase", fontWeight: 600 }
+            }, pair[0]),
+            React.createElement("div", {
+              style: { padding: "5px 10px", color: white, fontSize: "10px" }
+            }, Array.isArray(pair[1]) ? pair[1].join(", ") : (typeof pair[1] === "object" ? JSON.stringify(pair[1]) : String(pair[1] || "")))
+          );
+        })
+      )
+    );
+  };
+
+  // ── Reference Panel: Travelers ─────────────────────────────
+  var renderTravelers = function () {
+    var trav = travelers.find(function (t) { return (t.weld_id || t.id) === activeTraveler; }) || travelers[0] || {};
+    var travFields = [];
+    Object.keys(trav).forEach(function (k) {
+      if (k !== "pass_log" && k !== "id") {
+        travFields.push([k.replace(/_/g, " "), trav[k]]);
+      }
+    });
+    var passLog = trav.pass_log || [];
+    return React.createElement("div", null,
+      React.createElement("div", { style: { display: "flex", gap: "4px", marginBottom: "10px", flexWrap: "wrap" } },
+        travelers.map(function (t) {
+          var tid = t.weld_id || t.id || "trav";
+          return React.createElement("button", {
+            key: tid,
+            onClick: function () { setActiveTraveler(tid); },
+            style: {
+              background: activeTraveler === tid ? "rgba(212,131,42,0.15)" : "none",
+              border: "1px solid " + (activeTraveler === tid ? amber : border),
+              color: activeTraveler === tid ? amber : muted,
+              cursor: "pointer", padding: "5px 10px", fontFamily: mono,
+              fontSize: "8px", letterSpacing: "0.1em", textTransform: "uppercase"
+            }
+          }, tid);
+        })
+      ),
+      // Traveler fields
+      React.createElement("div", { style: { background: surf, border: "1px solid " + border, marginBottom: "10px" } },
+        travFields.map(function (pair, i) {
+          return React.createElement("div", {
+            key: i,
+            style: {
+              display: "grid", gridTemplateColumns: "160px 1fr",
+              borderBottom: i < travFields.length - 1 ? "1px solid " + border : "none"
+            }
+          },
+            React.createElement("div", {
+              style: { padding: "5px 10px", background: surf2, borderRight: "1px solid " + border, color: muted, fontSize: "8px", letterSpacing: "0.06em", textTransform: "uppercase", fontWeight: 600 }
+            }, pair[0]),
+            React.createElement("div", {
+              style: { padding: "5px 10px", color: white, fontSize: "10px" }
+            }, typeof pair[1] === "object" ? JSON.stringify(pair[1]) : String(pair[1] || ""))
+          );
+        })
+      ),
+      // Pass log table
+      passLog.length > 0 ? React.createElement("div", null,
+        React.createElement("div", { style: { color: amber, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", marginBottom: "6px" } }, "Pass Log"),
+        React.createElement("table", { style: { borderCollapse: "collapse", width: "100%", fontSize: "8.5px" } },
+          React.createElement("thead", null,
+            React.createElement("tr", { style: { background: "#111410" } },
+              Object.keys(passLog[0]).map(function (hk) {
+                return React.createElement("th", {
+                  key: hk,
+                  style: { padding: "5px 6px", textAlign: "left", color: amber, fontSize: "7.5px", letterSpacing: "0.08em", textTransform: "uppercase", borderBottom: "1px solid " + border, borderRight: "1px solid " + border, fontWeight: 600 }
+                }, hk.replace(/_/g, " "));
+              })
+            )
+          ),
+          React.createElement("tbody", null,
+            passLog.map(function (row, ri) {
+              return React.createElement("tr", { key: ri, style: { borderBottom: "1px solid " + border, background: ri % 2 === 0 ? "transparent" : "#1a1c18" } },
+                Object.keys(row).map(function (ck, ci) {
+                  return React.createElement("td", {
+                    key: ci,
+                    style: { padding: "4px 6px", color: textCol, fontSize: "9px", borderRight: "1px solid " + border }
+                  }, String(row[ck] || ""));
+                })
+              );
+            })
+          )
+        )
+      ) : null
+    );
+  };
+
+  // ── Reference Panel: Pipe MTRs ─────────────────────────────
+  var renderMtrPanel = function (items, activeId, setActiveId, panelLabel) {
+    var item = items.find(function (m) { return (m.id || m.cert_no) === activeId; }) || items[0] || {};
+    var chemistry = item.chemistry || [];
+    var mechanical = item.mechanical || [];
+    var fields = [];
+    Object.keys(item).forEach(function (k) {
+      if (k !== "chemistry" && k !== "mechanical" && k !== "id") {
+        fields.push([k.replace(/_/g, " "), item[k]]);
+      }
+    });
+
+    var renderDataTable = function (data, label) {
+      if (!data || data.length === 0) return null;
+      return React.createElement("div", { style: { marginBottom: "10px" } },
+        React.createElement("div", { style: { color: amber, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase", marginBottom: "4px" } }, label),
+        React.createElement("table", { style: { borderCollapse: "collapse", width: "100%", fontSize: "8.5px" } },
+          React.createElement("thead", null,
+            React.createElement("tr", { style: { background: "#111410" } },
+              (Array.isArray(data[0]) ? data[0] : Object.keys(data[0])).map(function (hdr, hi) {
+                return React.createElement("th", {
+                  key: hi,
+                  style: { padding: "4px 6px", textAlign: "left", color: amber, fontSize: "7px", letterSpacing: "0.06em", textTransform: "uppercase", borderBottom: "1px solid " + border, borderRight: "1px solid " + border, fontWeight: 600 }
+                }, String(hdr));
+              })
+            )
+          ),
+          React.createElement("tbody", null,
+            data.slice(1).map(function (row, ri) {
+              var cells = Array.isArray(row) ? row : Object.values(row);
+              return React.createElement("tr", { key: ri, style: { borderBottom: "1px solid " + border, background: ri % 2 === 0 ? "transparent" : "#1a1c18" } },
+                cells.map(function (cell, ci) {
+                  return React.createElement("td", {
+                    key: ci,
+                    style: { padding: "4px 6px", color: ri === 0 ? muted : textCol, fontSize: "8.5px", borderRight: "1px solid " + border }
+                  }, String(cell || ""));
+                })
+              );
+            })
+          )
+        )
+      );
+    };
+
+    return React.createElement("div", null,
+      React.createElement("div", { style: { display: "flex", gap: "4px", marginBottom: "10px", flexWrap: "wrap" } },
+        items.map(function (m) {
+          var mid = m.id || m.cert_no || "item";
+          return React.createElement("button", {
+            key: mid,
+            onClick: function () { setActiveId(mid); },
+            style: {
+              background: activeId === mid ? "rgba(212,131,42,0.15)" : "none",
+              border: "1px solid " + (activeId === mid ? amber : border),
+              color: activeId === mid ? amber : muted,
+              cursor: "pointer", padding: "5px 10px", fontFamily: mono,
+              fontSize: "8px", letterSpacing: "0.1em", textTransform: "uppercase"
+            }
+          }, m.cert_no || m.title || mid);
+        })
+      ),
+      // Fields
+      React.createElement("div", { style: { background: surf, border: "1px solid " + border, marginBottom: "10px" } },
+        fields.map(function (pair, i) {
+          return React.createElement("div", {
+            key: i,
+            style: {
+              display: "grid", gridTemplateColumns: "160px 1fr",
+              borderBottom: i < fields.length - 1 ? "1px solid " + border : "none"
+            }
+          },
+            React.createElement("div", {
+              style: { padding: "5px 10px", background: surf2, borderRight: "1px solid " + border, color: muted, fontSize: "8px", letterSpacing: "0.06em", textTransform: "uppercase", fontWeight: 600 }
+            }, pair[0]),
+            React.createElement("div", {
+              style: { padding: "5px 10px", color: white, fontSize: "10px", wordBreak: "break-word" }
+            }, Array.isArray(pair[1]) ? pair[1].join(", ") : (typeof pair[1] === "object" ? JSON.stringify(pair[1]) : String(pair[1] || "")))
+          );
+        })
+      ),
+      renderDataTable(chemistry, "Chemical Composition"),
+      renderDataTable(mechanical, "Mechanical Properties")
+    );
+  };
+
+  // ── Reference Panel ────────────────────────────────────────
+  var renderRefPanel = function () {
+    var refTabs = [
+      ["weldmap", "Weld Map"],
+      ["wps", "WPS Docs"],
+      ["wqr", "WQRs"],
+      ["travelers", "Travelers"],
+      ["pipemtrs", "Pipe MTRs"],
+      ["fillercerts", "Filler Certs"]
+    ];
+    return React.createElement("div", { style: { display: "flex", flexDirection: "column", height: "100%", overflow: "hidden" } },
+      // Tab bar
+      React.createElement("div", {
+        style: { display: "flex", borderBottom: "1px solid " + border, flexShrink: 0, overflowX: "auto" }
+      },
+        refTabs.map(function (rt) {
+          var rtId = rt[0], rtLabel = rt[1];
+          return React.createElement("button", {
+            key: rtId,
+            onClick: function () { setRefTab(rtId); },
+            style: {
+              background: "none", border: "none",
+              borderBottom: refTab === rtId ? "2px solid " + amber : "2px solid transparent",
+              color: refTab === rtId ? amber : muted,
+              cursor: "pointer", padding: "7px 10px", fontFamily: mono,
+              fontSize: "8px", letterSpacing: "0.1em", textTransform: "uppercase", whiteSpace: "nowrap"
+            }
+          }, rtLabel);
+        })
+      ),
+      // Content
+      React.createElement("div", { style: { flex: 1, overflowY: "auto", padding: "10px" } },
+        refTab === "weldmap" ? React.createElement("div", null,
+          React.createElement("div", { style: { color: muted, fontSize: "7.5px", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "6px" } },
+            (CFG.scenario && CFG.scenario.system ? CFG.scenario.system : "System") + " \u00B7 Weld Location Map"
+          ),
+          React.createElement("div", { style: { background: "#080d0a", border: "1px solid " + border } }, renderWeldMap())
+        ) : null,
+        refTab === "wps" ? React.createElement("div", null,
+          React.createElement("div", { style: { color: muted, fontSize: "7.5px", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "8px" } }, "Welding Procedure Specifications"),
+          renderWpsDocs()
+        ) : null,
+        refTab === "wqr" ? React.createElement("div", null,
+          React.createElement("div", { style: { color: muted, fontSize: "7.5px", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "8px" } }, "Welder Qualification Records"),
+          renderWqrs()
+        ) : null,
+        refTab === "travelers" ? React.createElement("div", null,
+          React.createElement("div", { style: { color: muted, fontSize: "7.5px", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "8px" } }, "Weld Travelers"),
+          renderTravelers()
+        ) : null,
+        refTab === "pipemtrs" ? React.createElement("div", null,
+          React.createElement("div", { style: { color: muted, fontSize: "7.5px", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "8px" } }, "Pipe Material Test Reports"),
+          renderMtrPanel(pipeMtrs, activePipeMtr, setActivePipeMtr, "Pipe MTRs")
+        ) : null,
+        refTab === "fillercerts" ? React.createElement("div", null,
+          React.createElement("div", { style: { color: muted, fontSize: "7.5px", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "8px" } }, "Filler Metal Certificates"),
+          renderMtrPanel(fillerCerts, activeFillerCert, setActiveFillerCert, "Filler Certs")
+        ) : null
+      )
+    );
+  };
+
+  // ── Single-weld form (Steps 1-3) ──────────────────────────
+  var renderSingleWeldForm = function (stepId) {
+    var fields = getFieldsForStep(stepId);
+    var ans = answers[stepId] || {};
+    var weldAns = ans["WLD-001"] || ans;
+    var isSub = !!submitted[stepId];
+    var sc = scores[stepId] || {};
+    var pct = stepScores[stepId];
+    var pass = !!stepPassed[stepId];
+    var allFilled = fields.every(function (f) {
+      return formData[stepId] && formData[stepId]["WLD-001"] && formData[stepId]["WLD-001"][f.key] && formData[stepId]["WLD-001"][f.key].trim() !== "";
+    });
+
+    // Group by section
+    var sMap = {}, sOrder = [];
+    fields.forEach(function (f) {
+      var sec = f.section || "general";
+      if (!sMap[sec]) { sMap[sec] = []; sOrder.push(sec); }
+      sMap[sec].push(f);
+    });
+
+    var sectionColors = {
+      weld_identification: amber,
+      welding_procedure: "#8ab4c4",
+      welder_qualification: "#a0c8a0",
+      base_material: amber,
+      filler_material: "#c4a882",
+      preheat: "#8ab4c4",
+      visual_inspection: "#a0c8a0",
+      nde: amber,
+      general: muted
+    };
+
+    return React.createElement("div", { style: { fontFamily: mono } },
+      // Form header
+      React.createElement("div", {
+        style: { background: "rgba(212,131,42,0.08)", border: "1px solid " + border, borderTop: "2px solid " + amber, padding: "8px 12px", marginBottom: "12px" }
+      },
+        React.createElement("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "flex-start" } },
+          React.createElement("div", null,
+            React.createElement("div", { style: { color: amber, fontSize: "8px", letterSpacing: "0.18em", textTransform: "uppercase", marginBottom: "3px" } }, CFG.scenario && CFG.scenario.owner ? CFG.scenario.owner : ""),
+            React.createElement("div", { style: { color: white, fontSize: "12px", fontWeight: 700, letterSpacing: "0.04em" } }, "WELD INSPECTION LOG"),
+            React.createElement("div", { style: { color: muted, fontSize: "8px", marginTop: "2px" } }, currentStep.label || "Step")
+          ),
+          React.createElement("div", { style: { textAlign: "right" } },
+            React.createElement("div", { style: { color: muted, fontSize: "7.5px", textTransform: "uppercase", letterSpacing: "0.1em" } }, "Weld"),
+            React.createElement("div", { style: { color: amber, fontSize: "11px", fontWeight: 700 } }, "WLD-001"),
+            React.createElement("div", { style: { color: muted, fontSize: "7.5px", marginTop: "2px" } }, welds[0] ? welds[0].description || "" : "")
+          )
+        ),
+        React.createElement("div", {
+          style: { marginTop: "8px", padding: "6px 8px", background: "rgba(0,0,0,0.3)", border: "1px solid " + border, fontSize: "8.5px", color: "#8ab4c4", fontStyle: "italic" }
+        },
+          React.createElement("span", { style: { color: "#8ab4c4", fontWeight: 700, marginRight: "6px" } }, "INSTRUCTIONS:"),
+          currentStep.description || "Complete all fields using the reference documents in the right panel."
+        )
+      ),
+      // Score banner
+      isSub ? React.createElement("div", {
+        style: {
+          background: pass ? "rgba(82,163,102,0.1)" : "rgba(201,95,95,0.08)",
+          border: "1px solid " + (pass ? "rgba(82,163,102,0.3)" : "rgba(201,95,95,0.3)"),
+          padding: "9px 12px", marginBottom: "12px",
+          display: "flex", justifyContent: "space-between", alignItems: "center"
+        }
+      },
+        React.createElement("span", { style: { color: pass ? green : red, fontWeight: 700, fontSize: "12px" } },
+          currentStep.label + " ", pass ? "\u2713 PASSED" : "\u2717 NOT PASSED", " \u2014 ", pct, "%",
+          React.createElement("span", { style: { color: muted, fontSize: "9px", fontWeight: 400, marginLeft: "8px" } },
+            pass ? "Min. 80% required." : "Correct answers shown in green below."
+          )
+        ),
+        React.createElement("div", { style: { display: "flex", gap: "8px" } },
+          !pass ? React.createElement("button", {
+            onClick: function () { handleRetry(stepId); },
+            style: { background: "none", border: "1px solid " + border, color: muted, padding: "5px 10px", cursor: "pointer", fontFamily: mono, fontSize: "8px", letterSpacing: "0.1em", textTransform: "uppercase" }
+          }, "Retry") : null,
+          pass && stepIndex(stepId) < steps.length - 1 ? React.createElement("button", {
+            onClick: function () { setActiveStep(steps[stepIndex(stepId) + 1].id); },
+            style: { background: amber, color: bg, border: "none", padding: "7px 14px", cursor: "pointer", fontFamily: mono, fontSize: "9px", letterSpacing: "0.1em", textTransform: "uppercase", fontWeight: 700 }
+          }, "Proceed to Next Step \u2192") : null,
+          pass && stepIndex(stepId) === steps.length - 1 ? React.createElement("button", {
+            onClick: handleExerciseComplete,
+            style: { background: green, color: bg, border: "none", padding: "7px 14px", cursor: "pointer", fontFamily: mono, fontSize: "9px", letterSpacing: "0.1em", textTransform: "uppercase", fontWeight: 700 }
+          }, "Exercise Complete \u2713") : null
+        )
+      ) : null,
+      // Weld identification bar
+      React.createElement("div", {
+        style: { border: "1px solid " + border, marginBottom: "8px", background: surf }
+      },
+        React.createElement("div", { style: { padding: "5px 10px", background: "rgba(255,255,255,0.03)", borderBottom: "1px solid " + border } },
+          React.createElement("span", { style: { color: muted, fontSize: "7.5px", letterSpacing: "0.14em", textTransform: "uppercase" } },
+            "Weld Identification ",
+            React.createElement("span", { style: { color: muted, marginLeft: "8px" } }, "(from Weld Map \u2014 pre-populated)")
+          )
+        ),
+        React.createElement("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr" } },
+          [
+            ["Weld ID", welds[0] ? welds[0].id : "WLD-001"],
+            ["Type", welds[0] ? welds[0].type || "" : ""],
+            ["Size", welds[0] ? welds[0].size || "" : ""],
+            ["Joint Type", welds[0] ? welds[0].joint_type || "" : ""]
+          ].map(function (pair, i) {
+            return React.createElement("div", {
+              key: pair[0],
+              style: { padding: "6px 10px", borderRight: i < 3 ? "1px solid " + border : "none" }
+            },
+              React.createElement("div", { style: { color: muted, fontSize: "7px", letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: "2px" } }, pair[0]),
+              React.createElement("div", { style: { color: "#4a6a52", fontSize: "10px", fontWeight: 600 } }, pair[1])
+            );
+          })
+        )
+      ),
+      // Section-grouped fields
+      sOrder.map(function (secKey) {
+        var secFields = sMap[secKey];
+        var secColor = sectionColors[secKey] || muted;
+        return React.createElement("div", {
+          key: secKey,
+          style: { border: "1px solid " + border, marginBottom: "8px", background: surf }
+        },
+          React.createElement("div", {
+            style: { padding: "5px 10px", background: "rgba(255,255,255,0.03)", borderBottom: "1px solid " + border, borderLeft: "2px solid " + secColor }
+          },
+            React.createElement("span", { style: { color: secColor, fontSize: "7.5px", letterSpacing: "0.14em", textTransform: "uppercase" } },
+              secKey.replace(/_/g, " ")
+            )
+          ),
+          React.createElement("div", null,
+            secFields.map(function (field, fi) {
+              return React.createElement("div", {
+                key: field.key,
+                style: {
+                  display: "grid", gridTemplateColumns: "200px 1fr",
+                  borderBottom: fi < secFields.length - 1 ? "1px solid #1a1c18" : "none"
+                }
+              },
+                // Label column
+                React.createElement("div", {
+                  style: { padding: "6px 10px", background: surf2, borderRight: "1px solid " + border }
+                },
+                  React.createElement("div", { style: { display: "flex", alignItems: "center" } },
+                    React.createElement("span", {
+                      style: { color: textCol, fontSize: "7.5px", letterSpacing: "0.07em", textTransform: "uppercase", fontWeight: 600 }
+                    }, field.label),
+                    field.tooltip && !isSub ? React.createElement("span", { className: "tip-wrap" },
+                      React.createElement("span", { className: "tip-icon" }, "i"),
+                      React.createElement("span", { className: "tip-box" }, field.tooltip)
+                    ) : null
+                  ),
+                  React.createElement("div", {
+                    style: { color: "#8a9ea8", fontSize: "7px", lineHeight: 1.5, fontStyle: "italic", marginTop: "3px" }
+                  }, field.hint || "")
+                ),
+                // Input column — IIFE to avoid focus loss
+                React.createElement("div", null, (function () {
+                  var ck = "WLD-001|" + field.key;
+                  var fr = isSub && sc["WLD-001"] && sc["WLD-001"][field.key];
+                  var wrapStyle = isSub
+                    ? { outline: "1.5px solid " + (fr && fr.ok ? "rgba(82,163,102,0.4)" : "rgba(201,95,95,0.35)"), background: fr && fr.ok ? "rgba(82,163,102,0.08)" : "rgba(201,95,95,0.08)" }
+                    : { outline: "1px solid #2a4a2a", background: "rgba(42,74,42,0.08)", transition: "outline 0.15s" };
+                  return React.createElement("div", { className: "fdq-form-input-wrap", style: wrapStyle },
+                    React.createElement("input", {
+                      className: "fdq-form-input",
+                      ref: function (el) { if (el) inputRefs.current[stepId + "|" + ck] = el; },
+                      value: (formData[stepId] && formData[stepId]["WLD-001"] && formData[stepId]["WLD-001"][field.key]) || "",
+                      disabled: isSub,
+                      onChange: function (e) { updateField(stepId, "WLD-001", field.key, e.target.value); },
+                      placeholder: field.hint || "",
+                      style: {
+                        width: "100%", background: "transparent", border: "none", outline: "none",
+                        color: isSub ? (fr && fr.ok ? "#52a366" : "#c95f5f") : "#ede8df",
+                        padding: "5px 8px", fontSize: "10px", fontFamily: mono,
+                        cursor: isSub ? "default" : "text", boxSizing: "border-box"
+                      }
+                    }),
+                    isSub && fr && !fr.ok
+                      ? React.createElement("div", { style: { padding: "0 8px 4px", fontSize: "8px", color: "#52a366" } }, "\u2713 " + fr.correct)
+                      : null
+                  );
+                })())
+              );
+            })
+          )
+        );
+      }),
+      // Submit bar
+      !isSub ? React.createElement("div", {
+        style: { display: "flex", justifyContent: "space-between", alignItems: "center" }
+      },
+        React.createElement("span", { style: { color: muted, fontSize: "8px" } },
+          allFilled ? "All fields complete \u2014 ready to submit." : "Complete all fields to submit."
+        ),
+        React.createElement("button", {
+          onClick: function () { handleSubmitStep(stepId); },
+          disabled: !allFilled,
+          style: {
+            background: allFilled ? amber : "#232520",
+            color: allFilled ? bg : "#3d3f39",
+            border: "none", padding: "10px 22px",
+            cursor: allFilled ? "pointer" : "not-allowed",
+            fontFamily: mono, fontSize: "11px", letterSpacing: "0.12em",
+            textTransform: "uppercase", fontWeight: 600
+          }
+        }, "Submit Step")
+      ) : null
+    );
+  };
+
+  // ── All-weld table (Steps 4-5) ────────────────────────────
+  var renderAllWeldTable = function (stepId) {
+    var fields = getFieldsForStep(stepId);
+    var isSub = !!submitted[stepId];
+    var sc = scores[stepId] || {};
+    var pct = stepScores[stepId];
+    var pass = !!stepPassed[stepId];
+    var allFilled = welds.every(function (w) {
+      return fields.every(function (f) {
+        return formData[stepId] && formData[stepId][w.id] && formData[stepId][w.id][f.key] && formData[stepId][w.id][f.key].trim() !== "";
+      });
+    });
+
+    return React.createElement("div", { style: { fontFamily: mono } },
+      // Header info block
+      React.createElement("div", {
+        style: { background: surf, border: "1px solid " + border, borderTop: "2px solid " + amber, padding: "10px 12px", marginBottom: "10px", display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px" }
+      },
+        [
+          ["Project", CFG.scenario ? CFG.scenario.project || "" : ""],
+          ["System", CFG.scenario ? CFG.scenario.system || "" : ""],
+          ["Step", currentStep.label || ""],
+          ["Code", CFG.scenario ? CFG.scenario.code || "" : ""],
+          ["Service", CFG.scenario ? CFG.scenario.service || "" : ""],
+          ["Date", "___________"]
+        ].map(function (pair) {
+          return React.createElement("div", { key: pair[0] },
+            React.createElement("div", { style: { color: amber, fontSize: "7px", letterSpacing: "0.14em", textTransform: "uppercase", marginBottom: "1px" } }, pair[0]),
+            React.createElement("div", { style: { color: white, fontSize: "10px" } }, pair[1])
+          );
+        })
+      ),
+      // Score banner
+      isSub ? React.createElement("div", {
+        style: {
+          background: pass ? "rgba(82,163,102,0.12)" : "rgba(201,95,95,0.1)",
+          border: "1px solid " + (pass ? "rgba(82,163,102,0.35)" : "rgba(201,95,95,0.3)"),
+          padding: "9px 12px", marginBottom: "10px",
+          display: "flex", justifyContent: "space-between", alignItems: "center"
+        }
+      },
+        React.createElement("span", { style: { color: pass ? green : red, fontWeight: 700, fontSize: "12px" } },
+          pass ? "\u2713 PASSED" : "\u2717 NOT PASSED", " \u2014 ", pct, "%",
+          React.createElement("span", { style: { color: muted, fontSize: "10px", fontWeight: 400, marginLeft: "8px" } },
+            pass ? "Min. 80% required." : "Correct answers shown below cells."
+          )
+        ),
+        React.createElement("div", { style: { display: "flex", gap: "8px" } },
+          !pass ? React.createElement("button", {
+            onClick: function () { handleRetry(stepId); },
+            style: { background: "none", border: "1px solid " + border, color: muted, padding: "5px 10px", cursor: "pointer", fontFamily: mono, fontSize: "9px", letterSpacing: "0.1em", textTransform: "uppercase" }
+          }, "Retry") : null,
+          pass && stepIndex(stepId) < steps.length - 1 ? React.createElement("button", {
+            onClick: function () { setActiveStep(steps[stepIndex(stepId) + 1].id); },
+            style: { background: amber, color: bg, border: "none", padding: "7px 14px", cursor: "pointer", fontFamily: mono, fontSize: "9px", letterSpacing: "0.1em", textTransform: "uppercase", fontWeight: 700 }
+          }, "Next Step \u2192") : null,
+          pass && stepIndex(stepId) === steps.length - 1 ? React.createElement("button", {
+            onClick: handleExerciseComplete,
+            style: { background: green, color: bg, border: "none", padding: "7px 14px", cursor: "pointer", fontFamily: mono, fontSize: "9px", letterSpacing: "0.1em", textTransform: "uppercase", fontWeight: 700 }
+          }, "Exercise Complete \u2713") : null
+        )
+      ) : null,
+      // Table
+      React.createElement("div", { style: { overflowX: "auto", background: surf, border: "1px solid " + border } },
+        React.createElement("table", { style: { borderCollapse: "collapse", fontSize: "11px", width: "100%" } },
+          // Thead
+          React.createElement("thead", null,
+            React.createElement("tr", { style: { background: surf2 } },
+              // Weld ID column
+              React.createElement("th", {
+                style: { padding: "7px 8px", textAlign: "left", color: muted, fontSize: "8px", letterSpacing: "0.08em", textTransform: "uppercase", borderBottom: "2px solid " + border, borderRight: "1px solid " + border, fontWeight: 500, whiteSpace: "nowrap" }
+              }, "Weld"),
+              // Weld description column
+              React.createElement("th", {
+                style: { padding: "7px 8px", textAlign: "left", color: muted, fontSize: "8px", letterSpacing: "0.08em", textTransform: "uppercase", borderBottom: "2px solid " + border, borderRight: "1px solid " + border, fontWeight: 500, whiteSpace: "nowrap" }
+              }, "Description"),
+              // Input columns
+              fields.map(function (col, ci) {
+                return React.createElement("th", {
+                  key: col.key,
+                  style: { padding: "7px 8px", textAlign: "left", color: amber, fontSize: "8px", letterSpacing: "0.08em", textTransform: "uppercase", borderBottom: "2px solid " + amber, borderRight: ci < fields.length - 1 ? "1px solid " + border : "none", fontWeight: 600, whiteSpace: "pre-line", minWidth: "72px" }
+                }, col.label);
+              })
+            )
+          ),
+          // Tbody
+          React.createElement("tbody", null,
+            welds.map(function (w, ri) {
+              return React.createElement("tr", {
+                key: w.id,
+                style: { borderBottom: "1px solid " + border, background: ri % 2 === 0 ? "transparent" : "#1a1c18" }
+              },
+                // Weld ID cell
+                React.createElement("td", {
+                  style: { padding: "0 8px", height: "42px", color: amber, fontWeight: 600, borderRight: "1px solid " + border, whiteSpace: "nowrap", fontSize: "11px" }
+                }, w.id),
+                // Description cell
+                React.createElement("td", {
+                  style: { padding: "0 8px", color: textCol, fontSize: "11px", borderRight: "1px solid " + border, whiteSpace: "nowrap" }
+                }, w.description || w.type || ""),
+                // Input cells
+                fields.map(function (col, ci) {
+                  var ck = w.id + "|" + col.key;
+                  var fr = isSub && sc[w.id] && sc[w.id][col.key];
+                  var outlineColor = "transparent", cellBg = "transparent";
+                  if (activeCell === stepId + "|" + ck && !isSub) {
+                    outlineColor = amber;
+                    cellBg = "rgba(212,131,42,0.08)";
+                  }
+                  if (isSub) {
+                    cellBg = fr && fr.ok ? "rgba(82,163,102,0.1)" : "rgba(201,95,95,0.08)";
+                    outlineColor = fr && fr.ok ? "rgba(82,163,102,0.4)" : "rgba(201,95,95,0.4)";
+                  }
+                  return React.createElement("td", {
+                    key: col.key,
+                    style: { padding: 0, borderRight: ci < fields.length - 1 ? "1px solid " + border : "none" }
+                  },
+                    React.createElement("div", {
+                      style: { outline: "2px solid " + outlineColor, outlineOffset: "-2px", background: cellBg, minHeight: "42px", display: "flex", flexDirection: "column", justifyContent: "center" }
+                    },
+                      React.createElement("input", {
+                        ref: function (el) { if (el) inputRefs.current[stepId + "|" + ck] = el; },
+                        value: (formData[stepId] && formData[stepId][w.id] && formData[stepId][w.id][col.key]) || "",
+                        disabled: isSub,
+                        onChange: function (e) { updateField(stepId, w.id, col.key, e.target.value); },
+                        onFocus: function () { setActiveCell(stepId + "|" + ck); },
+                        onBlur: function () { setActiveCell(null); },
+                        onKeyDown: function (e) {
+                          if (e.key === "Tab" || e.key === "Enter") {
+                            e.preventDefault();
+                            navToNext(stepId, ck);
+                          }
+                        },
+                        placeholder: col.hint || "",
+                        style: {
+                          width: "100%", background: "transparent", border: "none", outline: "none",
+                          color: isSub ? (fr && fr.ok ? green : red) : white,
+                          padding: "8px", fontSize: "11px", fontFamily: mono,
+                          cursor: isSub ? "default" : "text", boxSizing: "border-box"
+                        }
+                      }),
+                      isSub && fr && !fr.ok ? React.createElement("div", {
+                        style: { padding: "0 8px 5px", fontSize: "8px", color: green, letterSpacing: "0.06em" }
+                      }, "\u2713 " + fr.correct) : null
+                    )
+                  );
+                })
+              );
+            })
+          )
+        )
+      ),
+      // Footer
+      React.createElement("div", { style: { color: "#3d3f39", fontSize: "8px", marginTop: "5px", letterSpacing: "0.1em" } }, "TAB or ENTER to advance"),
+      React.createElement("div", { style: { marginTop: "14px", display: "flex", justifyContent: "flex-end", gap: "10px", alignItems: "center" } },
+        !isSub && !allFilled ? React.createElement("span", { style: { color: muted, fontSize: "9px" } }, "Fill all cells to submit") : null,
+        !isSub ? React.createElement(Btn, {
+          onClick: function () { handleSubmitStep(stepId); },
+          disabled: !allFilled
+        }, "Submit Step") : null
+      )
+    );
+  };
+
+  // ── Determine which form pane to render ────────────────────
+  var renderFormPane = function () {
+    if (!currentStep.id) return null;
+    if (currentStep.scope === "single") {
+      return renderSingleWeldForm(activeStep);
+    } else {
+      return renderAllWeldTable(activeStep);
+    }
+  };
+
+  // ── Overall score display ──────────────────────────────────
+  var overallScore = null;
+  var overallPassed = false;
+  var completedSteps = steps.filter(function (s) { return submitted[s.id]; });
+  if (completedSteps.length > 0) {
+    var totalPct = 0;
+    completedSteps.forEach(function (s) { totalPct += (stepScores[s.id] || 0); });
+    overallScore = Math.round(totalPct / completedSteps.length);
+    overallPassed = completedSteps.length === steps.length && steps.every(function (s) { return stepPassed[s.id]; });
+  }
+
+  // ── MAIN RENDER ────────────────────────────────────────────
+  return React.createElement("div", {
+    style: { fontFamily: mono, background: bg, color: textCol, height: "100vh", display: "flex", flexDirection: "column", fontSize: "13px" }
+  },
+    // ── Header bar ─────────────────────────────────────────────
+    React.createElement("div", {
+      style: { background: surf, borderBottom: "1px solid " + border, padding: "10px 20px", display: "flex", justifyContent: "space-between", alignItems: "center", flexShrink: 0 }
+    },
+      React.createElement("div", null,
+        React.createElement("div", { style: { color: amber, fontSize: "8px", letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: "2px" } }, "FDQ Tier 1 \u00B7 Practical Exercise"),
+        React.createElement("div", { style: { color: white, fontSize: "16px", fontWeight: 900, textTransform: "uppercase", letterSpacing: "0.06em" } }, "Weld Inspection Log")
+      ),
+      React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "16px" } },
+        overallScore !== null ? React.createElement("div", { style: { textAlign: "right" } },
+          React.createElement("div", { style: { fontSize: "28px", fontWeight: 900, color: overallPassed ? green : completedSteps.length > 0 ? amber : muted, lineHeight: 1 } }, overallScore, "%"),
+          React.createElement("div", { style: { fontSize: "8px", color: overallPassed ? green : muted, letterSpacing: "0.14em", textTransform: "uppercase" } },
+            overallPassed ? "\u2713 ALL PASSED" : completedSteps.length + "/" + steps.length + " STEPS"
+          )
+        ) : null,
+        React.createElement("div", { style: { display: "flex", borderLeft: "1px solid " + border, paddingLeft: "16px", gap: "4px" } },
+          [["brief", "Scenario"], ["work", "Work View"]].map(function (pair) {
+            var id = pair[0], label = pair[1];
+            return React.createElement("button", {
+              key: id,
+              onClick: function () { setTab(id); },
+              style: {
+                background: tab === id ? "rgba(212,131,42,0.12)" : "none",
+                border: "1px solid " + (tab === id ? amber : border),
+                color: tab === id ? amber : muted,
+                cursor: "pointer", padding: "6px 14px", fontFamily: mono,
+                fontSize: "9px", letterSpacing: "0.12em", textTransform: "uppercase"
+              }
+            }, label);
+          })
+        )
+      )
+    ),
+    // ── Brief tab ──────────────────────────────────────────────
+    tab === "brief" ? React.createElement("div", {
+      style: { flex: 1, overflowY: "auto", padding: "20px", maxWidth: "860px", margin: "0 auto", width: "100%" }
+    },
+      // Brief box
+      React.createElement("div", {
+        style: { background: surf, border: "1px solid " + border, borderLeft: "3px solid " + amber, padding: "18px 20px", marginBottom: "16px" }
+      },
+        React.createElement("div", { style: { color: amber, fontSize: "9px", letterSpacing: "0.2em", textTransform: "uppercase", marginBottom: "10px" } }, "Exercise Brief"),
+        React.createElement("p", { style: { fontFamily: "sans-serif", fontSize: "14px", lineHeight: 1.85, margin: 0 } },
+          "You are the QC Inspector on ",
+          React.createElement("strong", { style: { color: white } }, CFG.scenario ? CFG.scenario.project || "" : ""),
+          ". Welding for ",
+          React.createElement("strong", { style: { color: white } }, CFG.scenario ? CFG.scenario.system || "" : ""),
+          " is complete. Switch to ",
+          React.createElement("strong", { style: { color: white } }, "Work View"),
+          " to access the weld map, WPS documents, welder qualifications, weld travelers, and material test reports \u2014 all alongside the fillable inspection log. Complete each step in sequence: review weld data, verify procedures, confirm materials, then inspect all welds. Inspector: ",
+          React.createElement("strong", { style: { color: white } }, CFG.scenario ? CFG.scenario.inspector || "Inspector" : "Inspector"),
+          "."
+        )
+      ),
+      // Scenario info grid
+      React.createElement("div", {
+        style: { background: surf, border: "1px solid " + border, display: "grid", gridTemplateColumns: "1fr 1fr", marginBottom: "20px" }
+      },
+        [
+          ["Project", CFG.scenario ? CFG.scenario.project || "" : ""],
+          ["System", CFG.scenario ? CFG.scenario.system || "" : ""],
+          ["Code", CFG.scenario ? CFG.scenario.code || "" : ""],
+          ["Service", CFG.scenario ? CFG.scenario.service || "" : ""],
+          ["Contractor", CFG.scenario ? CFG.scenario.contractor || "" : ""],
+          ["Inspector", CFG.scenario ? CFG.scenario.inspector || "" : ""],
+          ["Total Welds", String(welds.length)],
+          ["Steps", String(steps.length)]
+        ].map(function (pair, i) {
+          return React.createElement("div", {
+            key: pair[0],
+            style: { padding: "10px 14px", borderBottom: "1px solid " + border, borderRight: i % 2 === 0 ? "1px solid " + border : "none", display: "flex", gap: "12px" }
+          },
+            React.createElement("div", { style: { color: amber, fontSize: "8px", letterSpacing: "0.1em", textTransform: "uppercase", width: "120px", flexShrink: 0 } }, pair[0]),
+            React.createElement("div", { style: { color: white, fontSize: "12px" } }, pair[1])
+          );
+        })
+      ),
+      // 5-weld summary table
+      React.createElement("div", {
+        style: { background: surf, border: "1px solid " + border, marginBottom: "20px" }
+      },
+        React.createElement("div", { style: { padding: "8px 12px", background: surf2, borderBottom: "1px solid " + border } },
+          React.createElement("span", { style: { color: amber, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase" } }, "Weld Summary")
+        ),
+        React.createElement("table", { style: { borderCollapse: "collapse", width: "100%", fontSize: "10px" } },
+          React.createElement("thead", null,
+            React.createElement("tr", { style: { background: "#111410" } },
+              ["Weld ID", "Type", "Size", "Joint", "WPS", "Welder"].map(function (h, hi) {
+                return React.createElement("th", {
+                  key: h,
+                  style: { padding: "6px 10px", textAlign: "left", color: amber, fontSize: "7.5px", letterSpacing: "0.08em", textTransform: "uppercase", borderBottom: "1px solid " + border, borderRight: hi < 5 ? "1px solid " + border : "none", fontWeight: 600 }
+                }, h);
+              })
+            )
+          ),
+          React.createElement("tbody", null,
+            welds.map(function (w, ri) {
+              return React.createElement("tr", {
+                key: w.id,
+                style: { borderBottom: "1px solid " + border, background: ri % 2 === 0 ? "transparent" : "#1a1c18" }
+              },
+                React.createElement("td", { style: { padding: "5px 10px", color: amber, fontWeight: 600, borderRight: "1px solid " + border } }, w.id),
+                React.createElement("td", { style: { padding: "5px 10px", color: textCol, borderRight: "1px solid " + border } }, w.type || ""),
+                React.createElement("td", { style: { padding: "5px 10px", color: textCol, borderRight: "1px solid " + border } }, w.size || ""),
+                React.createElement("td", { style: { padding: "5px 10px", color: textCol, borderRight: "1px solid " + border } }, w.joint_type || ""),
+                React.createElement("td", { style: { padding: "5px 10px", color: textCol, borderRight: "1px solid " + border } }, w.wps || ""),
+                React.createElement("td", { style: { padding: "5px 10px", color: textCol } }, w.welder || "")
+              );
+            })
+          )
+        )
+      ),
+      React.createElement(Btn, { onClick: function () { setTab("work"); } }, "Open Work View \u2192")
+    ) : null,
+    // ── Work View ──────────────────────────────────────────────
+    tab === "work" ? React.createElement("div", {
+      style: { flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }
+    },
+      // Step indicator bar
+      React.createElement("div", {
+        style: { display: "flex", background: surf2, borderBottom: "1px solid " + border, flexShrink: 0, padding: "0 16px", overflowX: "auto" }
+      },
+        steps.map(function (st, i) {
+          var unlocked = isStepUnlocked(st.id);
+          var isActive = activeStep === st.id;
+          return React.createElement("div", {
+            key: st.id,
+            onClick: function () {
+              if (unlocked) setActiveStep(st.id);
+            },
+            style: {
+              display: "flex", alignItems: "center", gap: "8px", padding: "8px 14px",
+              cursor: unlocked ? "pointer" : "not-allowed",
+              opacity: unlocked ? 1 : 0.35,
+              borderBottom: isActive ? "2px solid " + amber : "2px solid transparent",
+              marginBottom: "-1px", whiteSpace: "nowrap"
+            }
+          },
+            // Step number circle
+            React.createElement("div", {
+              style: {
+                width: "18px", height: "18px", borderRadius: "50%",
+                background: isActive ? "rgba(212,131,42,0.2)" : stepPassed[st.id] ? "rgba(82,163,102,0.2)" : "transparent",
+                border: "1px solid " + (isActive ? amber : stepPassed[st.id] ? green : border),
+                display: "flex", alignItems: "center", justifyContent: "center"
+              }
+            },
+              React.createElement("span", {
+                style: { color: isActive ? amber : stepPassed[st.id] ? green : muted, fontSize: "8px", fontWeight: 700 }
+              }, stepPassed[st.id] ? "\u2713" : String(i + 1))
+            ),
+            // Step label
+            React.createElement("div", null,
+              React.createElement("div", {
+                style: { color: isActive ? amber : stepPassed[st.id] ? green : muted, fontSize: "8.5px", fontWeight: 700, letterSpacing: "0.06em" }
+              }, "Step " + (i + 1) + " of " + steps.length),
+              React.createElement("div", { style: { color: "#3a3d37", fontSize: "7px", letterSpacing: "0.04em" } }, st.label || "")
+            ),
+            i < steps.length - 1 ? React.createElement("div", { style: { color: border, fontSize: "12px", marginLeft: "6px" } }, "\u203A") : null
+          );
+        })
+      ),
+      // Split pane: 52% form / 48% ref
+      React.createElement("div", { style: { flex: 1, display: "flex", overflow: "hidden" } },
+        // Left pane: form
+        React.createElement("div", {
+          style: { width: "52%", borderRight: "1px solid " + border, display: "flex", flexDirection: "column", overflow: "hidden" }
+        },
+          // Form header
+          React.createElement("div", {
+            style: { padding: "7px 12px", background: surf2, borderBottom: "1px solid " + border, flexShrink: 0 }
+          },
+            React.createElement("span", {
+              style: { color: muted, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase" }
+            }, (currentStep.label || "Step") + " \u00B7 " + (currentStep.scope === "single" ? "WLD-001" : "All Welds"))
+          ),
+          // Form content
+          React.createElement("div", { style: { flex: 1, overflowY: "auto", padding: "12px" } },
+            renderFormPane()
+          )
+        ),
+        // Right pane: reference panel
+        React.createElement("div", {
+          style: { flex: 1, display: "flex", flexDirection: "column", overflow: "hidden" }
+        },
+          React.createElement("div", {
+            style: { padding: "7px 12px", background: surf2, borderBottom: "1px solid " + border, flexShrink: 0 }
+          },
+            React.createElement("span", {
+              style: { color: muted, fontSize: "8px", letterSpacing: "0.14em", textTransform: "uppercase" }
+            }, "Reference \u00B7 Scenario Documents")
+          ),
+          React.createElement("div", { style: { flex: 1, overflow: "hidden" } },
+            renderRefPanel()
+          )
+        )
+      )
+    ) : null
+  );
+}
+
 (function() {
   var mountEl = document.getElementById('exercise-root') || document.getElementById('root');
   var root = ReactDOM.createRoot(mountEl);
   var exerciseType = window.EXERCISE_TYPE || 'torque_form';
   if (exerciseType === 'weld_log') {
-    root.render(
-      React.createElement('div', {
-        style: {
-          fontFamily: "'IBM Plex Mono', monospace",
-          background: '#0e0f0d',
-          color: '#d4832a',
-          height: '100vh',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '16px'
-        }
-      },
-        React.createElement('div', {
-          style: { fontSize: '11px', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#6e6b63' }
-        }, 'FDQ Tier 1 · Module 3 Gate Exercise'),
-        React.createElement('div', {
-          style: { fontSize: '22px', fontWeight: 900, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#ede8df' }
-        }, 'Weld Inspection Log'),
-        React.createElement('div', {
-          style: {
-            marginTop: '24px',
-            padding: '16px 24px',
-            background: '#161714',
-            border: '1px solid #2a2d27',
-            borderLeft: '3px solid #d4832a',
-            fontSize: '13px',
-            color: '#6e6b63',
-            maxWidth: '480px',
-            textAlign: 'center',
-            lineHeight: 1.7
-          }
-        }, 'This exercise is under construction. The scenario data is loaded and ready — the React component will be built in the next development session.')
-      )
-    );
+    root.render(React.createElement(WeldLog));
   } else {
     root.render(React.createElement(TorqueLog));
   }

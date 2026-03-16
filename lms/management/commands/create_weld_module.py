@@ -814,9 +814,6 @@ class Command(BaseCommand):
                 "wps_verification": [
                     {"key": "wps_number", "label": "Applicable WPS No.", "section": "identification", "hint": "WPS-XX-XXX Rev. X \u2014 match OD, WT, grade, process, and position", "tooltip": "Check OD range, wall range, base metal grade, process, and position against both WPS documents."},
                     {"key": "welding_process", "label": "Welding Process(es)", "section": "identification", "hint": "e.g. SMAW/FCAW \u2014 as listed on the WPS for this joint", "tooltip": "Record the process(es) on the WPS. Multi-process joints list both."},
-                    {"key": "positions_covered", "label": "Positions Covered by WPS", "section": "coverage", "hint": "List all positions on this WPS e.g. 1G, 2G, 5G", "tooltip": "Copy the positions list from the WPS. Confirm 5G is included for this joint."},
-                    {"key": "od_range", "label": "OD Range Covered", "section": "coverage", "hint": "e.g. 4.500\" and above \u2014 from WPS essential variables", "tooltip": "The WPS must cover the OD of the pipe being welded. Find this in the essential variables section."},
-                    {"key": "wall_range", "label": "Wall Thickness Range", "section": "coverage", "hint": "e.g. 0.188\" to 0.750\" \u2014 from WPS essential variables", "tooltip": "The actual wall thickness must fall within this range."},
                     {"key": "base_metal_covered", "label": "Base Metal Covered", "section": "coverage", "hint": "e.g. API 5L X52 through X70 \u2014 from WPS base metal section", "tooltip": "The pipe grade must fall within the base metal range qualified by the WPS."},
                     {"key": "preheat_min", "label": "Min. Preheat (\u00b0F) \u2014 this WT", "section": "parameters", "hint": "Numeric \u2014 from WPS preheat table for WT \u2264 0.500\"", "tooltip": "The WPS has a tiered preheat requirement by wall thickness. Use the row that covers 0.375\"."},
                     {"key": "interpass_max", "label": "Max. Interpass Temp (\u00b0F)", "section": "parameters", "hint": "Numeric \u2014 from WPS interpass temperature limit", "tooltip": "The ceiling temperature between passes. A required entry on every joint traveler."},
@@ -872,9 +869,6 @@ class Command(BaseCommand):
                     "WLD-001": {
                         "wps_number": "WPS-CS-001 Rev. 4",
                         "welding_process": "SMAW/FCAW",
-                        "positions_covered": "1G, 2G, 5G",
-                        "od_range": "4.500\" and above",
-                        "wall_range": "0.188\" to 0.750\"",
                         "base_metal_covered": "API 5L X52 through X70",
                         "preheat_min": "100",
                         "interpass_max": "400",
