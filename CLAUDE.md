@@ -73,3 +73,20 @@ Split settings in `FDQ/settings/`:
 - `/billing/` — Stripe checkout and webhooks
 - `/admin/` — Django admin
 - `/ckeditor5/` — CKEditor file uploads
+
+## Curriculum
+
+The Tier 1 body of knowledge is in `docs/curriculum/tier1-body-of-knowledge.md`: 12 modules, 220 testable statements. It is the standard every Tier 1 lesson, video script, quiz question and gate exercise is written against. The file is an export of the working copy (the Claude Doc linked at the top of the file). Change the doc and re-export; do not edit the markdown by hand.
+
+### Statement IDs
+
+- Each statement's number is its permanent ID. The full ID adds the tier: `T1.6.12` is Tier 1, Module 6, statement 12. In the file, statements are list items that start `- <module>.<n> `.
+- A new statement takes the next unused number in its module. A removed ID is retired and never reused. A statement that changes the skill it tests, or moves modules, gets a new ID and the old one is retired.
+- Every quiz question, video section and gate exercise carries `statement_ids`, a list of the full IDs it tests (for example `["T1.6.4", "T1.6.6"]`). Video question exports use `{statement_ids, section, order, text, choice_a, choice_b, choice_c, choice_d, correct_answer, explanation}`.
+- Any statement with no question tagged to it is a coverage gap. When producing questions for a module, list the module's statements that have none.
+
+### Content rules
+
+- Tier 1 covers contractor QC and owner-side inspection, gas and hazardous liquid lines (49 CFR 192 and 195), on the right-of-way and inside the fence. Environmental inspection is out of scope.
+- Tier 1 recognizes and records. Content never teaches a graduate to accept work that needs a CWI, API 1169, AMPP or NDE certification to sign. Each module's "Where Tier 1 stops" line sets that boundary.
+- Where requirements vary by project, teach how to find the requirement in the project documents, not one company's answer.
