@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block title %}You're on the list | Field-Driven Quality{% endblock %}
+
+{% block meta_tags %}<meta name="robots" content="noindex" />{% endblock %}
+
+{% block extra_styles %}
+.wl-lesson { max-width: 880px; margin: 0 auto; padding: clamp(2.5rem, 7vw, 5rem) clamp(1rem, 4vw, 2rem); }
+.wl-lesson h1 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 900;
+  font-size: clamp(2.4rem, 6vw, 4rem);
+  line-height: 0.95;
+  text-transform: uppercase;
+  color: var(--white);
+  margin-bottom: 1rem;
+}
+.wl-lesson h1 em { font-style: normal; color: var(--amber); }
+.wl-lesson video {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  background: #000;
+  border: 1px solid var(--border);
+  margin: 2rem 0 0.8rem;
+}
+.wl-credits { font-size: 0.75rem; color: var(--muted); line-height: 1.6; }
+.wl-credits a { color: inherit; }
+.wl-card { display: flex; gap: 1.4rem; align-items: center; margin-top: 3rem; }
+.wl-card img { width: 110px; flex-shrink: 0; border: 1px solid var(--border); background: var(--white); }
+.wl-card h2 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 800;
+  font-size: 1.6rem;
+  text-transform: uppercase;
+  color: var(--white);
+  margin-bottom: 0.4rem;
+}
+.wl-card p { font-size: 0.92rem; color: var(--muted); line-height: 1.6; margin-bottom: 1rem; }
+@media (max-width: 520px) { .wl-card { flex-direction: column; align-items: flex-start; } }
+{% endblock %}
+
+{% block content %}
+<section class="wl-lesson">
+  <p class="page-label">FDQ Tier 1 &middot; Weld mapping &middot; Lesson 01</p>
+  <h1>You're on the <em>list.</em></h1>
+  <p class="page-sub">Here's lesson 1: why weld maps exist. I'll email you when Tier 1 opens.</p>
+
+  <video controls playsinline preload="metadata" poster="{% url 'lesson_1_poster' %}">
+    <source src="{% url 'lesson_1_video' %}" type="video/mp4" />
+    <track kind="captions" src="{% url 'lesson_1_captions' %}" srclang="en" label="English" />
+    <a href="{% url 'lesson_1_video' %}">Download lesson 1 (MP4)</a>
+  </video>
+  <p class="wl-credits">
+    Photo: &ldquo;Gas pipeline weld, Azna 2017&rdquo; by Hamid Soufi, via <a href="https://commons.wikimedia.org/w/index.php?curid=79186640">Wikimedia Commons</a>, <a href="https://creativecommons.org/licenses/by-sa/3.0">CC BY-SA 3.0</a>, cropped and marked up.
+    Drawing: NTSB Pipeline Accident Report <a href="https://www.ntsb.gov/investigations/AccidentReports/Pages/PAR1101.aspx">PAR-11/01</a>, Figure 18, public domain.
+    Music: &ldquo;Gustav Sting&rdquo; by Kevin MacLeod (incompetech.com), <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.
+  </p>
+
+  <div class="wl-card">
+    <a href="{% url 'field_card' %}"><img src="{% url 'field_card_preview' %}" alt="Weld Map Field Card, side A" width="110" height="143" /></a>
+    <div>
+      <p class="ci-label">Free PDF</p>
+      <h2>Weld map field card</h2>
+      <p>Every field a weld map carries, for mainline and for stations, and the three checks before you leave for the day. Print it on letter paper, both sides, and keep it with the map.</p>
+      <a href="{% url 'field_card' %}" class="btn-primary">Open the field card (PDF)</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

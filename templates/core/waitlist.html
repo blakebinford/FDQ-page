@@ -1,0 +1,195 @@
+{% extends 'base.html' %}
+
+{% block title %}FDQ Tier 1 | Field-Driven Quality{% endblock %}
+
+{% block meta_tags %}
+<meta name="description" content="FDQ Tier 1 takes someone with no quality background into a first QC job on a pipeline or station job. Get on the list and watch lesson 1 of weld mapping free." />
+<meta property="og:title" content="FDQ Tier 1: from the crew to the quality side" />
+<meta property="og:description" content="Get on the list and watch lesson 1 of weld mapping free: why weld maps exist." />
+<meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{% url 'lesson_1_poster' %}" />
+{% endblock %}
+
+{% block extra_styles %}
+.wl-hero {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: clamp(3rem, 8vw, 6rem) clamp(1.5rem, 5vw, 4rem) clamp(3rem, 6vw, 5rem);
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+  gap: clamp(2.5rem, 6vw, 5rem);
+  align-items: start;
+}
+@media (max-width: 860px) { .wl-hero { grid-template-columns: 1fr; } }
+@media (max-width: 520px) {
+  .wl-hero { padding-top: 2rem; gap: 2rem; }
+  .wl-hero .page-sub { font-size: 0.95rem; }
+  .wl-hero .aside-box { padding: 1.5rem; }
+}
+
+.wl-hero h1 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 900;
+  font-size: clamp(2.6rem, 6.5vw, 5rem);
+  line-height: 0.95;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  color: var(--white);
+  margin-bottom: 1.4rem;
+}
+.wl-hero h1 em { font-style: normal; color: var(--amber); }
+
+.wl-offer { margin-bottom: 1.8rem; }
+.wl-poster { display: block; width: 100%; height: auto; border: 1px solid var(--border); margin-bottom: 1.2rem; }
+.wl-offer h2 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 800;
+  font-size: 1.6rem;
+  line-height: 1.05;
+  text-transform: uppercase;
+  color: var(--white);
+  margin-bottom: 0.4rem;
+}
+.wl-offer p { font-size: 0.92rem; color: var(--muted); line-height: 1.6; }
+@media (max-width: 520px) {
+  .wl-offer { display: grid; grid-template-columns: 120px 1fr; column-gap: 1rem; align-items: start; }
+  .wl-poster { grid-row: span 2; margin-bottom: 0; }
+  .wl-offer h2 { font-size: 1.35rem; }
+  .wl-offer p:not(.ci-label) { grid-column: 1 / -1; margin-top: 0.8rem; }
+}
+
+.wl-form { display: flex; flex-direction: column; gap: 1.1rem; }
+.wl-form .btn-primary { width: 100%; text-align: center; }
+.wl-error { font-size: 0.85rem; color: #e57373; }
+.wl-fine { font-size: 0.82rem; color: var(--muted); line-height: 1.6; margin-top: 1.2rem; }
+.wl-trap { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+
+.wl-section { max-width: 1200px; margin: 0 auto; padding: clamp(3rem, 7vw, 5rem) clamp(1.5rem, 5vw, 4rem); }
+
+.wl-modules {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+}
+@media (max-width: 860px) { .wl-modules { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 520px) { .wl-modules { grid-template-columns: 1fr; } }
+.wl-modules li {
+  background: var(--bg);
+  padding: 1.2rem 1.3rem;
+  display: flex;
+  gap: 1rem;
+  align-items: baseline;
+  color: var(--text);
+  font-size: 0.97rem;
+}
+.wl-modules span {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.72rem;
+  color: var(--amber);
+  letter-spacing: 0.1em;
+}
+
+.wl-two { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(2rem, 5vw, 4rem); align-items: start; }
+@media (max-width: 860px) { .wl-two { grid-template-columns: 1fr; } }
+.wl-two h3 {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-weight: 800;
+  font-size: 1.8rem;
+  text-transform: uppercase;
+  color: var(--white);
+  margin-bottom: 1rem;
+}
+{% endblock %}
+
+{% block content %}
+<section class="wl-hero">
+  <div>
+    <p class="page-label">FDQ Tier 1 &middot; Opening soon</p>
+    <h1>The best quality hands came up through the <em>crew.</em></h1>
+    <p class="page-sub">Tier 1 takes someone with no quality background into a first quality job: contractor QC tech or owner-side junior inspector, on the right-of-way and inside the fence. Get on the list and watch the first lesson now.</p>
+  </div>
+
+  <div class="aside-box" id="sign-up">
+    <div class="wl-offer">
+      <img class="wl-poster" src="{% url 'lesson_1_poster' %}" alt="Tier 1, weld mapping, lesson 01: Why weld maps exist" width="1280" height="720" />
+      <p class="ci-label">Free lesson &middot; 4:35</p>
+      <h2>Why weld maps exist</h2>
+      <p>Lesson 1 of the weld mapping course: one line of a weld log, and the test every line has to pass. Comes with the weld map field card to print.</p>
+    </div>
+
+    <form class="wl-form" action="{% url 'waitlist' %}" method="POST" novalidate>
+      {% csrf_token %}
+      <div class="form-group">
+        <label for="wl-email">Email</label>
+        <input id="wl-email" type="email" name="email" value="{{ form.email.value|default_if_none:'' }}" placeholder="you@example.com" autocomplete="email" required />
+        {% if form.email.errors %}<p class="wl-error">Enter an email address that can get mail.</p>{% endif %}
+      </div>
+      <div class="form-group">
+        <label for="wl-trade">What do you do now? <span style="text-transform:none;letter-spacing:0;">(optional)</span></label>
+        <select id="wl-trade" name="trade">
+          {% for value, label in form.fields.trade.choices %}
+            <option value="{{ value }}"{% if form.trade.value == value %} selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="wl-trap" aria-hidden="true">
+        <label for="wl-website">Leave this empty</label>
+        <input id="wl-website" type="text" name="website" tabindex="-1" autocomplete="off" />
+      </div>
+      <input type="hidden" name="utm_source" value="{{ form.utm_source.value|default_if_none:'' }}" />
+      <input type="hidden" name="utm_medium" value="{{ form.utm_medium.value|default_if_none:'' }}" />
+      <input type="hidden" name="utm_campaign" value="{{ form.utm_campaign.value|default_if_none:'' }}" />
+      <input type="hidden" name="utm_content" value="{{ form.utm_content.value|default_if_none:'' }}" />
+      <input type="hidden" name="referrer_host" value="{{ form.referrer_host.value|default_if_none:'' }}" />
+      <button type="submit" class="btn-primary">Watch lesson 1</button>
+    </form>
+    <p class="wl-fine">The lesson opens right away. After that, a few emails around the Tier 1 launch and nothing else. Reply to any of them to come off the list.</p>
+  </div>
+</section>
+
+<div class="full-divider"></div>
+
+<section class="wl-section">
+  <p class="section-label">What Tier 1 covers</p>
+  <ol class="wl-modules">
+    <li><span>01</span>How a job runs and where QC sits</li>
+    <li><span>02</span>Quality fundamentals</li>
+    <li><span>03</span>The paperwork hierarchy</li>
+    <li><span>04</span>Reading drawings</li>
+    <li><span>05</span>Material and traceability</li>
+    <li><span>06</span>Weld mapping and weld records</li>
+    <li><span>07</span>Welding compliance for a non-CWI QC</li>
+    <li><span>08</span>NDE basics</li>
+    <li><span>09</span>Coating and paint</li>
+    <li><span>10</span>Bolted connections</li>
+    <li><span>11</span>Tie-ins, fabrication and pressure testing</li>
+    <li><span>12</span>Conduct on site</li>
+  </ol>
+</section>
+
+<div class="full-divider"></div>
+
+<section class="wl-section">
+  <div class="wl-two">
+    <div class="aside-box">
+      <p class="ci-label">Where Tier 1 stops</p>
+      <h3>Recognize and record</h3>
+      <div class="prose">
+        <p>Tier 1 teaches you to spot a problem and get it on the record. It doesn't replace a CWI, API 1169, AMPP or NDE cert, and it won't teach you to accept work that needs one of them to sign. Every module says where that line is.</p>
+        <p>It covers gas and hazardous liquid lines and their stations, under <strong>49 CFR 192 and 195</strong>. Where a requirement changes from job to job, you learn where to find it in the project documents.</p>
+      </div>
+    </div>
+    <div>
+      <p class="ci-label">Who built it</p>
+      <h3>From the field</h3>
+      <div class="prose">
+        <p>I started as a field inspector. I've held the weld log and walked the right-of-way at 5 AM. FDQ comes out of fifteen years on pipeline, LNG, compressor station and industrial jobs, watching which quality programs worked in the field and which ones lived in a binder.</p>
+        <p>Tier 1 is the course for the hand who already knows what good work looks like and wants the quality side next.</p>
+      </div>
+      <a href="#sign-up" class="btn-secondary" style="margin-top:0.8rem;">Watch lesson 1</a>
+    </div>
+  </div>
+</section>
+{% endblock %}
