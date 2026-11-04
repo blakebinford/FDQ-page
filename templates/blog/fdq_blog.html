@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Blog | Field-Driven Quality{% endblock %}
+{% block title %}Blog | Field Driven Quality{% endblock %}
 
 {% block extra_styles %}
 /* ── TAG FILTERS ── */
@@ -12,11 +12,9 @@
 }
 
 .tag-btn {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'Public Sans', sans-serif;
   font-size: 0.68rem;
   font-weight: 500;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
   padding: 0.45rem 1rem;
   text-decoration: none;
   border: 1px solid var(--border);
@@ -26,7 +24,7 @@
 }
 
 .tag-btn:hover { color: var(--white); border-color: var(--muted); }
-.tag-btn.active { background: var(--amber); color: var(--bg); border-color: var(--amber); }
+.tag-btn.active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
 
 /* ── FEATURED POST ── */
 .featured-card {
@@ -48,27 +46,23 @@
 }
 
 .featured-body h3 {
-  font-family: 'Barlow Condensed', sans-serif;
+  font-family: 'Public Sans', sans-serif;
   font-weight: 800;
   font-size: clamp(1.4rem, 3vw, 2rem);
-  text-transform: uppercase;
   color: var(--white);
   margin-bottom: 0.6rem;
 }
 
 .post-meta {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'Public Sans', sans-serif;
   font-size: 0.68rem;
-  letter-spacing: 0.1em;
   color: var(--muted);
   margin-bottom: 0.8rem;
 }
 
 .post-tag {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'Public Sans', sans-serif;
   font-size: 0.62rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
   padding: 0.25rem 0.6rem;
   border: 1px solid var(--border);
   color: var(--muted);
@@ -131,10 +125,9 @@
 }
 
 .blog-card-body h5 {
-  font-family: 'Barlow Condensed', sans-serif;
+  font-family: 'Public Sans', sans-serif;
   font-weight: 700;
   font-size: 1.15rem;
-  text-transform: uppercase;
   color: var(--white);
   margin-bottom: 0.5rem;
 }
@@ -155,10 +148,8 @@
 }
 
 .read-more {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'Public Sans', sans-serif;
   font-size: 0.68rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
   color: var(--amber);
   margin-top: auto;
 }
@@ -172,49 +163,18 @@
   font-size: 0.95rem;
 }
 
-/* ── CTA BAND ── */
-.cta-band {
-  background: var(--amber);
-  padding: clamp(3rem, 7vw, 5rem) clamp(1.5rem, 5vw, 4rem);
-}
 
-.cta-band-inner {
-  max-width: 1200px;
-  margin: 0 auto;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 2rem;
-  flex-wrap: wrap;
-}
-
-.cta-band h2 {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-weight: 900;
-  font-size: clamp(1.8rem, 4vw, 3rem);
-  text-transform: uppercase;
-  color: var(--bg);
-  line-height: 1;
-}
-
-@media (max-width: 480px) {
-  .cta-band-inner {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-}
-
-/* ── STAGGER 5-6 ── */
-.stagger.visible > *:nth-child(5) { opacity: 1; transform: none; transition-delay: 0.45s; }
-.stagger.visible > *:nth-child(6) { opacity: 1; transform: none; transition-delay: 0.55s; }
+.blog-tier1 { border-top: 1px solid var(--rule); background: var(--surface); }
+.blog-tier1-inner { max-width: 1160px; margin: 0 auto; padding: 2rem clamp(1rem, 4vw, 2.5rem); display: flex; gap: 1rem 2rem; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+.blog-tier1 p { color: var(--ink-2); max-width: 60ch; }
+.blog-tier1 strong { color: var(--ink); }
 {% endblock %}
 
 {% block content %}
 <!-- PAGE HERO -->
 <div class="page-hero reveal">
-  <p class="page-label">From the Field</p>
-  <h1>FDQ <em>Blog.</em></h1>
-  <p class="page-sub">Lessons, insights, and hard-earned perspective on construction quality from the field.</p>
+  <h1>Blog</h1>
+  <p class="page-sub">Notes on construction quality from the field.</p>
 </div>
 
 <div class="page-content">
@@ -242,7 +202,7 @@
         {% endfor %}
       </div>
       <p class="featured-summary">{{ featured_post.summary|striptags }}</p>
-      <a href="{% url 'blog_detail' featured_post.slug %}" class="btn-primary">Read Article</a>
+      <a href="{% url 'blog_detail' featured_post.slug %}" class="btn-primary">Read the article</a>
     </div>
   </div>
   {% endif %}
@@ -264,7 +224,7 @@
             {% endfor %}
           </div>
           <p class="card-summary">{{ post.summary|striptags }}</p>
-          <span class="read-more">Read More &rarr;</span>
+          <span class="read-more">Read more</span>
         </div>
       </a>
     </div>
@@ -275,11 +235,10 @@
 
 </div>
 
-<!-- CTA BAND -->
-<div class="cta-band">
-  <div class="cta-band-inner">
-    <h2>Quality starts<br/>in the field.</h2>
-    <a href="{% url 'contact' %}" class="btn-dark">Get Started with FDQ</a>
+<div class="blog-tier1">
+  <div class="blog-tier1-inner">
+    <p><strong>FDQ Tier 1</strong> takes a pipeline hand with no quality background into a first QC or inspection job. Lesson 1 is free.</p>
+    <a href="{% url 'waitlist' %}#sign-up" class="btn-primary">Watch lesson 1 free</a>
   </div>
 </div>
 {% endblock %}

@@ -1,131 +1,92 @@
 {% extends 'base.html' %}
 
-{% block title %}Certifications | Field-Driven Quality{% endblock %}
+{% block title %}Certifications | Field Driven Quality{% endblock %}
 
 {% block extra_styles %}
-:root {
-  --tier1: #d4832a;
-  --tier2: #6a9abc;
-  --tier3: #b8824a;
-}
-
-/* ── TIER GRID ── */
-.tier-grid {
-  max-width: 1200px; margin: 0 auto;
-  padding: clamp(3rem, 7vw, 5rem) clamp(1.5rem, 5vw, 4rem);
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1px;
-  background: var(--border);
-}
-@media (max-width: 960px) { .tier-grid { grid-template-columns: 1fr 1fr; } }
-@media (max-width: 560px) { .tier-grid { grid-template-columns: 1fr; } }
-
-.tier-card {
-  background: var(--surface);
-  padding: clamp(2rem, 4vw, 3rem);
-  position: relative;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-.tier-card::before {
-  content: '';
-  position: absolute; top: 0; left: 0; right: 0;
-  height: 3px;
-}
-.tier-card.tier-1::before { background: var(--tier1); }
-.tier-card.tier-2::before { background: var(--tier2); }
-.tier-card.tier-3::before { background: var(--tier3); }
-
-.tier-tag {
-  font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem;
-  letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 1.2rem;
-}
-.tier-1 .tier-tag { color: var(--tier1); }
-.tier-2 .tier-tag { color: var(--tier2); }
-.tier-3 .tier-tag { color: var(--tier3); }
-
-.tier-card h3 {
-  font-family: 'Barlow Condensed', sans-serif; font-weight: 900;
-  font-size: clamp(1.8rem, 3.5vw, 2.6rem); text-transform: uppercase;
-  color: var(--white); line-height: 1; margin-bottom: 0.5rem;
-}
-
-.tier-who {
-  font-size: 0.85rem; color: var(--muted); font-style: italic; margin-bottom: 1.5rem;
-}
-
-.tier-desc {
-  font-size: 0.93rem; color: var(--text); line-height: 1.7; margin-bottom: 1.5rem;
-  flex: 1;
-}
-
-.tier-price {
-  font-family: 'Barlow Condensed', sans-serif; font-weight: 800;
-  font-size: 2rem; color: var(--white); margin-bottom: 1.5rem;
-}
-
-.tier-card .btn-primary { width: 100%; text-align: center; }
-
-.badge-certified {
-  font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; font-weight: 500;
-  letter-spacing: 0.12em; text-transform: uppercase; padding: 0.9rem 2rem;
-  text-align: center; display: block;
-  background: rgba(76, 175, 80, 0.15); color: #81c784; border: 1px solid rgba(76, 175, 80, 0.3);
-}
-
-.badge-ineligible {
-  font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; font-weight: 500;
-  letter-spacing: 0.12em; text-transform: uppercase; padding: 0.9rem 2rem;
-  text-align: center; display: block;
-  background: rgba(136, 136, 128, 0.1); color: var(--muted); border: 1px solid var(--border);
-}
-
-.badge-prereq {
-  font-family: 'IBM Plex Mono', monospace; font-size: 0.72rem; font-weight: 500;
-  letter-spacing: 0.12em; text-transform: uppercase; padding: 0.9rem 2rem;
-  text-align: center; display: block;
-  background: rgba(61, 90, 114, 0.15); color: #6a9abc; border: 1px solid rgba(61, 90, 114, 0.3);
-}
+.tier-list { list-style: none; border-top: 1px solid var(--rule); }
+.tier-row { display: grid; grid-template-columns: minmax(0, 1fr) 15rem; gap: 1rem 3rem; padding: 1.75rem 0; border-bottom: 1px solid var(--rule); align-items: start; }
+@media (max-width: 720px) { .tier-row { grid-template-columns: 1fr; } }
+.tier-row h2 { font-weight: 800; font-size: 1.45rem; line-height: 1.2; margin-bottom: 0.4rem; }
+.tier-row p { color: var(--ink-2); max-width: 62ch; }
+.tier-act { display: flex; flex-direction: column; gap: 0.5rem; }
+.tier-act .btn-primary, .tier-act .btn-secondary, .tier-act .btn-continue { width: 100%; }
+.tier-price { font-weight: 700; font-size: 1.2rem; }
+.tier-when { font-weight: 600; color: var(--ink-3); }
+.tier-when.open { color: var(--accent-ink); }
+.tier-note { font-size: 0.9rem; color: var(--ink-3); }
+.tier-badge { display: block; text-align: center; font-weight: 600; padding: 0.85rem 1rem; border-radius: var(--radius); border: 1px solid var(--rule-2); background: var(--surface); }
+.tier-badge.done { border-color: #9bc7a0; background: #eef6ef; color: #1f5f2a; }
 {% endblock %}
 
 {% block content %}
-<div class="page-hero reveal">
-  <p class="page-label">FDQ Certification</p>
-  <h1>Get <em>certified.</em></h1>
-  <p class="page-sub">Three tiers. Built for the field. Pick the level that matches your role and start building the skills that prevent rework, not just document it.</p>
+<div class="page-hero">
+  <p class="page-label">FDQ certification</p>
+  <h1>Three tiers. Tier 1 opens first.</h1>
+  <p class="page-sub">Each tier is a course and a certification. Start with Tier 1 if you're coming from the crew.</p>
 </div>
 
-<div class="tier-grid stagger">
-  {% for item in tier_data %}
-  <div class="tier-card tier-{{ item.tier.order }}">
-    <p class="tier-tag">Tier {{ item.tier.order }}</p>
-    <h3>{{ item.tier.name }}</h3>
-    <p class="tier-who">{{ item.tier.description|truncatewords:20 }}</p>
-    <p class="tier-desc">{{ item.tier.description }}</p>
-    <p class="tier-price">{{ item.price_display }}</p>
-
-    {% if item.cta == 'certified' %}
-      <span class="badge-certified">&#10003; Certified</span>
-    {% elif item.cta == 'in_progress' %}
-      <a href="{% url 'lms:dashboard' %}" class="btn-continue">Continue Learning &rarr;</a>
-    {% elif item.cta == 'unauthenticated' %}
-      <a href="{% url 'accounts:register' %}" class="btn-primary">Apply to Enroll</a>
-    {% elif item.cta == 'no_application' %}
-      <a href="{% url 'applications:apply' %}" class="btn-primary">Apply Now</a>
-    {% elif item.cta == 'pending' %}
-      <a href="{% url 'applications:status' %}" class="btn-secondary">Application Under Review</a>
-    {% elif item.cta == 'denied_no_reapply' %}
-      <span class="badge-ineligible">Not Eligible</span>
-    {% elif item.cta == 'denied_can_reapply' %}
-      <a href="{% url 'applications:apply' %}" class="btn-primary">Reapply</a>
-    {% elif item.cta == 'prereq_required' %}
-      <span class="badge-prereq">Complete {{ item.prereq_name }} First</span>
-    {% elif item.cta == 'enroll' %}
-      <a href="{% url 'lms:checkout' item.tier.slug %}" class="btn-primary">Enroll &mdash; {{ item.price_display }}</a>
-    {% endif %}
-  </div>
-  {% endfor %}
+<div class="page-content">
+  <ul class="tier-list">
+    {% for item in tier_data %}
+      <li class="tier-row">
+        <div>
+          <h2>Tier {{ item.tier.order }}: {{ item.tier.name }}</h2>
+          <p>{{ item.tier.description }}</p>
+        </div>
+        <div class="tier-act">
+          {% if not item.tier.is_active %}
+            <span class="tier-when">Coming soon</span>
+            {% if item.tier.order == 1 %}<a href="{% url 'waitlist' %}#sign-up" class="btn-secondary">Get on the list</a>{% endif %}
+          {% else %}
+            <span class="tier-price">{{ item.price_display }}</span>
+            {% if item.cta == 'certified' %}
+              <span class="tier-badge done">Certified</span>
+            {% elif item.cta == 'in_progress' %}
+              <a href="{% url 'lms:dashboard' %}" class="btn-continue">Continue learning</a>
+            {% elif item.cta == 'unauthenticated' %}
+              <a href="{% url 'accounts:register' %}" class="btn-primary">Apply to enroll</a>
+            {% elif item.cta == 'no_application' %}
+              <a href="{% url 'applications:apply' %}" class="btn-primary">Apply now</a>
+            {% elif item.cta == 'pending' %}
+              <a href="{% url 'applications:status' %}" class="btn-secondary">Application under review</a>
+            {% elif item.cta == 'denied_no_reapply' %}
+              <span class="tier-badge">Not eligible</span>
+            {% elif item.cta == 'denied_can_reapply' %}
+              <a href="{% url 'applications:apply' %}" class="btn-primary">Reapply</a>
+            {% elif item.cta == 'prereq_required' %}
+              <span class="tier-badge">Finish {{ item.prereq_name }} first</span>
+            {% elif item.cta == 'enroll' %}
+              <a href="{% url 'lms:checkout' item.tier.slug %}" class="btn-primary">Enroll for {{ item.price_display }}</a>
+            {% endif %}
+          {% endif %}
+        </div>
+      </li>
+    {% empty %}
+      <li class="tier-row">
+        <div>
+          <h2>Tier 1: From the crew to the quality side</h2>
+          <p>For pipeline hands with no quality background. It teaches the work of a contractor QC tech or an owner-side junior inspector, on the right-of-way and inside the fence.</p>
+        </div>
+        <div class="tier-act">
+          <span class="tier-when open">Opening soon</span>
+          <a href="{% url 'waitlist' %}#sign-up" class="btn-primary">Watch lesson 1 free</a>
+        </div>
+      </li>
+      <li class="tier-row">
+        <div>
+          <h2>Tier 2: Running quality on a project</h2>
+          <p>For working QC inspectors and quality engineers who run quality on an active project.</p>
+        </div>
+        <div class="tier-act"><span class="tier-when">Coming soon</span></div>
+      </li>
+      <li class="tier-row">
+        <div>
+          <h2>Tier 3: Building the program</h2>
+          <p>For quality managers and directors who build the program a whole project works in.</p>
+        </div>
+        <div class="tier-act"><span class="tier-when">Coming soon</span></div>
+      </li>
+    {% endfor %}
+  </ul>
 </div>
 {% endblock %}

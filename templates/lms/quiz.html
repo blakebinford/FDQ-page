@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}{{ quiz.title }} | Field-Driven Quality{% endblock %}
+{% block title %}{{ quiz.title }} | Field Driven Quality{% endblock %}
 
 {% block extra_styles %}
 .quiz-wrap {
@@ -16,19 +16,16 @@
 }
 
 .quiz-header h1 {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-weight: 900;
+  font-family: 'Public Sans', sans-serif;
+  font-weight: 800;
   font-size: clamp(2rem, 5vw, 3rem);
-  text-transform: uppercase;
   color: var(--white);
   margin-bottom: 0.5rem;
 }
 
 .quiz-info {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'Public Sans', sans-serif;
   font-size: 0.72rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
   color: var(--muted);
   display: flex;
   gap: 1.5rem;
@@ -43,10 +40,8 @@
 }
 
 .question-number {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'Public Sans', sans-serif;
   font-size: 0.68rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
   color: var(--amber);
   margin-bottom: 0.6rem;
 }

@@ -1,13 +1,12 @@
 {% extends 'base.html' %}
 
-{% block title %}{% if is_reapply %}Reapply{% else %}Apply{% endif %} | Field-Driven Quality{% endblock %}
+{% block title %}{% if is_reapply %}Reapply{% else %}Apply{% endif %} | Field Driven Quality{% endblock %}
 
 {% block extra_styles %}
 .apply-form { max-width: 760px; display: flex; flex-direction: column; gap: 1.2rem; }
 .field-help {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'Public Sans', sans-serif;
   font-size: 0.65rem;
-  letter-spacing: 0.06em;
   color: var(--muted);
   margin-top: 0.3rem;
 }
@@ -25,26 +24,21 @@
   margin-bottom: 0.8rem;
 }
 .wh-title {
-  font-family: 'Barlow Condensed', sans-serif;
+  font-family: 'Public Sans', sans-serif;
   font-weight: 700;
   font-size: 1.05rem;
-  text-transform: uppercase;
   color: var(--white);
   margin-bottom: 0.2rem;
 }
 .wh-meta {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'Public Sans', sans-serif;
   font-size: 0.65rem;
-  letter-spacing: 0.1em;
   color: var(--muted);
-  text-transform: uppercase;
 }
 .wh-contact { font-size: 0.82rem; color: var(--muted); margin-top: 0.5rem; }
 .wh-section-label {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'Public Sans', sans-serif;
   font-size: 0.65rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
   color: var(--amber);
   margin: 0 0 1rem;
   display: flex;
@@ -59,10 +53,8 @@
   background: var(--amber);
 }
 .wh-edit-link {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'Public Sans', sans-serif;
   font-size: 0.68rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
   color: var(--amber);
   text-decoration: none;
   margin-top: 0.5rem;
@@ -93,7 +85,7 @@
 {% block content %}
 <div class="page-hero reveal">
   <p class="page-label">FDQ Application</p>
-  <h1>Apply to <em>get started.</em></h1>
+  <h1>Apply to enroll</h1>
   {% if is_reapply %}
     <p class="page-sub">Update your application below and resubmit for review.</p>
   {% else %}

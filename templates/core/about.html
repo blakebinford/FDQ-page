@@ -1,187 +1,58 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}What is FDQ | Field-Driven Quality{% endblock %}
+{% block title %}About FDQ | Field Driven Quality{% endblock %}
+
+{% block meta_tags %}
+<meta name="description" content="Why Field Driven Quality exists, how the courses are built, and who's behind them." />
+{% endblock %}
 
 {% block extra_styles %}
-/* ── SECTION BASE ── */
-section {
-  padding: clamp(4rem, 9vw, 7rem) clamp(1.5rem, 5vw, 4rem);
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-/* ── ABOUT TWO-COL ── */
-.about-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: start; margin-bottom: 5rem; }
-@media (max-width: 720px) { .about-two-col { grid-template-columns: 1fr; gap: 2rem; } }
-
-/* ── PILLARS ── */
-.pillars-header {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 4rem;
-  align-items: end;
-  margin-bottom: 4rem;
-}
-
-@media (max-width: 720px) {
-  .pillars-header { grid-template-columns: 1fr; gap: 1.5rem; }
-}
-
-.pillars-header h2 {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-weight: 900;
-  font-size: clamp(2.2rem, 5vw, 3.8rem);
-  line-height: 0.95;
-  text-transform: uppercase;
-  color: var(--white);
-}
-
-.pillars-header h2 em {
-  font-style: normal;
-  color: var(--amber);
-}
-
-.pillars-header p {
-  color: var(--muted);
-  font-size: 0.97rem;
-  line-height: 1.75;
-}
-
-.pillars-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1px;
-  background: var(--border);
-}
-
-@media (max-width: 720px) {
-  .pillars-grid { grid-template-columns: 1fr; }
-}
-
-.pillar {
-  background: var(--surface);
-  padding: 2.5rem 2rem;
-  transition: background 0.2s;
-}
-
-.pillar:hover { background: var(--surface2); }
-
-.pillar-number {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.68rem;
-  letter-spacing: 0.15em;
-  color: var(--amber);
-  margin-bottom: 1.5rem;
-}
-
-.pillar h3 {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-weight: 800;
-  font-size: 1.6rem;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-  color: var(--white);
-  margin-bottom: 0.9rem;
-}
-
-.pillar p {
-  font-size: 0.93rem;
-  color: var(--muted);
-  line-height: 1.7;
-}
-
-/* ── CTA BAND ── */
-.cta-band {
-  background: var(--amber);
-  padding: clamp(3rem, 7vw, 5rem) clamp(1.5rem, 5vw, 4rem);
-}
-
-.cta-band-inner {
-  max-width: 1200px;
-  margin: 0 auto;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 2rem;
-  flex-wrap: wrap;
-}
-
-.cta-band h2 {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-weight: 900;
-  font-size: clamp(1.8rem, 4vw, 3rem);
-  text-transform: uppercase;
-  color: var(--bg);
-  line-height: 1;
-}
-
-@media (max-width: 480px) {
-  .cta-band-inner {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-}
+.about { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 0.8fr); gap: clamp(2rem, 6vw, 5rem); align-items: start; }
+@media (max-width: 860px) { .about { grid-template-columns: 1fr; } }
+.about h2 { font-weight: 800; font-size: clamp(1.4rem, 2.6vw, 1.8rem); line-height: 1.2; margin: 2.25rem 0 0.75rem; }
+.about h2:first-child { margin-top: 0; }
+.about .prose { max-width: 64ch; }
+.about figure { position: sticky; top: 88px; }
+@media (max-width: 860px) { .about figure { position: static; order: -1; } }
+.about-cta { margin-top: 2rem; display: flex; gap: 0.75rem; flex-wrap: wrap; }
 {% endblock %}
 
 {% block content %}
-<div class="page-hero reveal">
-  <p class="page-label">What is FDQ</p>
-  <h1>Quality built<br/>for the <em>field.</em></h1>
-  <p class="page-sub">I've reviewed more quality plans than I can count. Most of them were built to impress an auditor, not to help a crew do the work right. FDQ was built to fix that.</p>
+<div class="page-hero">
+  <p class="page-label">About FDQ</p>
+  <h1>Quality that holds up in the field, not just in the binder.</h1>
 </div>
 
 <div class="page-content">
-
-  <div class="about-two-col reveal">
+  <div class="about">
     <div class="prose">
-      <p class="section-label">The Problem</p>
-      <p>I've been on projects where the quality program had a procedure for everything. Procedure for coating inspection. Procedure for joint fit-up. Procedure for the procedure. The QMS was thorough. It was organized. Nobody in the field had ever read it.</p>
-      <p>That's not an exaggeration. I've asked field crews to show me where they'd find the answer to a basic question about their scope, and watched them flip through a three-ring binder with no idea where to look. The system wasn't built for them. It was built to pass an audit.</p>
-      <p>That version of quality costs money, slows crews down, and still doesn't stop the failures. Somewhere along the way, quality became something that happened to construction instead of something that happened in it.</p>
-    </div>
-    <div class="prose">
-      <p class="section-label">The FDQ Approach</p>
-      <p>Quality lives where the work happens. Not in the QC trailer. Not in the quality manual. On the pad, at the joint, in the trench. That's the premise FDQ is built on, and everything in the certification flows from it.</p>
-      <p>Tier 1 gives field crews the tools and language to own quality at the task level. Tier 2 gives QC professionals a system that holds up under field conditions. Tier 3 gives quality directors a program architecture built to scale across a project without falling apart when the schedule gets tight.</p>
-      <p>The result is simpler than most quality programs: fewer NCRs, less rework, and a crew that catches problems before they become expensive.</p>
-    </div>
-  </div>
+      <h2>Why it exists</h2>
+      <p>I've reviewed more quality plans than I can count. Most of them were written to pass an audit, not to help a crew do the work right.</p>
+      <p>I've been on jobs where the quality program had a procedure for everything and nobody in the field had read any of it. Ask a hand where to find the answer to a basic question about their scope and you'd watch them flip through a binder with no idea where to look.</p>
+      <p>That kind of program costs money, slows the crew down and still lets problems through. The rework that hurts a pipeline job is a cut-out weld, a coating repair or a re-shot tie-in, and each one costs days. The people who stop it are the ones standing at the joint, and the best quality hands I've worked with came up through the crew.</p>
 
-  <p class="section-label reveal">The Certification Framework</p>
-  <div class="pillars-grid stagger" style="margin-bottom:5rem;">
-    <div class="pillar">
-      <p class="pillar-number">Tier 1 / FIELD CREW</p>
-      <h3>In the Dirt</h3>
-      <p>Built for the people doing the work. Covers pre-task quality fundamentals, FDQ documentation, and how to identify and flag task-level risks before they hit inspection. No quality background required to start.</p>
-    </div>
-    <div class="pillar">
-      <p class="pillar-number">Tier 2 / QC AND OPERATIONS</p>
-      <h3>Own the Process</h3>
-      <p>Built for the people accountable for quality outcomes on an active project. Covers deploying FDQ tools in the field, managing quality data, leading pre-task quality conversations, and keeping quality performance from falling apart under schedule pressure.</p>
-    </div>
-    <div class="pillar">
-      <p class="pillar-number">Tier 3 / SENIOR QUALITY</p>
-      <h3>Build the Program</h3>
-      <p>Built for senior quality professionals responsible for the whole system. Covers QMS design, audit program development, metrics and KPI reporting, and how to build a quality culture that functions at the project or organizational level without requiring constant supervision to hold together.</p>
-    </div>
-  </div>
+      <h2>What FDQ is</h2>
+      <p>FDQ is a certification in three tiers for pipeline and station construction. <strong>Tier 1 opens first.</strong> It takes a hand with field time and no quality background into a first job as a contractor QC tech or an owner-side junior inspector.</p>
+      <p>Tier 2, for working QC inspectors and quality engineers, and Tier 3, for the managers who build a quality program, are coming later.</p>
 
-  <div class="aside-box reveal" style="max-width:760px;">
-    <p class="section-label">Built for Construction Quality</p>
-    <div class="prose" style="max-width:100%;">
-      <p>Construction quality is different from quality in a factory, a lab, or an office building. Your workforce rotates. Your project footprint moves. Your work goes in the ground and can't always be undone. Your schedule pressure is relentless and it doesn't respect your quality plan. The certification programs built for other industries don't account for any of that.</p>
-      <p>FDQ does. The tools are designed to work in a construction trailer, not a conference room. The documentation is written for someone filling it out at the joint, not sitting at a desk. The assessment content comes from real pipeline, energy, industrial, and heavy civil projects, with scenarios that reflect what actually happens when quality meets field conditions.</p>
-      <p>Tier 1 speaks the language of the crew. It doesn't assume quality knowledge. It meets people where they are and gives them something practical they can use the next day. Tier 2 addresses the real challenges of managing quality on a live project: keeping inspection current with the work, managing NCRs before they pile up, and running a pre-task process that the crew actually participates in. Tier 3 covers what it takes to build a quality program that functions at scale, under pressure, with a workforce that turns over and a scope that changes.</p>
-      <p><strong>If you work in pipeline, energy, industrial, or heavy civil construction, FDQ is the credential built for your work.</strong> Not adapted. Not retrofitted. Built from the start for this environment.</p>
+      <h2>How the courses are built</h2>
+      <p>Every Tier 1 lesson is written against a list of things a graduate can do, and every test question checks one of them. If a lesson doesn't teach something on the list, it gets cut.</p>
+      <p>Tier 1 teaches you to recognize a problem and record it. It says plainly where the CWI, API 1169, AMPP or NDE technician takes over, and it never teaches you to sign off work that needs their cert.</p>
+
+      <h2>Who's behind it</h2>
+      <p>I'm Blake Binford. I started as a field inspector, holding the weld log on the right-of-way, and I've worked quality on pipeline, LNG, compressor station and industrial jobs since. FDQ is built from what I watched hold up on those jobs and what didn't.</p>
+
+      <div class="about-cta">
+        <a href="{% url 'waitlist' %}#sign-up" class="btn-primary">Watch lesson 1 free</a>
+        <a href="{% url 'contact' %}" class="btn-secondary">Get in touch</a>
+      </div>
     </div>
-  </div>
 
-</div>
-
-<div class="cta-band">
-  <div class="cta-band-inner">
-    <h2>Your tier is<br/>waiting.</h2>
-    <a href="{% url 'contact' %}" class="btn-dark">Get Started with FDQ</a>
+    <figure class="photo">
+      <img src="{% static 'images/photos/welder-umbrella-1942.jpg' %}" alt="A welder under an umbrella making a joint on a big-inch pipeline, 1942" width="1400" height="1079" loading="lazy" />
+      <figcaption>Welder on the firing line near Longview, Texas, 1942. Photo: John Vachon, <a href="https://www.loc.gov/pictures/item/2017838290/">Library of Congress</a>, public domain.</figcaption>
+    </figure>
   </div>
 </div>
 {% endblock %}

@@ -4,82 +4,93 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>{% block title %}Field-Driven Quality{% endblock %}</title>
+  <title>{% block title %}Field Driven Quality{% endblock %}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
   {% block meta_tags %}{% endblock %}
   {% block extra_head %}{% endblock %}
   <style>
-    /* ── RESET ── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    /* ── DESIGN TOKENS ── */
     :root {
-      --bg:       #111210;
-      --surface:  #1a1c19;
-      --surface2: #222420;
-      --border:   #2e3129;
-      --text:     #ddd9cf;
-      --muted:    #888880;
-      --amber:    #d4832a;
-      --amber-lt: #e8a04a;
-      --amber-dk: #a0601c;
+      --paper:      #fbfaf7;
+      --panel:      #f1efe9;
+      --rule:       #dcd8ce;
+      --rule-2:     #c4bfb3;
+      --ink:        #17191b;
+      --ink-2:      #4c5156;
+      --ink-3:      #6a6f74;
+      --accent:     #f78331;  /* FDQ orange: fills and the logo only */
+      --accent-ink: #a8490b;  /* orange for text on paper */
+      --danger:     #b3261e;
+      --radius:     6px;
+
+      /* Older names the course, blog and account pages still use. */
+      --bg:       var(--paper);
+      --surface:  #ffffff;
+      --surface2: var(--panel);
+      --border:   var(--rule);
+      --text:     var(--ink);
+      --muted:    var(--ink-2);
+      --white:    var(--ink);
+      --amber:    var(--accent-ink);
+      --amber-lt: #c25a14;
+      --amber-dk: #8a3c09;
       --steel:    #3d5a72;
-      --white:    #f2ede4;
     }
 
     html { scroll-behavior: smooth; }
 
     body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'Barlow', sans-serif;
-      font-weight: 400;
-      font-size: 17px;
-      line-height: 1.65;
+      background: var(--paper);
+      color: var(--ink);
+      font-family: 'Public Sans', system-ui, sans-serif;
+      font-size: 18px;
+      line-height: 1.6;
       -webkit-font-smoothing: antialiased;
     }
 
-    /* ── NAV ── */
+    a { color: inherit; }
+    img { max-width: 100%; }
+
+    h1, h2, h3 { color: var(--ink); letter-spacing: -0.015em; text-wrap: balance; }
+
+    .wrap { max-width: 1160px; margin: 0 auto; padding: 0 clamp(1rem, 4vw, 2.5rem); }
+
+    /* Nav */
     nav {
       position: sticky;
       top: 0;
       z-index: 100;
-      background: rgba(17, 18, 16, 0.92);
-      backdrop-filter: blur(10px);
-      border-bottom: 1px solid var(--border);
-      padding: 0 clamp(1.5rem, 5vw, 4rem);
+      background: rgba(251, 250, 247, 0.96);
+      border-bottom: 1px solid var(--rule);
+      padding: 0 clamp(1rem, 4vw, 2.5rem);
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      height: 60px;
+      gap: 2rem;
+      height: 64px;
     }
 
-    .nav-logo {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-weight: 800;
-      font-size: 1.3rem;
-      letter-spacing: 0.08em;
-      color: var(--amber);
+    .nav-logo { display: flex; align-items: baseline; gap: 0.6rem; text-decoration: none; margin-right: auto; }
+    .nav-logo b { font-weight: 800; font-size: 1.5rem; letter-spacing: -0.01em; color: var(--accent); }
+    .nav-logo span { font-size: 0.85rem; font-weight: 600; color: var(--ink-3); }
+
+    .nav-links { display: flex; gap: 1.8rem; list-style: none; }
+    .nav-links a, .nav-right a, .nav-logout-btn {
+      font: 500 0.95rem 'Public Sans', sans-serif;
+      color: var(--ink-2);
       text-decoration: none;
-      text-transform: uppercase;
+      background: none;
+      border: none;
+      cursor: pointer;
     }
+    .nav-links a:hover, .nav-right a:hover, .nav-logout-btn:hover { color: var(--ink); }
+    .nav-links a[aria-current="page"] { color: var(--ink); font-weight: 600; }
 
-    .nav-links { display: flex; gap: 2rem; list-style: none; }
-
-    .nav-links a {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 0.72rem;
-      font-weight: 500;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--muted);
-      text-decoration: none;
-      transition: color 0.2s;
-    }
-
-    .nav-links a:hover { color: var(--white); }
+    .nav-right { display: flex; align-items: center; gap: 1.5rem; }
+    .nav-cta { font: 600 0.95rem 'Public Sans', sans-serif; color: var(--ink); text-decoration: none; }
+    .nav-cta:hover { text-decoration: underline; }
 
     .nav-hamburger {
       display: none;
@@ -88,575 +99,253 @@
       background: none;
       border: none;
       cursor: pointer;
-      padding: 4px;
+      padding: 8px 4px;
     }
-
-    .nav-hamburger span {
-      display: block;
-      width: 22px;
-      height: 2px;
-      background: var(--muted);
-      transition: all 0.25s;
-    }
-
+    .nav-hamburger span { display: block; width: 22px; height: 2px; background: var(--ink); transition: transform 0.2s, opacity 0.2s; }
     .nav-hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
     .nav-hamburger.open span:nth-child(2) { opacity: 0; }
     .nav-hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
-    @media (max-width: 640px) {
+    .mobile-only { display: none; }
+
+    @media (max-width: 760px) {
+      nav { gap: 1rem; }
+      .nav-logo span { display: none; }
       .nav-links {
         display: none;
         position: absolute;
-        top: 60px;
+        top: 64px;
         left: 0;
         right: 0;
-        background: rgba(17, 18, 16, 0.98);
-        border-bottom: 1px solid var(--border);
+        background: var(--paper);
+        border-bottom: 1px solid var(--rule);
         flex-direction: column;
         gap: 0;
-        padding: 0.5rem 0;
+        padding: 0.25rem 0 0.75rem;
       }
-
       .nav-links.open { display: flex; }
-
-      .nav-links li a {
+      .nav-links li a, .nav-links li button {
         display: block;
-        padding: 0.9rem clamp(1.5rem, 5vw, 4rem);
-        border-bottom: 1px solid var(--border);
+        width: 100%;
+        text-align: left;
+        padding: 0.8rem clamp(1rem, 4vw, 2.5rem);
+        font-size: 1.05rem;
       }
-
       .nav-hamburger { display: flex; }
-      .nav-cta { display: none; }
+      .nav-right { display: none; }
       .mobile-only { display: list-item; }
     }
 
-    .nav-cta {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 0.72rem;
-      font-weight: 500;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      background: var(--amber);
-      color: var(--bg);
-      padding: 0.45rem 1.1rem;
+    /* Buttons */
+    .btn-primary, .btn-secondary, .btn-dark, .btn-continue {
+      display: inline-block;
+      font: 600 1rem/1.2 'Public Sans', sans-serif;
+      padding: 0.85rem 1.4rem;
+      border-radius: var(--radius);
       text-decoration: none;
-      transition: background 0.2s;
-    }
-
-    .nav-cta:hover { background: var(--amber-lt); }
-
-    .nav-right {
-      display: flex;
-      align-items: center;
-      gap: 1.5rem;
-    }
-
-    .nav-right a {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 0.72rem;
-      font-weight: 500;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--muted);
-      text-decoration: none;
-      transition: color 0.2s;
-    }
-
-    .nav-right a:hover { color: var(--white); }
-
-    .nav-logout-btn {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 0.72rem;
-      font-weight: 500;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--muted);
-      background: none;
-      border: none;
       cursor: pointer;
-      padding: 0;
-      transition: color 0.2s;
-    }
-
-    .nav-logout-btn:hover { color: var(--white); }
-
-    @media (max-width: 640px) {
-      .nav-right { display: none; }
-    }
-
-    /* ── BUTTONS ── */
-    .btn-primary {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 0.78rem;
-      font-weight: 500;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      background: var(--amber);
-      color: var(--bg);
-      padding: 0.9rem 2rem;
-      text-decoration: none;
-      display: inline-block;
-      transition: background 0.2s, transform 0.15s;
-      border: none;
-      cursor: pointer;
-    }
-
-    .btn-primary:hover { background: var(--amber-lt); transform: translateY(-1px); }
-
-    .btn-secondary {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 0.78rem;
-      font-weight: 500;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      background: transparent;
-      color: var(--muted);
-      padding: 0.9rem 2rem;
-      text-decoration: none;
-      display: inline-block;
-      border: 1px solid var(--border);
-      transition: color 0.2s, border-color 0.2s;
-    }
-
-    .btn-secondary:hover { color: var(--white); border-color: var(--muted); }
-
-    .btn-dark {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 0.78rem;
-      font-weight: 500;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      background: var(--bg);
-      color: var(--white);
-      padding: 0.9rem 2rem;
-      text-decoration: none;
-      display: inline-block;
-      white-space: nowrap;
-      transition: background 0.2s;
-    }
-
-    .btn-dark:hover { background: #222; }
-
-    .btn-continue {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 0.78rem;
-      font-weight: 500;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      padding: 0.9rem 2rem;
-      text-decoration: none;
-      display: block;
+      border: 1px solid transparent;
+      transition: background 0.15s, border-color 0.15s;
       text-align: center;
-      background: var(--surface2);
-      color: var(--white);
-      border: 1px solid var(--border);
-      transition: background 0.2s, border-color 0.2s;
     }
+    .btn-primary { background: var(--accent); color: var(--ink); }
+    .btn-primary:hover { background: #ea7322; }
+    .btn-secondary { background: transparent; color: var(--ink); border-color: var(--rule-2); }
+    .btn-secondary:hover { border-color: var(--ink); }
+    .btn-dark { background: var(--ink); color: var(--paper); white-space: nowrap; }
+    .btn-dark:hover { background: #33373b; }
+    .btn-continue { display: block; background: var(--surface); color: var(--ink); border-color: var(--rule-2); }
+    .btn-continue:hover { border-color: var(--ink); }
+    .btn-row { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; }
 
-    .btn-continue:hover { background: var(--border); border-color: var(--muted); }
-
-    .btn-row { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
-
-    /* ── PAGE HERO ── */
+    /* Page header */
     .page-hero {
-      padding: clamp(4rem, 10vw, 7rem) clamp(1.5rem, 5vw, 4rem) clamp(3rem, 6vw, 5rem);
-      max-width: 1200px;
+      max-width: 1160px;
       margin: 0 auto;
-      border-bottom: 1px solid var(--border);
+      padding: clamp(2.5rem, 7vw, 4.5rem) clamp(1rem, 4vw, 2.5rem) clamp(2rem, 5vw, 3rem);
+      border-bottom: 1px solid var(--rule);
     }
-
-    .page-label {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 0.72rem;
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      color: var(--amber);
-      margin-bottom: 1.5rem;
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
+    .page-label, .section-label {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--ink-3);
+      margin-bottom: 0.75rem;
     }
-
-    .page-label::before {
-      content: '';
-      display: block;
-      width: 2rem;
-      height: 1px;
-      background: var(--amber);
-    }
-
+    .section-label { margin-bottom: 1.25rem; }
     .page-hero h1 {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-weight: 900;
-      font-size: clamp(2.8rem, 7vw, 5.5rem);
-      line-height: 0.95;
-      letter-spacing: -0.01em;
-      text-transform: uppercase;
-      color: var(--white);
-      margin-bottom: 1.2rem;
-    }
-
-    .page-hero h1 em { font-style: normal; color: var(--amber); }
-
-    .page-sub {
-      font-size: clamp(1rem, 2vw, 1.15rem);
-      color: var(--muted);
-      max-width: 560px;
-      line-height: 1.7;
-      font-weight: 300;
-    }
-
-    .page-content {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: clamp(3rem, 7vw, 5rem) clamp(1.5rem, 5vw, 4rem);
-    }
-
-    /* ── SECTION LABEL ── */
-    .section-label {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 0.68rem;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--amber);
-      margin-bottom: 2.5rem;
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
-
-    .section-label::before {
-      content: '';
-      display: block;
-      width: 1.5rem;
-      height: 1px;
-      background: var(--amber);
-    }
-
-    /* ── PROSE ── */
-    .prose p {
-      color: var(--muted);
-      font-size: 0.97rem;
-      line-height: 1.8;
-      margin-bottom: 1.2rem;
-    }
-
-    .prose p strong {
-      color: var(--text);
-      font-weight: 500;
-    }
-
-    /* ── CENTER LAYOUT (confirmation/error pages) ── */
-    .center-wrap {
-      min-height: calc(100vh - 60px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 3rem clamp(1.5rem, 5vw, 4rem);
-    }
-
-    .center-box { width: 100%; max-width: 520px; text-align: center; }
-
-    .center-box h1 {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-weight: 900;
-      font-size: clamp(2.5rem, 6vw, 4rem);
-      text-transform: uppercase;
-      color: var(--white);
-      margin-bottom: 1rem;
-    }
-
-    .center-box h1 em { font-style: normal; color: var(--amber); }
-
-    .center-sub {
-      font-size: 1rem;
-      color: var(--muted);
-      line-height: 1.7;
-      margin-bottom: 2.5rem;
-    }
-
-    /* ── LOGIN / AUTH FORM LAYOUT ── */
-    .login-wrap {
-      min-height: calc(100vh - 60px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 3rem clamp(1.5rem, 5vw, 4rem);
-    }
-
-    .login-box { width: 100%; max-width: 400px; }
-
-    .login-logo {
-      font-family: 'Barlow Condensed', sans-serif;
-      font-weight: 900;
-      font-size: 2.2rem;
-      text-transform: uppercase;
-      color: var(--amber);
-      letter-spacing: 0.06em;
-      margin-bottom: 0.3rem;
-    }
-
-    .login-tagline {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 0.65rem;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 2.5rem;
-    }
-
-    .login-form { display: flex; flex-direction: column; gap: 1.1rem; }
-
-    .lf-group { display: flex; flex-direction: column; gap: 0.4rem; }
-
-    .lf-group label {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 0.65rem;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--muted);
-    }
-
-    .lf-group input {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      color: var(--text);
-      font-family: 'Barlow', sans-serif;
-      font-size: 0.95rem;
-      padding: 0.85rem 1rem;
-      outline: none;
-      width: 100%;
-      transition: border-color 0.2s;
-    }
-
-    .lf-group input:focus { border-color: var(--amber); }
-
-    .login-divider { height: 1px; background: var(--border); margin: 1.8rem 0; }
-
-    .login-link {
-      font-size: 0.85rem;
-      color: var(--muted);
-      text-align: center;
-    }
-
-    .login-link a { color: var(--amber); text-decoration: none; }
-    .login-link a:hover { color: var(--amber-lt); }
-
-    .error-list { list-style: none; margin-bottom: 1rem; }
-    .error-list li { font-size: 0.85rem; color: #e57373; padding: 0.4rem 0; }
-
-    .invalid-msg {
-      text-align: center;
-      color: var(--muted);
-      font-size: 0.95rem;
-      line-height: 1.7;
-    }
-
-    .invalid-msg a { color: var(--amber); text-decoration: none; }
-    .invalid-msg a:hover { color: var(--amber-lt); }
-
-    /* ── FOOTER ── */
-    footer {
-      border-top: 1px solid var(--border);
-      padding: 2.5rem clamp(1.5rem, 5vw, 4rem);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 1rem;
-    }
-
-    footer .footer-logo {
-      font-family: 'Barlow Condensed', sans-serif;
       font-weight: 800;
-      font-size: 1.05rem;
-      letter-spacing: 0.08em;
-      color: var(--amber);
-      text-transform: uppercase;
+      font-size: clamp(2.1rem, 5vw, 3.4rem);
+      line-height: 1.08;
+      margin-bottom: 1rem;
+      max-width: 22ch;
+    }
+    .page-hero h1 em, .center-box h1 em { font-style: normal; }
+    .page-sub { font-size: clamp(1.05rem, 2vw, 1.2rem); color: var(--ink-2); max-width: 60ch; }
+    .page-content {
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: clamp(2.5rem, 6vw, 4rem) clamp(1rem, 4vw, 2.5rem);
     }
 
-    footer .footer-copy {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 0.65rem;
-      letter-spacing: 0.1em;
-      color: var(--muted);
-      text-transform: uppercase;
+    .prose p { font-size: 1.05rem; line-height: 1.7; margin-bottom: 1.1rem; color: var(--ink); }
+    .prose p strong { font-weight: 600; }
+    .prose a { color: var(--accent-ink); }
+
+    /* Confirmation and error pages */
+    .center-wrap {
+      min-height: calc(100vh - 64px - 120px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem clamp(1rem, 4vw, 2.5rem);
     }
+    .center-box { width: 100%; max-width: 540px; text-align: center; }
+    .center-box h1 { font-weight: 800; font-size: clamp(2rem, 5vw, 2.8rem); line-height: 1.1; margin-bottom: 0.9rem; }
+    .center-sub { color: var(--ink-2); margin-bottom: 2rem; }
 
-    footer .footer-links { display: flex; gap: 1.5rem; list-style: none; }
-
-    footer .footer-links a {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 0.65rem;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--muted);
-      text-decoration: none;
+    /* Sign-in and account forms */
+    .login-wrap {
+      min-height: calc(100vh - 64px - 120px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem clamp(1rem, 4vw, 2.5rem);
     }
-
-    footer .footer-links a:hover { color: var(--white); }
-
-    @media (max-width: 480px) {
-      footer {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 1.2rem;
-      }
-
-      .footer-links {
-        flex-wrap: wrap;
-        gap: 1rem;
-      }
+    .login-box { width: 100%; max-width: 420px; }
+    .login-logo { font-weight: 800; font-size: 2rem; color: var(--accent); line-height: 1; margin-bottom: 0.4rem; }
+    .login-tagline { font-size: 0.95rem; color: var(--ink-2); margin-bottom: 2rem; }
+    .login-form { display: flex; flex-direction: column; gap: 1.1rem; }
+    .login-form .btn-primary { width: 100%; }
+    .lf-group { display: flex; flex-direction: column; gap: 0.35rem; }
+    .lf-group label, .form-group label { font-size: 0.95rem; font-weight: 600; color: var(--ink); }
+    .lf-group input, .form-group input, .form-group select, .form-group textarea {
+      background: var(--surface);
+      border: 1px solid var(--rule-2);
+      border-radius: var(--radius);
+      color: var(--ink);
+      font: 400 1rem 'Public Sans', sans-serif;
+      padding: 0.75rem 0.9rem;
+      width: 100%;
     }
-
-    /* ── DIVIDER ── */
-    .full-divider {
-      height: 1px;
-      background: var(--border);
+    .lf-group input:focus, .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+      outline: 2px solid var(--accent);
+      outline-offset: 1px;
+      border-color: var(--ink-3);
     }
-
-    /* ── SCROLL ANIMATION ── */
-    .reveal {
-      opacity: 0;
-      transform: translateY(24px);
-      transition: opacity 0.6s ease, transform 0.6s ease;
-    }
-
-    .reveal.visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
-
-    .stagger > * {
-      opacity: 0;
-      transform: translateY(20px);
-      transition: opacity 0.5s ease, transform 0.5s ease;
-    }
-
-    .stagger.visible > *:nth-child(1) { opacity: 1; transform: none; transition-delay: 0.05s; }
-    .stagger.visible > *:nth-child(2) { opacity: 1; transform: none; transition-delay: 0.15s; }
-    .stagger.visible > *:nth-child(3) { opacity: 1; transform: none; transition-delay: 0.25s; }
-    .stagger.visible > *:nth-child(4) { opacity: 1; transform: none; transition-delay: 0.35s; }
-
-    /* ── FORM GROUP (contact/profile forms) ── */
-    .form-group { display: flex; flex-direction: column; gap: 0.45rem; }
-    .form-group label {
-      font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem;
-      letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted);
-    }
-    .form-group input, .form-group select, .form-group textarea {
-      background: var(--surface); border: 1px solid var(--border);
-      color: var(--text); font-family: 'Barlow', sans-serif; font-size: 0.95rem;
-      padding: 0.8rem 1rem; outline: none; width: 100%; transition: border-color 0.2s;
-    }
-    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--amber); }
+    .form-group { display: flex; flex-direction: column; gap: 0.35rem; }
     .form-group textarea { resize: vertical; min-height: 140px; }
-    .form-group select option { background: var(--surface); }
+    .login-divider { height: 1px; background: var(--rule); margin: 1.6rem 0; }
+    .login-link, .invalid-msg { font-size: 0.95rem; color: var(--ink-2); text-align: center; }
+    .login-link a, .invalid-msg a { color: var(--accent-ink); }
+    .error-list { list-style: none; margin-bottom: 1rem; }
+    .error-list li { font-size: 0.95rem; color: var(--danger); padding: 0.3rem 0; }
 
-    /* ── CI ITEM (info rows) ── */
-    .ci-item { padding: 1.3rem 0; border-bottom: 1px solid var(--border); }
-    .ci-label { font-family: 'IBM Plex Mono', monospace; font-size: 0.65rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--amber); margin-bottom: 0.3rem; }
-    .ci-value { font-size: 0.97rem; color: var(--text); }
-    .ci-sub { font-size: 0.85rem; color: var(--muted); margin-top: 0.15rem; }
-
-    /* ── ASIDE BOX ── */
+    /* Info rows and side boxes */
+    .ci-item { padding: 1.1rem 0; border-bottom: 1px solid var(--rule); }
+    .ci-label { font-size: 0.85rem; font-weight: 600; color: var(--ink-3); margin-bottom: 0.2rem; }
+    .ci-value { color: var(--ink); }
+    .ci-sub { font-size: 0.9rem; color: var(--ink-2); margin-top: 0.1rem; }
     .aside-box {
       background: var(--surface);
-      border: 1px solid var(--border);
-      border-left: 3px solid var(--amber);
-      padding: clamp(2rem, 4vw, 3rem);
+      border: 1px solid var(--rule);
+      border-radius: 8px;
+      padding: clamp(1.4rem, 3vw, 2rem);
     }
 
-    /* ── MOBILE-ONLY UTILITY ── */
-    .mobile-only { display: none; }
+    .full-divider { height: 1px; background: var(--rule); }
+
+    /* Photos carry their credit line underneath. */
+    figure.photo img { display: block; width: 100%; height: auto; border-radius: 4px; }
+    figure.photo figcaption { font-size: 0.78rem; color: var(--ink-3); margin-top: 0.45rem; line-height: 1.4; }
+    figure.photo figcaption a { color: inherit; }
+
+    /* Old pages still carry these classes; content shows without waiting for a scroll. */
+    .reveal, .stagger > * { opacity: 1; transform: none; }
+
+    /* Footer */
+    footer { border-top: 1px solid var(--rule); background: var(--panel); margin-top: 0; }
+    .footer-inner {
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 2rem clamp(1rem, 4vw, 2.5rem);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem 2.5rem;
+      align-items: baseline;
+      justify-content: space-between;
+    }
+    .footer-logo { font-weight: 800; color: var(--ink); }
+    .footer-links { display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem; list-style: none; }
+    .footer-links a { color: var(--ink-2); text-decoration: none; font-size: 0.95rem; }
+    .footer-links a:hover { color: var(--ink); text-decoration: underline; }
+    .footer-copy { font-size: 0.85rem; color: var(--ink-3); }
 
     {% block extra_styles %}{% endblock %}
   </style>
 </head>
 <body>
 
-<!-- NAV -->
 <nav>
-  <a href="{% url 'home' %}" class="nav-logo">FDQ</a>
+  <a href="{% url 'home' %}" class="nav-logo" aria-label="Field Driven Quality, home"><b>FDQ</b><span>Field Driven Quality</span></a>
   <ul class="nav-links" id="navLinks">
-    {% if not user.is_authenticated %}
-      <li><a href="{% url 'accounts:register' %}">Register</a></li>
-    {% endif %}
-    <li><a href="{% url 'about' %}">What is FDQ</a></li>
-    <li><a href="{% url 'blog_list' %}">Blog</a></li>
-    <li><a href="{% url 'contact' %}">Contact</a></li>
+    <li><a href="{% url 'waitlist' %}"{% if request.path == '/tier-1/' %} aria-current="page"{% endif %}>Tier 1</a></li>
+    <li><a href="{% url 'about' %}"{% if request.path == '/about/' %} aria-current="page"{% endif %}>About</a></li>
+    <li><a href="{% url 'blog_list' %}"{% if request.path == '/blog/' %} aria-current="page"{% endif %}>Blog</a></li>
+    <li><a href="{% url 'contact' %}"{% if request.path == '/contact/' %} aria-current="page"{% endif %}>Contact</a></li>
     {% if user.is_authenticated %}
-      <li><a href="{% url 'lms:dashboard' %}">Dashboard</a></li>
+      <li class="mobile-only"><a href="{% url 'lms:dashboard' %}">Dashboard</a></li>
       <li class="mobile-only"><a href="{% url 'accounts:profile' %}">Profile</a></li>
       <li class="mobile-only">
         <form method="post" action="{% url 'accounts:logout' %}">
           {% csrf_token %}
-          <button type="submit"
-            style="background:none;border:none;cursor:pointer;
-                   font-family:'IBM Plex Mono',monospace;
-                   font-size:0.72rem;letter-spacing:0.1em;
-                   text-transform:uppercase;color:var(--muted);
-                   padding:0.9rem clamp(1.5rem,5vw,4rem);
-                   width:100%;text-align:left;
-                   border-bottom:1px solid var(--border);">
-            Logout
-          </button>
+          <button type="submit" class="nav-logout-btn">Log out</button>
         </form>
       </li>
+    {% else %}
+      <li class="mobile-only"><a href="{% url 'accounts:login' %}">Log in</a></li>
     {% endif %}
   </ul>
   {% if user.is_authenticated %}
     <div class="nav-right">
       <a href="{% url 'lms:dashboard' %}">Dashboard</a>
       <a href="{% url 'accounts:profile' %}">Profile</a>
-      <form method="post" action="{% url 'accounts:logout' %}" style="display:inline;">
+      <form method="post" action="{% url 'accounts:logout' %}">
         {% csrf_token %}
-        <button type="submit" class="nav-logout-btn">Logout</button>
+        <button type="submit" class="nav-logout-btn">Log out</button>
       </form>
     </div>
   {% else %}
-    <a href="{% url 'accounts:login' %}" class="nav-cta">Login</a>
+    <div class="nav-right"><a href="{% url 'accounts:login' %}" class="nav-cta">Log in</a></div>
   {% endif %}
-  <button class="nav-hamburger" id="hamburger" aria-label="Menu">
+  <button class="nav-hamburger" id="hamburger" aria-label="Menu" aria-expanded="false" aria-controls="navLinks">
     <span></span><span></span><span></span>
   </button>
 </nav>
 
 {% block content %}{% endblock %}
 
-<!-- FOOTER -->
 <footer>
-  <span class="footer-logo">Field-Driven Quality</span>
-  <ul class="footer-links">
-    <li><a href="{% url 'about' %}">About</a></li>
-    <li><a href="{% url 'blog_list' %}">Blog</a></li>
-    <li><a href="{% url 'contact' %}">Contact</a></li>
-    {% if not user.is_authenticated %}
-      <li><a href="{% url 'accounts:login' %}">Login</a></li>
-    {% endif %}
-  </ul>
-  <span class="footer-copy">&copy; 2025 Field-Driven Quality</span>
+  <div class="footer-inner">
+    <span class="footer-logo">Field Driven Quality</span>
+    <ul class="footer-links">
+      <li><a href="{% url 'waitlist' %}">Tier 1</a></li>
+      <li><a href="{% url 'about' %}">About</a></li>
+      <li><a href="{% url 'blog_list' %}">Blog</a></li>
+      <li><a href="{% url 'contact' %}">Contact</a></li>
+      {% if not user.is_authenticated %}<li><a href="{% url 'accounts:login' %}">Log in</a></li>{% endif %}
+    </ul>
+    <span class="footer-copy">&copy; {% now "Y" %} Field Driven Quality</span>
+  </div>
 </footer>
 
 <script>
-  // Hamburger toggle
   const hamburger = document.getElementById('hamburger');
   const navLinks = document.getElementById('navLinks');
   hamburger.addEventListener('click', () => {
-    hamburger.classList.toggle('open');
-    navLinks.classList.toggle('open');
+    const open = navLinks.classList.toggle('open');
+    hamburger.classList.toggle('open', open);
+    hamburger.setAttribute('aria-expanded', open);
   });
-
-  // Intersection Observer for scroll reveals
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add('visible');
-      }
-    });
-  }, { threshold: 0.1 });
-
-  document.querySelectorAll('.reveal, .stagger').forEach(el => observer.observe(el));
 
   {% block extra_js %}{% endblock %}
 </script>

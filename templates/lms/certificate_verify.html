@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Verify Certificate | Field-Driven Quality{% endblock %}
+{% block title %}Verify Certificate | Field Driven Quality{% endblock %}
 
 {% block extra_styles %}
 .verify-wrap {
@@ -23,26 +23,25 @@
 
 .verify-badge.valid {
   background: rgba(76, 175, 80, 0.15);
-  border: 2px solid #81c784;
-  color: #81c784;
+  border: 2px solid #1f7a35;
+  color: #1f7a35;
 }
 
 .verify-badge.invalid {
   background: rgba(229, 115, 115, 0.1);
   border: 2px solid rgba(229, 115, 115, 0.4);
-  color: #e57373;
+  color: #b3261e;
 }
 
 .verify-status {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-weight: 900;
+  font-family: 'Public Sans', sans-serif;
+  font-weight: 800;
   font-size: clamp(1.8rem, 4vw, 2.5rem);
-  text-transform: uppercase;
   margin-bottom: 2rem;
 }
 
-.verify-status.valid { color: #81c784; }
-.verify-status.invalid { color: #e57373; }
+.verify-status.valid { color: #1f7a35; }
+.verify-status.invalid { color: #b3261e; }
 
 .verify-details {
   background: var(--surface);
@@ -59,10 +58,8 @@
 .vd-row:last-child { border-bottom: none; }
 
 .vd-label {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'Public Sans', sans-serif;
   font-size: 0.65rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
   color: var(--amber);
   margin-bottom: 0.2rem;
 }

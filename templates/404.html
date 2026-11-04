@@ -1,11 +1,11 @@
 {% extends 'base.html' %}
 
-{% block title %}404 — Page Not Found | Field-Driven Quality{% endblock %}
+{% block title %}404 — Page Not Found | Field Driven Quality{% endblock %}
 
 {% block extra_styles %}
 .error-number {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-weight: 900;
+  font-family: 'Public Sans', sans-serif;
+  font-weight: 800;
   font-size: 6rem;
   color: var(--amber);
   line-height: 1;
@@ -18,7 +18,7 @@
 <div class="center-wrap">
   <div class="center-box reveal">
     <div class="error-number">404</div>
-    <h1>Page <em>not found.</em></h1>
+    <h1>That page isn't here.</h1>
     <p class="center-sub">The page you're looking for doesn't exist or has been moved.</p>
     <div class="btn-row">
       <a href="{% url 'home' %}" class="btn-primary">Go Home</a>

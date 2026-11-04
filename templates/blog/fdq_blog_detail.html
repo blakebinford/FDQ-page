@@ -21,10 +21,8 @@
 }
 
 .back-link a {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'Public Sans', sans-serif;
   font-size: 0.68rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
   color: var(--muted);
   text-decoration: none;
   transition: color 0.2s;
@@ -41,30 +39,26 @@
 }
 
 .article-hero h1 {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-weight: 900;
+  font-family: 'Public Sans', sans-serif;
+  font-weight: 800;
   font-size: clamp(2.2rem, 6vw, 4.5rem);
   line-height: 0.95;
   letter-spacing: -0.01em;
-  text-transform: uppercase;
   color: var(--white);
   margin-bottom: 1.2rem;
   max-width: 900px;
 }
 
 .post-meta {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'Public Sans', sans-serif;
   font-size: 0.68rem;
-  letter-spacing: 0.1em;
   color: var(--muted);
   margin-bottom: 1rem;
 }
 
 .post-tag {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'Public Sans', sans-serif;
   font-size: 0.62rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
   padding: 0.25rem 0.6rem;
   border: 1px solid var(--border);
   color: var(--muted);
@@ -106,9 +100,8 @@
 }
 
 .article-content h2, .article-content h3 {
-  font-family: 'Barlow Condensed', sans-serif;
+  font-family: 'Public Sans', sans-serif;
   font-weight: 800;
-  text-transform: uppercase;
   color: var(--white);
   margin-top: 2.5rem;
   margin-bottom: 1rem;
@@ -152,64 +145,16 @@
 
 .article-content a:hover { color: var(--amber-lt); }
 
-/* ── CTA BAND ── */
-.cta-band {
-  background: var(--amber);
-  padding: clamp(3rem, 7vw, 5rem) clamp(1.5rem, 5vw, 4rem);
-}
-
-.cta-band-inner {
-  max-width: 1200px;
-  margin: 0 auto;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 2rem;
-  flex-wrap: wrap;
-}
-
-.cta-band h2 {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-weight: 900;
-  font-size: clamp(1.8rem, 4vw, 3rem);
-  text-transform: uppercase;
-  color: var(--bg);
-  line-height: 1;
-}
-
-/* ── SHARE FAB ── */
-.share-fab {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  z-index: 1050;
-  width: 48px;
-  height: 48px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  color: var(--amber);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-decoration: none;
-  font-size: 1.1rem;
-  transition: background 0.2s, color 0.2s;
-}
-
-.share-fab:hover { background: var(--amber); color: var(--bg); }
-
-@media (max-width: 480px) {
-  .cta-band-inner {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-}
+.blog-tier1 { border-top: 1px solid var(--rule); background: var(--surface); }
+.blog-tier1-inner { max-width: 1160px; margin: 0 auto; padding: 2rem clamp(1rem, 4vw, 2.5rem); display: flex; gap: 1rem 2rem; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+.blog-tier1 p { color: var(--ink-2); max-width: 60ch; }
+.blog-tier1 strong { color: var(--ink); }
 {% endblock %}
 
 {% block content %}
 <!-- BACK LINK -->
 <div class="back-link">
-  <a href="{% url 'blog_list' %}">&larr; Back to Articles</a>
+  <a href="{% url 'blog_list' %}">&larr; All articles</a>
 </div>
 
 <!-- BANNER -->
@@ -237,11 +182,10 @@
   {{ post.content|safe }}
 </div>
 
-<!-- CTA BAND -->
-<div class="cta-band">
-  <div class="cta-band-inner">
-    <h2>Ready to bring FDQ<br/>to your team?</h2>
-    <a href="{% url 'about' %}" class="btn-dark">What is FDQ</a>
+<div class="blog-tier1">
+  <div class="blog-tier1-inner">
+    <p><strong>FDQ Tier 1</strong> takes a pipeline hand with no quality background into a first QC or inspection job. Lesson 1 is free.</p>
+    <a href="{% url 'waitlist' %}#sign-up" class="btn-primary">Watch lesson 1 free</a>
   </div>
 </div>
 

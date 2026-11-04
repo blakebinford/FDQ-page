@@ -1,11 +1,11 @@
 {% extends 'base.html' %}
 
-{% block title %}Prerequisite Required | Field-Driven Quality{% endblock %}
+{% block title %}Prerequisite Required | Field Driven Quality{% endblock %}
 
 {% block content %}
 <div class="center-wrap">
   <div class="center-box reveal">
-    <h1>Complete <em>{{ tier.prerequisite.name }}</em> first.</h1>
+    <h1>Finish {{ tier.prerequisite.name }} first</h1>
     <p class="center-sub">You need to complete and pass {{ tier.prerequisite.name }} before purchasing {{ tier.name }}.</p>
     <div class="btn-row">
       <a href="{% url 'lms:tier_list' %}" class="btn-primary">Back to Certifications</a>

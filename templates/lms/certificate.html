@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Certificate | Field-Driven Quality{% endblock %}
+{% block title %}Certificate | Field Driven Quality{% endblock %}
 
 {% block extra_styles %}
 .cert-wrap {
@@ -26,29 +26,24 @@
 }
 
 .cert-brand {
-  font-family: 'Barlow Condensed', sans-serif;
+  font-family: 'Public Sans', sans-serif;
   font-weight: 800;
   font-size: 1.1rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
   color: var(--amber);
   margin-bottom: 0.3rem;
 }
 
 .cert-label {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'Public Sans', sans-serif;
   font-size: 0.65rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
   color: var(--muted);
   margin-bottom: 2.5rem;
 }
 
 .cert-name {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-weight: 900;
+  font-family: 'Public Sans', sans-serif;
+  font-weight: 800;
   font-size: clamp(2.2rem, 5vw, 3.2rem);
-  text-transform: uppercase;
   color: var(--white);
   line-height: 1;
   margin-bottom: 0.8rem;
@@ -61,26 +56,23 @@
 }
 
 .cert-tier {
-  font-family: 'Barlow Condensed', sans-serif;
+  font-family: 'Public Sans', sans-serif;
   font-weight: 800;
   font-size: 1.6rem;
-  text-transform: uppercase;
   color: var(--amber);
   margin-bottom: 2rem;
 }
 
 .cert-date {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'Public Sans', sans-serif;
   font-size: 0.75rem;
-  letter-spacing: 0.1em;
   color: var(--muted);
   margin-bottom: 0.4rem;
 }
 
 .cert-id {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'Public Sans', sans-serif;
   font-size: 0.72rem;
-  letter-spacing: 0.06em;
   color: var(--muted);
   word-break: break-all;
 }
@@ -94,9 +86,8 @@
 }
 
 .cert-verify-link {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'Public Sans', sans-serif;
   font-size: 0.72rem;
-  letter-spacing: 0.08em;
   color: var(--muted);
   text-align: center;
   margin-top: 1.5rem;
@@ -117,10 +108,8 @@
 }
 
 .cert-share a {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'Public Sans', sans-serif;
   font-size: 0.72rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
   color: var(--muted);
   text-decoration: none;
   border: 1px solid var(--border);
@@ -137,7 +126,7 @@
 {% block content %}
 <div class="cert-wrap reveal">
   <div class="cert-card">
-    <div class="cert-brand">Field-Driven Quality</div>
+    <div class="cert-brand">Field Driven Quality</div>
     <div class="cert-label">Certificate of Completion</div>
 
     <div class="cert-name">{{ user.first_name }} {{ user.last_name }}</div>
@@ -164,9 +153,8 @@
   {% if next_tier %}
   <div style="margin-top:2rem;padding-top:2rem;
               border-top:1px solid var(--border);text-align:center;">
-    <p style="font-family:'IBM Plex Mono',monospace;
-              font-size:0.68rem;letter-spacing:0.18em;
-              text-transform:uppercase;color:var(--amber);
+    <p style="font-family:'Public Sans', sans-serif;
+              font-size:0.68rem;color:var(--amber);
               margin-bottom:0.75rem;">Continue Your Certification</p>
     <p style="font-size:0.95rem;color:var(--muted);
               margin-bottom:1.5rem;">

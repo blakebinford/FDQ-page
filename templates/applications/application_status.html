@@ -1,23 +1,21 @@
 {% extends 'base.html' %}
 
-{% block title %}Application Status | Field-Driven Quality{% endblock %}
+{% block title %}Application Status | Field Driven Quality{% endblock %}
 
 {% block extra_styles %}
 .status-box { max-width: 640px; }
 .status-row { padding: 1rem 0; border-bottom: 1px solid var(--border); }
 .status-row:last-child { border-bottom: none; }
 .status-label {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'Public Sans', sans-serif;
   font-size: 0.65rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
   color: var(--amber);
   margin-bottom: 0.3rem;
 }
 .status-value { font-size: 0.97rem; color: var(--text); }
-.status-value.pending { color: var(--amber); font-family: 'IBM Plex Mono', monospace; font-size: 0.85rem; letter-spacing: 0.06em; }
-.status-value.approved { color: #81c784; font-family: 'IBM Plex Mono', monospace; font-size: 0.85rem; letter-spacing: 0.06em; }
-.status-value.denied { color: #e57373; font-family: 'IBM Plex Mono', monospace; font-size: 0.85rem; letter-spacing: 0.06em; }
+.status-value.pending { color: var(--amber); font-family: 'Public Sans', sans-serif; font-size: 0.85rem; }
+.status-value.approved { color: #1f7a35; font-family: 'Public Sans', sans-serif; font-size: 0.85rem; }
+.status-value.denied { color: #b3261e; font-family: 'Public Sans', sans-serif; font-size: 0.85rem; }
 .status-body { font-size: 0.92rem; color: var(--muted); line-height: 1.7; margin-top: 1.5rem; }
 .status-body a { color: var(--amber); text-decoration: none; }
 .status-body a:hover { color: var(--amber-lt); }
@@ -28,7 +26,7 @@
 {% if application.is_pending %}
 <div class="page-hero reveal">
   <p class="page-label">Application Status</p>
-  <h1>Under <em>review.</em></h1>
+  <h1>Your application is under review</h1>
   <p class="page-sub">We've received your application and will review it within 1–2 business days.</p>
 </div>
 
@@ -49,12 +47,12 @@
 {% elif application.is_approved %}
 <div class="page-hero reveal">
   <p class="page-label">Application Status</p>
-  <h1>You're <em>approved.</em></h1>
+  <h1>You're approved</h1>
   <p class="page-sub">Your application has been reviewed and approved. You're ready to get certified.</p>
 </div>
 
 <div class="page-content">
-  <div class="aside-box status-box reveal" style="border-left-color: #4caf50;">
+  <div class="aside-box status-box reveal" style="border-left-color: #1f7a35;">
     <div class="status-row">
       <p class="status-label">Status</p>
       <p class="status-value approved">Approved</p>
@@ -72,7 +70,7 @@
 {% elif application.is_denied %}
 <div class="page-hero reveal">
   <p class="page-label">Application Status</p>
-  <h1>Application <em>not approved.</em></h1>
+  <h1>Your application wasn't approved</h1>
   {% if application.can_reapply %}
     <p class="page-sub">Your application was not approved at this time, but you may resubmit.</p>
   {% else %}

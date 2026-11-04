@@ -1,42 +1,27 @@
 {% extends 'base.html' %}
 
-{% block title %}You're on the list | Field-Driven Quality{% endblock %}
+{% block title %}You're on the list | Field Driven Quality{% endblock %}
 
 {% block meta_tags %}<meta name="robots" content="noindex" />{% endblock %}
 
 {% block extra_styles %}
 .wl-lesson { max-width: 880px; margin: 0 auto; padding: clamp(2.5rem, 7vw, 5rem) clamp(1rem, 4vw, 2rem); }
-.wl-lesson h1 {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-weight: 900;
-  font-size: clamp(2.4rem, 6vw, 4rem);
-  line-height: 0.95;
-  text-transform: uppercase;
-  color: var(--white);
-  margin-bottom: 1rem;
-}
-.wl-lesson h1 em { font-style: normal; color: var(--amber); }
+.wl-lesson h1 { font-weight: 800; font-size: clamp(2rem, 5vw, 3rem); line-height: 1.08; margin-bottom: 0.75rem; }
 .wl-lesson video {
   display: block;
   width: 100%;
   height: auto;
   aspect-ratio: 16 / 9;
   background: #000;
-  border: 1px solid var(--border);
-  margin: 2rem 0 0.8rem;
+  border-radius: 4px;
+  margin: 1.75rem 0 0.6rem;
 }
 .wl-credits { font-size: 0.75rem; color: var(--muted); line-height: 1.6; }
 .wl-credits a { color: inherit; }
 .wl-card { display: flex; gap: 1.4rem; align-items: center; margin-top: 3rem; }
-.wl-card img { width: 110px; flex-shrink: 0; border: 1px solid var(--border); background: var(--white); }
-.wl-card h2 {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-weight: 800;
-  font-size: 1.6rem;
-  text-transform: uppercase;
-  color: var(--white);
-  margin-bottom: 0.4rem;
-}
+.wl-card { padding-top: 2rem; border-top: 1px solid var(--rule); }
+.wl-card img { width: 110px; flex-shrink: 0; border: 1px solid var(--rule); background: #fff; }
+.wl-card h2 { font-weight: 700; font-size: 1.3rem; margin-bottom: 0.4rem; }
 .wl-card p { font-size: 0.92rem; color: var(--muted); line-height: 1.6; margin-bottom: 1rem; }
 @media (max-width: 520px) { .wl-card { flex-direction: column; align-items: flex-start; } }
 {% endblock %}
@@ -44,7 +29,7 @@
 {% block content %}
 <section class="wl-lesson">
   <p class="page-label">FDQ Tier 1 &middot; Weld mapping &middot; Lesson 01</p>
-  <h1>You're on the <em>list.</em></h1>
+  <h1>You're on the list.</h1>
   <p class="page-sub">Here's lesson 1: why weld maps exist. Turn your sound on. I'll email you when Tier 1 opens.</p>
 
   <video controls playsinline preload="metadata" poster="{% url 'lesson_1_player_poster' %}">

@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}FDQ Tier 1 | Field-Driven Quality{% endblock %}
+{% block title %}FDQ Tier 1 | Field Driven Quality{% endblock %}
 
 {% block meta_tags %}
 <meta name="description" content="FDQ Tier 1 takes someone with no quality background into a first QC job on a pipeline or station job. Get on the list and watch lesson 1 of weld mapping free." />
@@ -11,112 +11,71 @@
 
 {% block extra_styles %}
 .wl-hero {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: clamp(3rem, 8vw, 6rem) clamp(1.5rem, 5vw, 4rem) clamp(3rem, 6vw, 5rem);
   display: grid;
-  grid-template-columns: 1.1fr 1fr;
-  gap: clamp(2.5rem, 6vw, 5rem);
+  grid-template-columns: 1.15fr 1fr;
+  gap: clamp(2rem, 5vw, 4rem);
   align-items: start;
+  padding-top: clamp(2rem, 6vw, 4rem);
+  padding-bottom: clamp(2.5rem, 6vw, 4rem);
 }
 @media (max-width: 860px) { .wl-hero { grid-template-columns: 1fr; } }
-@media (max-width: 520px) {
-  .wl-hero { padding-top: 2rem; gap: 2rem; }
-  .wl-hero .page-sub { font-size: 0.95rem; }
-  .wl-hero .aside-box { padding: 1.5rem; }
-}
+.wl-hero h1 { font-weight: 800; font-size: clamp(2.1rem, 5vw, 3.4rem); line-height: 1.06; margin-bottom: 1rem; }
+.wl-hero .page-sub { margin-bottom: 1.5rem; }
+.wl-facts { list-style: none; color: var(--ink-2); font-size: 1rem; }
+.wl-facts li { padding: 0.55rem 0; border-top: 1px solid var(--rule); }
+.wl-facts li:last-child { border-bottom: 1px solid var(--rule); }
+.wl-facts b { color: var(--ink); font-weight: 600; }
 
-.wl-hero h1 {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-weight: 900;
-  font-size: clamp(2.6rem, 6.5vw, 5rem);
-  line-height: 0.95;
-  letter-spacing: -0.01em;
-  text-transform: uppercase;
-  color: var(--white);
-  margin-bottom: 1.4rem;
-}
-.wl-hero h1 em { font-style: normal; color: var(--amber); }
-
-.wl-offer { margin-bottom: 1.8rem; }
-.wl-poster { display: block; width: 100%; height: auto; border: 1px solid var(--border); margin-bottom: 1.2rem; }
-.wl-offer h2 {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-weight: 800;
-  font-size: 1.6rem;
-  line-height: 1.05;
-  text-transform: uppercase;
-  color: var(--white);
-  margin-bottom: 0.4rem;
-}
-.wl-offer p { font-size: 0.92rem; color: var(--muted); line-height: 1.6; }
-@media (max-width: 520px) {
-  .wl-offer { display: grid; grid-template-columns: 120px 1fr; column-gap: 1rem; align-items: start; }
-  .wl-poster { grid-row: span 2; margin-bottom: 0; }
-  .wl-offer h2 { font-size: 1.35rem; }
-  .wl-offer p:not(.ci-label) { grid-column: 1 / -1; margin-top: 0.8rem; }
-}
-
-.wl-form { display: flex; flex-direction: column; gap: 1.1rem; }
-.wl-form .btn-primary { width: 100%; text-align: center; }
-.wl-error { font-size: 0.85rem; color: #e57373; }
-.wl-fine { font-size: 0.82rem; color: var(--muted); line-height: 1.6; margin-top: 1.2rem; }
+.wl-offer { display: grid; grid-template-columns: 132px 1fr; gap: 1rem; align-items: center; margin-bottom: 1.4rem; }
+.wl-offer img { display: block; width: 100%; height: auto; border-radius: 3px; border: 1px solid var(--rule); }
+.wl-offer .ci-label { margin-bottom: 0.15rem; }
+.wl-offer h2 { font-size: 1.25rem; font-weight: 700; line-height: 1.2; }
+.wl-form { display: flex; flex-direction: column; gap: 1rem; }
+.wl-form .btn-primary { width: 100%; font-size: 1.05rem; }
+.wl-optional { font-weight: 400; color: var(--ink-3); }
+.wl-error { font-size: 0.9rem; color: var(--danger); }
+.wl-fine { font-size: 0.88rem; color: var(--ink-3); margin-top: 1rem; }
 .wl-trap { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
 
-.wl-section { max-width: 1200px; margin: 0 auto; padding: clamp(3rem, 7vw, 5rem) clamp(1.5rem, 5vw, 4rem); }
+.wl-block { padding-top: clamp(2.5rem, 6vw, 4rem); padding-bottom: clamp(2.5rem, 6vw, 4rem); }
+.wl-block h2 { font-weight: 800; font-size: clamp(1.6rem, 3.2vw, 2.2rem); line-height: 1.15; margin-bottom: 0.75rem; }
+.wl-block .intro { color: var(--ink-2); max-width: 62ch; margin-bottom: 1.75rem; }
+.band { background: var(--surface); border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
 
-.wl-modules {
-  list-style: none;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1px;
-  background: var(--border);
-  border: 1px solid var(--border);
-}
-@media (max-width: 860px) { .wl-modules { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 520px) { .wl-modules { grid-template-columns: 1fr; } }
-.wl-modules li {
-  background: var(--bg);
-  padding: 1.2rem 1.3rem;
-  display: flex;
-  gap: 1rem;
-  align-items: baseline;
-  color: var(--text);
-  font-size: 0.97rem;
-}
-.wl-modules span {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.72rem;
-  color: var(--amber);
-  letter-spacing: 0.1em;
-}
+.wl-modules { columns: 2; column-gap: clamp(2rem, 5vw, 4rem); list-style: none; counter-reset: mod; }
+@media (max-width: 680px) { .wl-modules { columns: 1; } }
+.wl-modules li { break-inside: avoid; padding: 0.9rem 0 0.9rem 2.6rem; border-top: 1px solid var(--rule); position: relative; counter-increment: mod; }
+.wl-modules li::before { content: counter(mod); position: absolute; left: 0; top: 0.9rem; font-weight: 700; color: var(--ink-3); width: 2rem; }
+.wl-modules b { display: block; font-weight: 700; }
+.wl-modules span { display: block; color: var(--ink-2); font-size: 0.95rem; margin-top: 0.15rem; }
 
-.wl-two { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(2rem, 5vw, 4rem); align-items: start; }
-@media (max-width: 860px) { .wl-two { grid-template-columns: 1fr; } }
-.wl-two h3 {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-weight: 800;
-  font-size: 1.8rem;
-  text-transform: uppercase;
-  color: var(--white);
-  margin-bottom: 1rem;
-}
+.wl-limits { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(2rem, 5vw, 4rem); }
+@media (max-width: 760px) { .wl-limits { grid-template-columns: 1fr; } }
+.wl-limits h3 { font-size: 1.15rem; font-weight: 700; margin-bottom: 0.6rem; }
+.wl-limits p { color: var(--ink-2); margin-bottom: 0.9rem; }
+.wl-limits a { color: var(--accent-ink); }
 {% endblock %}
 
 {% block content %}
-<section class="wl-hero">
+<section class="wrap wl-hero">
   <div>
     <p class="page-label">FDQ Tier 1 &middot; Opening soon</p>
-    <h1>The best quality hands came up through the <em>crew.</em></h1>
+    <h1>The best quality hands came up through the crew.</h1>
     <p class="page-sub">Tier 1 takes someone with no quality background into a first quality job: contractor QC tech or owner-side junior inspector, on the right-of-way and inside the fence. Get on the list and watch the first lesson now.</p>
+    <ul class="wl-facts">
+      <li><b>12 modules</b>, from how a job runs to running a QC day</li>
+      <li><b>Online</b>, at your own pace</li>
+      <li><b>Gas and liquid lines</b> and their stations, under 49 CFR 192 and 195</li>
+    </ul>
   </div>
 
   <div class="aside-box" id="sign-up">
     <div class="wl-offer">
-      <img class="wl-poster" src="{% url 'lesson_1_poster' %}" alt="Tier 1, weld mapping, lesson 01: Why weld maps exist" width="1280" height="720" />
-      <p class="ci-label">Free lesson &middot; 4:35</p>
-      <h2>Why weld maps exist</h2>
-      <p>Lesson 1 of the weld mapping course: one line of a weld log, and the test every line has to pass. Comes with the weld map field card to print.</p>
+      <img src="{% url 'lesson_1_poster' %}" alt="Tier 1, weld mapping, lesson 01: Why weld maps exist" width="1280" height="720" />
+      <div>
+        <p class="ci-label">Free lesson &middot; 4:35</p>
+        <h2>Lesson 1: Why weld maps exist</h2>
+      </div>
     </div>
 
     <form class="wl-form" action="{% url 'waitlist' %}" method="POST" novalidate>
@@ -127,7 +86,7 @@
         {% if form.email.errors %}<p class="wl-error">Enter an email address that can get mail.</p>{% endif %}
       </div>
       <div class="form-group">
-        <label for="wl-trade">What do you do now? <span style="text-transform:none;letter-spacing:0;">(optional)</span></label>
+        <label for="wl-trade">What do you do now? <span class="wl-optional">(optional)</span></label>
         <select id="wl-trade" name="trade">
           {% for value, label in form.fields.trade.choices %}
             <option value="{{ value }}"{% if form.trade.value == value %} selected{% endif %}>{{ label }}</option>
@@ -145,50 +104,42 @@
       <input type="hidden" name="referrer_host" value="{{ form.referrer_host.value|default_if_none:'' }}" />
       <button type="submit" class="btn-primary">Watch lesson 1</button>
     </form>
-    <p class="wl-fine">The lesson opens right away. After that, a few emails around the Tier 1 launch and nothing else. Reply to any of them to come off the list.</p>
+    <p class="wl-fine">The lesson opens right away, with the weld map field card to print. After that, a few emails around the Tier 1 launch and nothing else. Reply to any of them to come off the list.</p>
   </div>
 </section>
 
-<div class="full-divider"></div>
-
-<section class="wl-section">
-  <p class="section-label">What Tier 1 covers</p>
-  <ol class="wl-modules">
-    <li><span>01</span>How a job runs and where QC sits</li>
-    <li><span>02</span>Quality fundamentals</li>
-    <li><span>03</span>The paperwork hierarchy</li>
-    <li><span>04</span>Reading drawings</li>
-    <li><span>05</span>Material and traceability</li>
-    <li><span>06</span>Weld mapping and weld records</li>
-    <li><span>07</span>Welding compliance for a non-CWI QC</li>
-    <li><span>08</span>NDE basics</li>
-    <li><span>09</span>Coating and paint</li>
-    <li><span>10</span>Bolted connections</li>
-    <li><span>11</span>Tie-ins, fabrication and pressure testing</li>
-    <li><span>12</span>Conduct on site</li>
-  </ol>
+<section class="band" id="modules">
+  <div class="wrap wl-block">
+    <h2>What Tier 1 covers</h2>
+    <p class="intro">Twelve modules, each ending with what you can do after it.</p>
+    <ol class="wl-modules">
+      <li><b>How a job runs and where QC sits</b><span>Who's who on a midstream job, and what QC checks at each step of construction.</span></li>
+      <li><b>Quality fundamentals</b><span>How quality is controlled, how a nonconformance gets handled, and records that survive turnover.</span></li>
+      <li><b>The paperwork hierarchy</b><span>Where every requirement comes from, and which document wins when two disagree.</span></li>
+      <li><b>Reading drawings</b><span>Find the right drawing and check the built work against it.</span></li>
+      <li><b>Material and traceability</b><span>Markings, mill certs, and the trail from the mill to the weld.</span></li>
+      <li><b>Weld mapping and weld records</b><span>Number and map every weld and tie it to its pipe, welders, procedure and NDE.</span></li>
+      <li><b>Welding compliance for a non-CWI QC</b><span>Check the welding against the WPS and the welder's qualification.</span></li>
+      <li><b>NDE basics</b><span>The methods, the reports, and keeping NDE tied to the weld map.</span></li>
+      <li><b>Coating and paint</b><span>The approved system, applied and recorded right, and damage found before burial.</span></li>
+      <li><b>Bolted connections</b><span>The right parts, the approved tightening method, and a record for every joint.</span></li>
+      <li><b>Tie-ins, fabrication and pressure testing</b><span>From the tie-in plan and the shop to a signed test record.</span></li>
+      <li><b>Conduct on site</b><span>Running a QC day, reporting what you see, and keeping your signature worth something.</span></li>
+    </ol>
+  </div>
 </section>
 
-<div class="full-divider"></div>
-
-<section class="wl-section">
-  <div class="wl-two">
-    <div class="aside-box">
-      <p class="ci-label">Where Tier 1 stops</p>
-      <h3>Recognize and record</h3>
-      <div class="prose">
-        <p>Tier 1 teaches you to spot a problem and get it on the record. It doesn't replace a CWI, API 1169, AMPP or NDE cert, and it won't teach you to accept work that needs one of them to sign. Every module says where that line is.</p>
-        <p>It covers gas and hazardous liquid lines and their stations, under <strong>49 CFR 192 and 195</strong>. Where a requirement changes from job to job, you learn where to find it in the project documents.</p>
-      </div>
+<section class="wrap wl-block">
+  <div class="wl-limits">
+    <div>
+      <h3>Where Tier 1 stops</h3>
+      <p>Tier 1 teaches you to spot a problem and get it on the record. It doesn't replace a CWI, API 1169, AMPP or NDE cert, and it won't teach you to accept work that needs one of them to sign. Every module says where that line is.</p>
+      <p>Where a requirement changes from job to job, you learn where to find it in the project documents.</p>
     </div>
     <div>
-      <p class="ci-label">Who built it</p>
-      <h3>From the field</h3>
-      <div class="prose">
-        <p>I started as a field inspector. I've held the weld log and walked the right-of-way at 5 AM. FDQ comes out of fifteen years on pipeline, LNG, compressor station and industrial jobs, watching which quality programs worked in the field and which ones lived in a binder.</p>
-        <p>Tier 1 is the course for the hand who already knows what good work looks like and wants the quality side next.</p>
-      </div>
-      <a href="#sign-up" class="btn-secondary" style="margin-top:0.8rem;">Watch lesson 1</a>
+      <h3>Who built it</h3>
+      <p>I'm Blake Binford. I started as a field inspector and have worked quality on pipeline, LNG, compressor station and industrial jobs. Tier 1 is for the hand who already knows what good work looks like and wants the quality side next.</p>
+      <p><a href="{% url 'about' %}">More about FDQ</a></p>
     </div>
   </div>
 </section>

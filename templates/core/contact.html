@@ -1,81 +1,68 @@
 {% extends 'base.html' %}
 
-{% block title %}Contact | Field-Driven Quality{% endblock %}
+{% block title %}Contact | Field Driven Quality{% endblock %}
 
 {% block extra_styles %}
-.contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6rem; align-items: start; }
-@media (max-width: 760px) { .contact-grid { grid-template-columns: 1fr; gap: 3rem; } }
-.contact-form { display: flex; flex-direction: column; gap: 1.2rem; }
+.contact-grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: clamp(2rem, 6vw, 5rem); align-items: start; }
+@media (max-width: 760px) { .contact-grid { grid-template-columns: 1fr; } }
+.contact-form { display: flex; flex-direction: column; gap: 1.1rem; }
+.contact-form .btn-primary { align-self: flex-start; }
+.contact-note { color: var(--ink-2); }
+.contact-note p { margin-bottom: 1rem; }
+.contact-note a { color: var(--accent-ink); }
+.form-message { background: #fdecea; border: 1px solid #f1b8b3; border-radius: var(--radius); padding: 0.9rem 1rem; margin-bottom: 1.25rem; font-size: 0.95rem; }
 {% endblock %}
 
 {% block content %}
-<div class="page-hero reveal">
+<div class="page-hero">
   <p class="page-label">Contact</p>
-  <h1>Tell me what<br/>you're <em>working on.</em></h1>
-  <p class="page-sub">Whether it's a single certification or rolling FDQ out across a project team, I'd rather have a direct conversation than send you through a form. Fill it out and I'll get back to you the same day.</p>
+  <h1>Tell me what you're working on.</h1>
+  <p class="page-sub">A question about Tier 1, training a crew, or something else. It comes straight to me.</p>
 </div>
 
 <div class="page-content">
   <div class="contact-grid">
-    <div class="reveal">
+    <div>
       {% if messages %}
         {% for message in messages %}
-          <div style="background: rgba(212, 50, 50, 0.15); border: 1px solid rgba(212, 50, 50, 0.4); border-left: 3px solid #d43232; padding: 1rem 1.2rem; margin-bottom: 1.5rem; color: var(--text); font-size: 0.92rem;">
-            {{ message }}
-          </div>
+          <div class="form-message">{{ message }}</div>
         {% endfor %}
       {% endif %}
       <form class="contact-form" action="{% url 'contact' %}" method="POST">
         {% csrf_token %}
         <div class="form-group">
-          <label>Full Name</label>
-          <input type="text" name="name" placeholder="Your name" required />
+          <label for="c-name">Name</label>
+          <input id="c-name" type="text" name="name" autocomplete="name" required />
         </div>
         <div class="form-group">
-          <label>Email</label>
-          <input type="email" name="email" placeholder="you@company.com" required />
+          <label for="c-email">Email</label>
+          <input id="c-email" type="email" name="email" autocomplete="email" required />
         </div>
         <div class="form-group">
-          <label>Company / Project</label>
-          <input type="text" name="company" placeholder="Optional" />
+          <label for="c-company">Company or project <span style="font-weight:400;color:var(--ink-3);">(optional)</span></label>
+          <input id="c-company" type="text" name="company" />
         </div>
         <div class="form-group">
-          <label>I'm interested in</label>
-          <select name="interest">
+          <label for="c-interest">What's it about?</label>
+          <select id="c-interest" name="interest">
             <option value="">Select one...</option>
-            <option>FDQ Tier 1 Certification</option>
-            <option>FDQ Tier 2 Certification</option>
-            <option>FDQ Tier 3 Certification</option>
-            <option>Bulk / Project Enrollment</option>
-            <option>Deploying FDQ on my project</option>
+            <option>FDQ Tier 1</option>
+            <option>Training a crew or a QC team</option>
+            <option>Tier 2 or Tier 3</option>
             <option>Something else</option>
           </select>
         </div>
         <div class="form-group">
-          <label>Message</label>
-          <textarea name="message" placeholder="Tell us what you're working on..."></textarea>
+          <label for="c-message">Message</label>
+          <textarea id="c-message" name="message" required></textarea>
         </div>
-        <button type="submit" class="btn-primary" style="align-self:flex-start;border:none;cursor:pointer;">Send Message</button>
+        <button type="submit" class="btn-primary">Send message</button>
       </form>
     </div>
-    <div class="reveal">
-      <div class="prose" style="margin-bottom:2rem;">
-        <p>Individual certifications are straightforward. Project deployments take more coordination, but that's where FDQ has the most impact. If you're trying to get a QC team or a full project crew certified before mobilization, tell me the timeline and what you're working with and we'll figure out how to make it work.</p>
-      </div>
-      <div class="ci-item">
-        <p class="ci-label">Certifications</p>
-        <p class="ci-value">Individual and bulk enrollment available</p>
-        <p class="ci-sub">Tier 1, 2, and 3 available online</p>
-      </div>
-      <div class="ci-item">
-        <p class="ci-label">Project Deployments</p>
-        <p class="ci-value">Full rollout support available</p>
-        <p class="ci-sub">Includes training materials, toolkits, and dashboard access</p>
-      </div>
-      <div class="ci-item">
-        <p class="ci-label">Response Time</p>
-        <p class="ci-value">Within 1 business day</p>
-      </div>
+    <div class="contact-note">
+      <p>Tier 1 opens soon. If you want it when it does, <a href="{% url 'waitlist' %}#sign-up">get on the list</a> and lesson 1 opens right away.</p>
+      <p>If you're thinking about putting a crew or a QC team through FDQ, tell me the job, the timeline and how many people, and we'll work out what makes sense.</p>
+      <p>Tiers 2 and 3 aren't open yet. Ask here and I'll tell you where they stand.</p>
     </div>
   </div>
 </div>

@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}{{ tier.name }} | Field-Driven Quality{% endblock %}
+{% block title %}{{ tier.name }} | Field Driven Quality{% endblock %}
 
 {% block extra_styles %}
 .learn-layout {
@@ -36,10 +36,8 @@
 }
 
 .sidebar-module-title {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'Public Sans', sans-serif;
   font-size: 0.68rem;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
   color: var(--amber);
   margin-bottom: 0.6rem;
   padding-bottom: 0.4rem;
@@ -74,8 +72,8 @@
 
 .sidebar-check.done {
   background: rgba(76, 175, 80, 0.2);
-  border-color: #81c784;
-  color: #81c784;
+  border-color: #1f7a35;
+  color: #1f7a35;
 }
 
 /* Locked module */
@@ -89,9 +87,8 @@
 }
 
 .sidebar-lock-msg {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'Public Sans', sans-serif;
   font-size: 0.62rem;
-  letter-spacing: 0.1em;
   color: var(--muted);
   padding: 4px 0 8px 22px;
   opacity: 0.6;
@@ -116,19 +113,17 @@
 
 .gate-item.passed {
   background: rgba(82,163,102,0.07);
-  border-left-color: #52a366;
+  border-left-color: #1f7a35;
 }
 
 .gate-item-label {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'Public Sans', sans-serif;
   font-size: 7.5px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
   color: var(--amber);
 }
 
 .gate-item.passed .gate-item-label {
-  color: #52a366;
+  color: #1f7a35;
 }
 
 .gate-item-title {
@@ -138,15 +133,14 @@
 
 /* Main content */
 .learn-main h1 {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-weight: 900;
+  font-family: 'Public Sans', sans-serif;
+  font-weight: 800;
   font-size: clamp(2rem, 5vw, 3rem);
-  text-transform: uppercase;
   color: var(--white);
   margin-bottom: 0.5rem;
 }
 
-.learn-main h1 em { font-style: normal; color: var(--amber); }
+.learn-main h1 em { font-style: normal; }
 
 .learn-progress-row {
   display: flex;
@@ -157,10 +151,9 @@
 }
 
 .learn-pct {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'Public Sans', sans-serif;
   font-size: 0.75rem;
   color: var(--muted);
-  letter-spacing: 0.08em;
   white-space: nowrap;
 }
 
@@ -192,10 +185,9 @@
 }
 
 .quiz-block h3 {
-  font-family: 'Barlow Condensed', sans-serif;
+  font-family: 'Public Sans', sans-serif;
   font-weight: 800;
   font-size: 1.3rem;
-  text-transform: uppercase;
   color: var(--white);
   margin-bottom: 0.5rem;
 }
@@ -208,10 +200,8 @@
 }
 
 .quiz-locked {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'Public Sans', sans-serif;
   font-size: 0.72rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
   color: var(--muted);
   padding: 0.7rem 1.5rem;
   border: 1px solid var(--border);
@@ -226,11 +216,10 @@
 }
 
 .cert-result h3 {
-  font-family: 'Barlow Condensed', sans-serif;
+  font-family: 'Public Sans', sans-serif;
   font-weight: 800;
   font-size: 1.3rem;
-  text-transform: uppercase;
-  color: #81c784;
+  color: #1f7a35;
   margin-bottom: 0.5rem;
 }
 
@@ -250,7 +239,7 @@
 {% block content %}
 <div class="page-hero reveal">
   <p class="page-label">{{ tier.name }}</p>
-  <h1>Learn<em>.</em></h1>
+  <h1>Your course</h1>
   <p class="page-sub">Work through each module and complete every lesson to unlock the certification quiz.</p>
 </div>
 
@@ -290,7 +279,7 @@
 
   <!-- Main -->
   <div class="learn-main reveal">
-    <h1>{{ tier.name }}<em>.</em></h1>
+    <h1>{{ tier.name }}</h1>
     <div class="learn-progress-row">
       <span class="learn-pct">{{ completed_count }}/{{ total_lessons }} lessons &middot; {{ pct }}%</span>
       <div class="progress-bar-track">
@@ -319,9 +308,8 @@
       {% if next_tier %}
       <div style="margin-top: 1.5rem; padding-top: 1.5rem;
                   border-top: 1px solid var(--border);">
-        <p style="font-family:'IBM Plex Mono',monospace;
-                  font-size:0.68rem;letter-spacing:0.14em;
-                  text-transform:uppercase;color:var(--amber);
+        <p style="font-family:'Public Sans', sans-serif;
+                  font-size:0.68rem;color:var(--amber);
                   margin-bottom:0.75rem;">Up Next</p>
         <p style="font-size:0.9rem;color:var(--muted);
                   margin-bottom:1rem;">

@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Dashboard | Field-Driven Quality{% endblock %}
+{% block title %}Dashboard | Field Driven Quality{% endblock %}
 
 {% block extra_styles %}
 .dash-section {
@@ -14,10 +14,9 @@
 }
 
 .dash-heading {
-  font-family: 'Barlow Condensed', sans-serif;
-  font-weight: 900;
+  font-family: 'Public Sans', sans-serif;
+  font-weight: 800;
   font-size: clamp(1.6rem, 4vw, 2.2rem);
-  text-transform: uppercase;
   color: var(--white);
   margin-bottom: 1.5rem;
 }
@@ -39,19 +38,16 @@
 }
 
 .tc-name {
-  font-family: 'Barlow Condensed', sans-serif;
+  font-family: 'Public Sans', sans-serif;
   font-weight: 800;
   font-size: 1.4rem;
-  text-transform: uppercase;
   color: var(--white);
 }
 
 .tc-count {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'Public Sans', sans-serif;
   font-size: 0.72rem;
-  letter-spacing: 0.1em;
   color: var(--muted);
-  text-transform: uppercase;
 }
 
 .progress-bar-track {
@@ -83,12 +79,10 @@
 }
 
 .cert-badge {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'Public Sans', sans-serif;
   font-size: 0.72rem;
   font-weight: 500;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: #81c784;
+  color: #1f7a35;
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -120,7 +114,7 @@
 {% block content %}
 <div class="page-hero reveal">
   <p class="page-label">Dashboard</p>
-  <h1>Your <em>progress.</em></h1>
+  <h1>Your progress</h1>
   <p class="page-sub">Track your certifications, continue where you left off, and download your certificates.</p>
 </div>
 
@@ -185,9 +179,8 @@
     {% if entry.next_tier and not entry.next_tier_enrolled %}
     <div style="margin-top:1rem;padding-top:1rem;
                 border-top:1px solid var(--border);">
-      <p style="font-family:'IBM Plex Mono',monospace;
-                font-size:0.65rem;letter-spacing:0.14em;
-                text-transform:uppercase;color:var(--amber);
+      <p style="font-family:'Public Sans', sans-serif;
+                font-size:0.65rem;color:var(--amber);
                 margin-bottom:0.5rem;">Next Step</p>
       <a href="{% url 'lms:tier_list' %}" class="btn-primary"
          style="font-size:0.72rem;padding:0.7rem 1.5rem;">

@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Edit Profile | Field-Driven Quality{% endblock %}
+{% block title %}Edit Profile | Field Driven Quality{% endblock %}
 
 {% block extra_styles %}
 .edit-form { max-width: 640px; display: flex; flex-direction: column; gap: 1.2rem; }
@@ -46,26 +46,21 @@
 }
 .wh-card-body { flex: 1; }
 .wh-title {
-  font-family: 'Barlow Condensed', sans-serif;
+  font-family: 'Public Sans', sans-serif;
   font-weight: 700;
   font-size: 1.05rem;
-  text-transform: uppercase;
   color: var(--white);
   margin-bottom: 0.2rem;
 }
 .wh-meta {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'Public Sans', sans-serif;
   font-size: 0.65rem;
-  letter-spacing: 0.1em;
   color: var(--muted);
-  text-transform: uppercase;
 }
 .wh-contact { font-size: 0.82rem; color: var(--muted); margin-top: 0.5rem; }
 .wh-delete {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'Public Sans', sans-serif;
   font-size: 0.65rem;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
   color: var(--muted);
   background: none;
   border: 1px solid var(--border);
@@ -73,12 +68,10 @@
   cursor: pointer;
   transition: color 0.2s, border-color 0.2s;
 }
-.wh-delete:hover { color: #e57373; border-color: #e57373; }
+.wh-delete:hover { color: #b3261e; border-color: #b3261e; }
 .wh-section-label {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'Public Sans', sans-serif;
   font-size: 0.65rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
   color: var(--amber);
   margin: 2rem 0 1rem;
   display: flex;
@@ -119,7 +112,7 @@
 {% block content %}
 <div class="page-hero reveal">
   <p class="page-label">Edit Profile</p>
-  <h1>Update your <em>information.</em></h1>
+  <h1>Edit your profile</h1>
 </div>
 
 <div class="page-content">
