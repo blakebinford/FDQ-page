@@ -22,6 +22,9 @@ FIELD_CARD_PREVIEW = FILES_DIR / 'weld-map-field-card-preview.png'
 LESSON_1_VIDEO = FILES_DIR / 'lesson-1-why-weld-maps-exist.mp4'
 LESSON_1_CAPTIONS = FILES_DIR / 'lesson-1-why-weld-maps-exist.vtt'
 LESSON_1_POSTER = FILES_DIR / 'lesson-1-poster.jpg'
+# The player shows a frame from inside the lesson: the opening is the same title
+# card as LESSON_1_POSTER, so a started video would look like it hadn't.
+LESSON_1_PLAYER_POSTER = FILES_DIR / 'lesson-1-player.jpg'
 
 # Set on signup; the thanks page (and lesson 1 on it) is for people who signed up.
 WAITLIST_SESSION_KEY = 'waitlist_signed_up'
@@ -173,3 +176,7 @@ def lesson_1_captions(request):
 
 def lesson_1_poster(request):
     return FileResponse(open(LESSON_1_POSTER, 'rb'), content_type='image/jpeg')
+
+
+def lesson_1_player_poster(request):
+    return FileResponse(open(LESSON_1_PLAYER_POSTER, 'rb'), content_type='image/jpeg')

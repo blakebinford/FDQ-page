@@ -95,5 +95,5 @@ class WaitlistTests(TestCase):
         captions = self.client.get(reverse('lesson_1_captions'))
         self.assertTrue(captions['Content-Type'].startswith('text/vtt'))
         self.assertTrue(b''.join(captions.streaming_content).startswith(b'WEBVTT'))
-        poster = self.client.get(reverse('lesson_1_poster'))
-        self.assertEqual(poster['Content-Type'], 'image/jpeg')
+        for name in ('lesson_1_poster', 'lesson_1_player_poster'):
+            self.assertEqual(self.client.get(reverse(name))['Content-Type'], 'image/jpeg')
