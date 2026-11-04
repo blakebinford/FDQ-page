@@ -76,7 +76,7 @@ Split settings in `FDQ/settings/`:
 
 ## Curriculum
 
-The Tier 1 body of knowledge is in `docs/curriculum/tier1-body-of-knowledge.md`: 12 modules, 220 testable statements. It is the standard every Tier 1 lesson, video script, quiz question and gate exercise is written against. The file is an export of the working copy (the Claude Doc linked at the top of the file). Change the doc and re-export; do not edit the markdown by hand.
+The Tier 1 body of knowledge is in `docs/curriculum/tier1-body-of-knowledge.md`: 12 modules, 228 testable statements. It is the standard every Tier 1 lesson, video script, quiz question and gate exercise is written against. The file is an export of the working copy (the Claude Doc linked at the top of the file). Change the doc and re-export; do not edit the markdown by hand.
 
 ### Statement IDs
 
