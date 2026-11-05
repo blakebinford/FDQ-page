@@ -295,7 +295,10 @@ class AnalyticsTests(TestCase):
         self.client.get(reverse('waitlist') + '?utm_campaign=cm03&utm_source=facebook')
         self.client.post(reverse('waitlist'), {'email': 'hand@example.com', 'website': ''})
         response = self.client.get(reverse('staff_funnel') + '?days=7')
-        self.assertContains(response, 'Waitlist funnel')
+        self.assertContains(response, 'Visitor funnel')
+        # It sits inside the admin, with its header and breadcrumbs.
+        self.assertContains(response, 'id="site-name"')
+        self.assertContains(response, 'class="breadcrumbs"')
         self.assertContains(response, 'cm03 (facebook)')
         self.assertContains(response, 'hand@example.com')
 

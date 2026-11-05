@@ -1,0 +1,82 @@
+{% extends "admin/base_site.html" %}
+
+{% block extrastyle %}
+{{ block.super }}
+{% include 'admin/core/_report_styles.html' %}
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs"><a href="{% url 'admin:index' %}">Home</a> &rsaquo; <a href="{% url 'staff_visitors' %}">Visitors</a> &rsaquo; Visitor funnel</div>
+{% endblock %}
+
+{% block content %}
+<nav class="vz-range" aria-label="Date range">
+  <a href="?days=7"{% if days == 7 %} aria-current="page"{% endif %}>7 days</a>
+  <a href="?days=30"{% if days == 30 %} aria-current="page"{% endif %}>30 days</a>
+  <a href="?days=90"{% if days == 90 %} aria-current="page"{% endif %}>90 days</a>
+</nav>
+
+<div class="fdq-summary">
+  <div class="fdq-card"><b>{{ signup_total }}</b><span>On the list now</span></div>
+  <div class="fdq-card"><b>{{ signups_in_range }}</b><span>New in {{ days }} days</span></div>
+  <div class="fdq-card"><b>{{ confirmed_in_range }}</b><span>Opened the email link</span></div>
+  <div class="fdq-card"><b>{{ unsubscribed_total }}</b><span>Left the list</span></div>
+  <div class="fdq-card"><b>{{ errors }} / {{ submits }}</b><span>Form errors / submits</span></div>
+  <div class="fdq-card"><b>{{ in_app }}</b><span>Came through the Facebook or Instagram app</span></div>
+</div>
+
+<div class="vz-section">
+  <h2>From visit to lesson, unique visitors</h2>
+  <div class="vz-scroll">
+    <table class="vz-table">
+      <thead><tr><th>Step</th><th>Visitors</th><th class="vz-bar"></th><th>Share of visitors</th></tr></thead>
+      <tbody>
+        {% for label, count, share in steps %}
+          <tr class="vz-step"><td>{{ label }}</td><td class="n">{{ count }}</td><td class="vz-bar"><i style="width: {{ share }}%"></i></td><td class="n">{{ share }}%</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p class="vz-note">Each bar is a share of everyone who visited in the range. Bots, link previews and prefetches aren't counted, and nothing before analytics went live on Nov 5, 2026 is.</p>
+</div>
+
+<div class="vz-grid">
+  <div class="vz-section">
+    <h2>By campaign (first visit)</h2>
+    <table class="vz-table">
+      <thead><tr><th>Campaign (source)</th><th>Visitors</th><th>Signed up</th><th>Rate</th></tr></thead>
+      <tbody>{% for name, visitors, signed, rate in by_campaign %}<tr><td>{{ name }}</td><td class="n">{{ visitors }}</td><td class="n">{{ signed }}</td><td class="n">{{ rate }}%</td></tr>{% empty %}<tr><td colspan="4">No visits in this range yet.</td></tr>{% endfor %}</tbody>
+    </table>
+  </div>
+  <div class="vz-section">
+    <h2>By device (first visit)</h2>
+    <table class="vz-table">
+      <thead><tr><th>Device</th><th>Visitors</th><th>Signed up</th><th>Rate</th></tr></thead>
+      <tbody>{% for name, visitors, signed, rate in by_device %}<tr><td>{{ name }}</td><td class="n">{{ visitors }}</td><td class="n">{{ signed }}</td><td class="n">{{ rate }}%</td></tr>{% empty %}<tr><td colspan="4">No visits in this range yet.</td></tr>{% endfor %}</tbody>
+    </table>
+  </div>
+</div>
+
+<div class="vz-section">
+  <h2>Latest signups</h2>
+  <div class="vz-scroll">
+    <table class="vz-table">
+      <thead><tr><th>Signed up</th><th>Email</th><th>Trade</th><th>Source</th><th>Campaign</th><th>Email link</th></tr></thead>
+      <tbody>
+        {% for s in latest %}
+          <tr>
+            <td>{{ s.created_at|date:"M j, g:i a" }}</td>
+            <td><a href="{% url 'admin:core_waitlistsignup_change' s.pk %}">{{ s.email }}</a>{% if s.unsubscribed_at %} (left){% endif %}</td>
+            <td>{{ s.get_trade_display|default:"" }}</td>
+            <td>{{ s.utm_source|default:s.referrer_host }}</td>
+            <td>{{ s.utm_campaign }}</td>
+            <td>{% if s.confirmed_at %}opened{% elif s.lesson_email_sent_at %}sent{% endif %}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="6">No signups yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

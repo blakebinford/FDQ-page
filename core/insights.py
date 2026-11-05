@@ -100,7 +100,9 @@ def funnel(request):
         )
 
     signups = WaitlistSignup.objects.filter(created_at__gte=since)
-    return render(request, 'core/staff_funnel.html', {
+    return render(request, 'admin/core/funnel.html', {
+        **admin.site.each_context(request),
+        'title': 'Visitor funnel',
         'days': days,
         'steps': steps,
         'by_campaign': rows(by_campaign),
