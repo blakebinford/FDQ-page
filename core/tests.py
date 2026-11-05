@@ -338,3 +338,18 @@ class CertificateLookupTests(TestCase):
 
     def test_malformed_id_is_not_found_rather_than_an_error(self):
         self.assertContains(self.client.get(reverse('lms:certificate_verify', args=['abc'])), 'No certificate has this ID.')
+
+
+class WaitlistSmtpTests(TestCase):
+    @override_settings(**EMAIL_ON, WAITLIST_EMAIL_HOST='smtp.resend.com', WAITLIST_EMAIL_HOST_USER='resend',
+                       WAITLIST_EMAIL_HOST_PASSWORD='')
+    def test_own_smtp_account_waits_for_its_password(self):
+        self.client.post(reverse('waitlist'), {'email': 'hand@example.com', 'website': ''})
+        self.assertEqual(len(mail.outbox), 0)
+
+    @override_settings(**EMAIL_ON)
+    def test_postal_address_is_in_the_email_but_not_on_the_site(self):
+        self.client.post(reverse('waitlist'), {'email': 'hand@example.com', 'website': ''})
+        self.assertIn('PO Box 100', mail.outbox[0].body)
+        for name in ('home', 'privacy', 'waitlist'):
+            self.assertNotContains(self.client.get(reverse(name)), 'PO Box 100')

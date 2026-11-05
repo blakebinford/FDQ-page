@@ -11,7 +11,6 @@
 .privacy li { margin-bottom: 0.35rem; }
 .privacy b { color: var(--ink); font-weight: 600; }
 .privacy a { color: var(--accent-ink); }
-.privacy-address { white-space: pre-line; }
 {% endblock %}
 
 {% block content %}
@@ -61,8 +60,6 @@
 
     <h2>Contact</h2>
     <p>Questions about this notice go through the <a href="{% url 'contact' %}">contact page</a>.</p>
-    {% if business_postal_address %}<p class="privacy-address">Field Driven Quality
-{{ business_postal_address }}</p>{% endif %}
   </div>
 </div>
 {% endblock %}

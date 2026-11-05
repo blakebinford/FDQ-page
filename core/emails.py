@@ -5,7 +5,7 @@ from datetime import timedelta
 
 from django.conf import settings
 from django.core import signing
-from django.core.mail import EmailMultiAlternatives
+from django.core.mail import EmailMultiAlternatives, get_connection
 from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
@@ -22,11 +22,26 @@ RESEND_AFTER = timedelta(minutes=10)
 
 
 def waitlist_email_ready():
-    """Email goes out only once the sender and the postal address are set."""
+    """Email goes out only once the sender, its password and the postal address are set."""
     return bool(
         settings.WAITLIST_EMAILS_ENABLED
         and settings.WAITLIST_FROM_EMAIL
         and settings.BUSINESS_POSTAL_ADDRESS
+        and (not settings.WAITLIST_EMAIL_HOST or settings.WAITLIST_EMAIL_HOST_PASSWORD)
+    )
+
+
+def _connection():
+    """The waitlist's own SMTP account when one is set, else the site default."""
+    if not settings.WAITLIST_EMAIL_HOST:
+        return None
+    return get_connection(
+        host=settings.WAITLIST_EMAIL_HOST,
+        port=settings.WAITLIST_EMAIL_PORT,
+        username=settings.WAITLIST_EMAIL_HOST_USER,
+        password=settings.WAITLIST_EMAIL_HOST_PASSWORD,
+        use_tls=True,
+        timeout=settings.EMAIL_TIMEOUT,
     )
 
 
@@ -81,6 +96,7 @@ def send_lesson_email(request, signup):
             'List-Unsubscribe': f'<{leave}>',
             'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
         },
+        connection=_connection(),
     )
     message.attach_alternative(render_to_string('emails/waitlist_lesson.html', context), 'text/html')
     try:

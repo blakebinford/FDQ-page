@@ -127,6 +127,12 @@ WAITLIST_EMAILS_ENABLED = config('WAITLIST_EMAILS_ENABLED', cast=bool, default=F
 WAITLIST_FROM_EMAIL = config('WAITLIST_FROM_EMAIL', default='')
 BUSINESS_POSTAL_ADDRESS = config('BUSINESS_POSTAL_ADDRESS', default='')
 EMAIL_TIMEOUT = 10
+# The waitlist sends through its own SMTP account (Resend, on the domain), so the
+# contact form's mail settings stay as they are. Left empty, it uses those instead.
+WAITLIST_EMAIL_HOST = config('WAITLIST_EMAIL_HOST', default='')
+WAITLIST_EMAIL_PORT = config('WAITLIST_EMAIL_PORT', cast=int, default=587)
+WAITLIST_EMAIL_HOST_USER = config('WAITLIST_EMAIL_HOST_USER', default='')
+WAITLIST_EMAIL_HOST_PASSWORD = config('WAITLIST_EMAIL_HOST_PASSWORD', default='')
 
 # Tier 1 facts that wait on the owner. Left empty, the site leaves them out.
 TIER1_OPENS = config('TIER1_OPENS', default='')  # e.g. "Wed Nov 18"

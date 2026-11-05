@@ -284,7 +284,6 @@
     .footer-links a { color: var(--ink-2); text-decoration: none; font-size: 0.95rem; }
     .footer-links a:hover { color: var(--ink); text-decoration: underline; }
     .footer-copy { font-size: 0.85rem; color: var(--ink-3); }
-    .footer-address { font-size: 0.85rem; color: var(--ink-3); white-space: pre-line; }
 
     {% block extra_styles %}{% endblock %}
   </style>
@@ -342,7 +341,6 @@
       {% if not user.is_authenticated %}<li><a href="{% url 'accounts:login' %}">Log in</a></li>{% endif %}
     </ul>
     <span class="footer-copy">&copy; {% now "Y" %} Field Driven Quality</span>
-    {% if business_postal_address %}<span class="footer-address">{{ business_postal_address }}</span>{% endif %}
   </div>
 </footer>
 
