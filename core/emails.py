@@ -85,6 +85,8 @@ def send_lesson_email(request, signup):
         'sheet_url': request.build_absolute_uri(reverse('field_sheet')),
         'unsubscribe_url': leave,
         'tier1_opens': settings.TIER1_OPENS,
+        'tier1_price': settings.TIER1_PRICE,
+        'tier1_founding_price': settings.TIER1_FOUNDING_PRICE,
         'postal_address': settings.BUSINESS_POSTAL_ADDRESS,
     }
     message = EmailMultiAlternatives(

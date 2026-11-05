@@ -69,6 +69,7 @@
         </div>
         <div class="tier-act">
           <span class="tier-when open">{% if tier1_opens %}Opens {{ tier1_opens }}{% else %}Opening soon{% endif %}</span>
+          {% if tier1_price %}<span class="tier-price">${{ tier1_price }}</span>{% if tier1_founding_price %}<span class="tier-note">${{ tier1_founding_price }} founding price for people on the list</span>{% endif %}{% endif %}
           <a href="{% url 'waitlist' %}#sign-up" class="btn-primary" data-cta="cert_tier1">Get lesson 1 free</a>
         </div>
       </li>

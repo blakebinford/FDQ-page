@@ -142,6 +142,9 @@ NTFY_SERVER = config('NTFY_SERVER', default='https://ntfy.sh')
 
 # Tier 1 facts that wait on the owner. Left empty, the site leaves them out.
 TIER1_OPENS = config('TIER1_OPENS', default='')  # e.g. "Wed Nov 18"
+# Whole dollars. The founding price is for people on the list.
+TIER1_PRICE = config('TIER1_PRICE', default='495')
+TIER1_FOUNDING_PRICE = config('TIER1_FOUNDING_PRICE', default='395')
 
 # Accounts open with Tier 1. Until then a new account would only reach an
 # application for a course that isn't open.

@@ -6,7 +6,7 @@ The Weld Field Sheet. Take your weld notes in the field to transfer to a weld ma
 
 {{ sheet_url }}
 
-Tier 1 opens {% if tier1_opens %}{{ tier1_opens }}{% else %}soon{% endif %}. You'll get a few emails around the launch and nothing else.
+Tier 1 opens {% if tier1_opens %}{{ tier1_opens }}{% else %}soon{% endif %}.{% if tier1_founding_price %} You're in for the founding price: ${{ tier1_founding_price }}{% if tier1_price %} instead of ${{ tier1_price }}{% endif %}. Nothing to pay now. You only pay if you enroll.{% endif %} You'll get a few emails around the launch and nothing else.
 
 You got this because {{ email }} signed up at fielddrivenquality.com.
 Leave the list: {{ unsubscribe_url }}

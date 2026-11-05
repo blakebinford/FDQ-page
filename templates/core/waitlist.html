@@ -44,6 +44,11 @@
 .wl-hint button { font: inherit; font-weight: 600; color: var(--accent-ink); background: none; border: none; padding: 0.35rem 0; text-decoration: underline; cursor: pointer; }
 .wl-fine { font-size: 0.86rem; color: var(--ink-3); line-height: 1.5; }
 .wl-fine a { color: var(--ink-2); }
+.wl-offer { margin-top: var(--s-4); padding: var(--s-3) var(--s-4); border-left: 3px solid var(--accent); background: var(--paper); font-size: 0.98rem; color: var(--ink-2); }
+.wl-offer b { color: var(--ink); }
+.wl-offer s { color: var(--ink-3); }
+.wl-offer .now { display: block; margin-top: var(--s-1); font-weight: 700; color: var(--ink); }
+.wl-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .wl-trap { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
 .wl-gets-label { margin: var(--s-5) 0 var(--s-3); padding-top: var(--s-5); border-top: 1px solid var(--rule); }
 .wl-gets { list-style: none; display: flex; flex-direction: column; gap: var(--s-3); }
@@ -166,7 +171,8 @@
       {% include 'core/_turnstile.html' with action='waitlist' %}
       {% if form_error %}<p class="wl-error" role="alert">{{ form_error }}</p>{% endif %}
       <button type="submit" class="btn-primary" id="wl-submit">Get lesson 1 free</button>
-      <p class="wl-fine">Plays on the next page{% if waitlist_email_ready %}, and we email you the link{% endif %}. Tier 1 isn't open yet: this puts you on the list. It doesn't enroll you or cost anything. <a href="{% url 'privacy' %}">Privacy</a></p>
+      {% if tier1_founding_price %}<p class="wl-offer"><b>Founding price: ${{ tier1_founding_price }}</b>{% if tier1_price %} <s><span class="wl-sr">regular price </span>${{ tier1_price }}</s>{% endif %}. Everyone on the list gets it when Tier 1 opens.<span class="now">Nothing to pay now. You only pay if you enroll.</span></p>{% endif %}
+      <p class="wl-fine">Plays on the next page{% if waitlist_email_ready %}, and we email you the link{% endif %}. Tier 1 isn't open yet: this puts you on the list. It doesn't enroll you. <a href="{% url 'privacy' %}">Privacy</a></p>
     </form>
     <p class="ci-label wl-gets-label">Free when you get on the list</p>
     <ul class="wl-gets">
@@ -196,7 +202,7 @@
       <div><dt>Format</dt><dd>Online and at your own pace, on a phone or a computer. Twelve modules.</dd></div>
       <div><dt>Proving it</dt><dd>Every module ends with a gate exercise: sample job paperwork with problems planted in it. A final exam comes after the last module. The passing score goes on this page before Tier 1 opens.</dd></div>
       <div><dt>Certificate</dt><dd>The FDQ Tier 1 certificate, a PDF with its own ID that anyone can check on this site. <a href="#certificate">What it is and isn't</a></dd></div>
-      <div><dt>Price</dt><dd>Goes on this page before Tier 1 opens. Getting on the list is free and doesn't commit you to anything.</dd></div>
+      <div><dt>Price</dt><dd>{% if tier1_price %}${{ tier1_price }}.{% if tier1_founding_price %} People on the list pay the founding price, ${{ tier1_founding_price }}.{% endif %} Nothing to pay when you sign up: you pay only if you enroll, after Tier 1 opens.{% else %}Goes on this page before Tier 1 opens. Getting on the list is free and doesn't commit you to anything.{% endif %}</dd></div>
       <div><dt>Opens</dt><dd>{% if tier1_opens %}{{ tier1_opens }}.{% else %}Soon.{% endif %} People on the list hear first.</dd></div>
     </dl>
     <div class="wl-fit">
@@ -478,7 +484,7 @@
   <div class="wl-faq">
     <details>
       <summary>What does Tier 1 cost?</summary>
-      <p>The price goes on this page before Tier 1 opens. Getting on the list is free and doesn't commit you to anything.</p>
+      <p>{% if tier1_price %}${{ tier1_price }}. People on the list pay the founding price{% if tier1_founding_price %}, ${{ tier1_founding_price }}{% endif %}. Getting on the list is free, and there's nothing to pay when you sign up. You pay only if you enroll, after Tier 1 opens.{% else %}The price goes on this page before Tier 1 opens. Getting on the list is free and doesn't commit you to anything.{% endif %}</p>
     </details>
     <details>
       <summary>When does it open?</summary>

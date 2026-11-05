@@ -603,3 +603,23 @@ class NoAlertsTests(TestCase):
         with mock.patch('core.alerts.threading.Thread') as thread:
             self.client.post(reverse('waitlist'), {'email': 'hand@example.com', 'website': ''})
         thread.assert_not_called()
+
+
+class PriceTests(TestCase):
+    def test_tier1_page_shows_the_price_and_the_founding_price(self):
+        response = self.client.get(reverse('waitlist'))
+        self.assertContains(response, 'Founding price: $395')
+        self.assertContains(response, 'Nothing to pay now.')
+        self.assertContains(response, '$495. People on the list pay the founding price, $395.')
+
+    @override_settings(**EMAIL_ON)
+    def test_thanks_page_and_email_tell_a_new_signup_their_price(self):
+        self.client.post(reverse('waitlist'), {'email': 'hand@example.com', 'website': ''})
+        self.assertContains(self.client.get(reverse('waitlist_thanks')), "You're in for the founding price: $395 instead of $495.")
+        self.assertIn('founding price: $395 instead of $495', mail.outbox[0].body)
+
+    @override_settings(TIER1_PRICE='', TIER1_FOUNDING_PRICE='')
+    def test_no_price_set_says_it_is_coming(self):
+        response = self.client.get(reverse('waitlist'))
+        self.assertContains(response, 'The price goes on this page before Tier 1 opens.')
+        self.assertNotContains(response, 'Founding price')

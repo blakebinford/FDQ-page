@@ -112,6 +112,7 @@
     <h2>What happens next</h2>
     <ul class="wl-next">
       <li>Tier 1 opens {% if tier1_opens %}{{ tier1_opens }}{% else %}soon{% endif %}. You'll hear first, by email.</li>
+      {% if tier1_founding_price %}<li>You're in for the founding price: ${{ tier1_founding_price }}{% if tier1_price %} instead of ${{ tier1_price }}{% endif %}. Nothing to pay now. You only pay if you enroll.</li>{% endif %}
       <li>You'll get a few emails around the launch and nothing else.{% if waitlist_email_ready %} Each one has a link to leave the list.{% endif %}</li>
       <li>{% if waitlist_email_ready %}Lost this page? The link in your email opens it again, or <a href="{% url 'waitlist_resend' %}">have it sent again</a>.{% else %}Lost this page? Sign up again with the same email on the <a href="{% url 'waitlist' %}#sign-up">Tier 1 page</a> and it opens right away.{% endif %}</li>
       <li><a href="{% url 'waitlist' %}#modules">See all 12 Tier 1 modules</a></li>
