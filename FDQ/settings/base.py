@@ -77,7 +77,8 @@ AUTH_USER_MODEL = 'accounts.User'
 LOGIN_URL = '/accounts/login/'
 
 LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'UTC'
+# Dates in the admin and on certificates read in the owner's time; the database stays in UTC.
+TIME_ZONE = 'America/Chicago'
 USE_I18N = True
 USE_TZ = True
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
@@ -133,6 +134,11 @@ WAITLIST_EMAIL_HOST = config('WAITLIST_EMAIL_HOST', default='')
 WAITLIST_EMAIL_PORT = config('WAITLIST_EMAIL_PORT', cast=int, default=587)
 WAITLIST_EMAIL_HOST_USER = config('WAITLIST_EMAIL_HOST_USER', default='')
 WAITLIST_EMAIL_HOST_PASSWORD = config('WAITLIST_EMAIL_HOST_PASSWORD', default='')
+
+# Push alerts to the owner's phone for each new signup, through the ntfy app.
+# The topic name is the only key, so it's long and random; empty turns alerts off.
+SIGNUP_ALERT_NTFY_TOPIC = config('SIGNUP_ALERT_NTFY_TOPIC', default='')
+NTFY_SERVER = config('NTFY_SERVER', default='https://ntfy.sh')
 
 # Tier 1 facts that wait on the owner. Left empty, the site leaves them out.
 TIER1_OPENS = config('TIER1_OPENS', default='')  # e.g. "Wed Nov 18"

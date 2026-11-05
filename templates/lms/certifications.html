@@ -4,11 +4,11 @@
 
 {% block extra_styles %}
 .tier-list { list-style: none; border-top: 1px solid var(--rule); }
-.tier-row { display: grid; grid-template-columns: minmax(0, 1fr) 15rem; gap: 1rem 3rem; padding: 1.75rem 0; border-bottom: 1px solid var(--rule); align-items: start; }
+.tier-row { display: grid; grid-template-columns: minmax(0, 1fr) 15rem; gap: var(--s-4) var(--s-7); padding: var(--s-6) 0; border-bottom: 1px solid var(--rule); align-items: start; }
 @media (max-width: 720px) { .tier-row { grid-template-columns: 1fr; } }
-.tier-row h2 { font-weight: 800; font-size: 1.45rem; line-height: 1.2; margin-bottom: 0.4rem; }
+.tier-row h2 { font-weight: 800; font-size: 1.45rem; line-height: 1.2; margin-bottom: var(--s-2); }
 .tier-row p { color: var(--ink-2); max-width: 62ch; }
-.tier-act { display: flex; flex-direction: column; gap: 0.5rem; }
+.tier-act { display: flex; flex-direction: column; gap: var(--s-2); }
 .tier-act .btn-primary, .tier-act .btn-secondary, .tier-act .btn-continue { width: 100%; }
 .tier-price { font-weight: 700; font-size: 1.2rem; }
 .tier-when { font-weight: 600; color: var(--ink-3); }
@@ -68,7 +68,7 @@
           <p>For pipeline hands with no quality background. It teaches the work of a contractor QC tech or an owner-side junior inspector, on the right-of-way and inside the fence.</p>
         </div>
         <div class="tier-act">
-          <span class="tier-when open">Opening soon</span>
+          <span class="tier-when open">{% if tier1_opens %}Opens {{ tier1_opens }}{% else %}Opening soon{% endif %}</span>
           <a href="{% url 'waitlist' %}#sign-up" class="btn-primary" data-cta="cert_tier1">Get lesson 1 free</a>
         </div>
       </li>

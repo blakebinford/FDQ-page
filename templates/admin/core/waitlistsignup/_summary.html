@@ -21,4 +21,4 @@
     <ul>{% for reason, n in summary.spam_week %}<li><span>{% if reason == 'honeypot' %}Hidden field filled{% elif reason == 'turnstile' %}Failed Cloudflare check{% elif reason == 'rate_limit' %}Too many from one connection{% else %}{{ reason }}{% endif %}</span><b>{{ n }}</b></li>{% empty %}<li><span>None</span></li>{% endfor %}</ul>
   </div>
 </div>
-<p class="fdq-links"><a href="{{ summary.funnel_url }}">Visitor funnel</a><a href="{% url 'admin:core_siteevent_changelist' %}">All site events</a><a href="{% url 'admin:core_siteevent_changelist' %}?name__exact=spam_blocked">Stopped bots</a></p>
+<p class="fdq-links"><a href="{% url 'staff_visitors' %}">Visitors</a><a href="{{ summary.funnel_url }}">Visitor funnel</a><a href="{% url 'admin:core_siteevent_changelist' %}">All site events</a><a href="{% url 'admin:core_siteevent_changelist' %}?name__exact=spam_blocked">Stopped bots</a></p>

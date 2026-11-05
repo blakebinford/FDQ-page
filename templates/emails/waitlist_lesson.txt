@@ -2,7 +2,7 @@
 
 {{ lesson_url }}
 
-The weld field sheet, to print:
+The Weld Field Sheet. Take your weld notes in the field to transfer to a weld map or weld log. To print:
 
 {{ sheet_url }}
 

@@ -95,6 +95,7 @@
   .fdq-lists li:last-child { border-bottom: none; }
   .fdq-lists li b { font-family: var(--font-family-monospace); font-weight: 500; }
   .fdq-links { margin: 0 0 1.25rem; font-size: 0.9rem; }
+  .fdq-alert { display: flex; flex-wrap: wrap; gap: 0.75rem; align-items: center; margin: 0 0 1rem; font-size: 0.9rem; color: var(--body-medium-color); }
   .fdq-links a { margin-right: 1.25rem; font-weight: 600; }
   .fdq-trail { border-collapse: collapse; font-size: 0.82rem; min-width: 32rem; }
   .fdq-trail th, .fdq-trail td { text-align: left; padding: 0.3rem 0.8rem 0.3rem 0; border-bottom: 1px solid var(--hairline-color); }
@@ -110,6 +111,7 @@
 
 {% block userlinks %}
   <a href="{% url 'home' %}">View site</a> /
+  <a href="{% url 'staff_visitors' %}">Visitors</a> /
   <a href="{% url 'staff_funnel' %}">Funnel</a> /
   {% if user.is_active and user.is_staff %}
     {% url 'django-admindocs-docroot' as docsroot %}

@@ -20,6 +20,7 @@ from .emails import (
 )
 from .models import WaitlistSignup
 from .spam import passes_turnstile, rate_limited
+from .alerts import signup_alert
 
 logger = logging.getLogger(__name__)
 
@@ -159,6 +160,8 @@ def waitlist(request):
                 request.session[WAITLIST_SESSION_KEY] = True
                 request.session[WAITLIST_SIGNUP_KEY] = signup.pk
                 request.session[LESSON_EMAILED_KEY] = send_lesson_email(request, signup) or bool(signup.lesson_email_sent_at)
+                if created:
+                    signup_alert(request, signup)
                 record(request, 'signup_success', is_new=created, trade=signup.trade,
                        utm_campaign=signup.utm_campaign, utm_source=signup.utm_source)
                 # Its own fragment, or the browser carries the form's #sign-up along.

@@ -5,8 +5,8 @@
 {% block meta_tags %}<meta name="robots" content="noindex" />{% endblock %}
 
 {% block extra_styles %}
-.wl-lesson { max-width: 880px; margin: 0 auto; padding: clamp(2.5rem, 7vw, 5rem) clamp(1rem, 4vw, 2rem); }
-.wl-lesson h1 { font-weight: 800; font-size: clamp(2rem, 5vw, 3rem); line-height: 1.08; margin-bottom: 0.75rem; }
+.wl-lesson { max-width: 880px; margin: 0 auto; padding: var(--section-tight) var(--gutter) var(--section); }
+.wl-lesson h1 { font-weight: 800; font-size: clamp(2rem, 5vw, 3rem); line-height: 1.08; margin-bottom: var(--s-3); }
 .wl-lesson video {
   display: block;
   width: 100%;
@@ -14,35 +14,36 @@
   aspect-ratio: 16 / 9;
   background: #000;
   border-radius: 4px;
-  margin: 1.75rem 0 0.6rem;
+  margin: var(--s-6) 0 var(--s-3);
 }
 .wl-credits { font-size: 0.75rem; color: var(--ink-3); line-height: 1.6; }
 .wl-credits a { color: inherit; }
 
-.wl-step { margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--rule); }
-.wl-step h2 { font-weight: 700; font-size: 1.3rem; margin-bottom: 0.4rem; }
+.wl-step { margin-top: var(--s-7); padding-top: var(--s-6); border-top: 1px solid var(--rule); }
+.wl-step h2 { font-weight: 700; font-size: 1.3rem; margin-bottom: var(--s-2); }
 .wl-step > p { font-size: 0.98rem; color: var(--ink-2); line-height: 1.6; margin-bottom: 1rem; max-width: 60ch; }
 
-.wl-trades { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.wl-trades { display: flex; flex-wrap: wrap; gap: var(--s-2); }
 .wl-trades button { font: 500 0.98rem 'Public Sans', sans-serif; color: var(--ink); background: var(--surface); border: 1px solid var(--field); border-radius: 999px; padding: 0.6rem 1rem; min-height: 44px; cursor: pointer; }
 .wl-trades button:hover { border-color: var(--ink); }
 .wl-trade-done { font-weight: 600; color: var(--ink); }
 
-.wl-card { display: flex; gap: clamp(1.4rem, 4vw, 2.5rem); align-items: flex-start; }
+.wl-card { display: flex; gap: var(--s-5) clamp(1.5rem, 4vw, 2.5rem); align-items: flex-start; }
 .wl-card > a { flex: 0 0 220px; }
 .wl-card img { display: block; width: 100%; height: auto; border: 1px solid var(--rule-2); background: #fff; }
 .wl-card p { font-size: 0.95rem; color: var(--ink-2); line-height: 1.6; margin-bottom: 1rem; }
-.wl-pages { list-style: none; font-size: 0.92rem; color: var(--ink-2); margin-bottom: 1.4rem; border-top: 1px solid var(--rule); }
-.wl-pages li { display: grid; grid-template-columns: 6.5rem minmax(0, 1fr); gap: 0.75rem; padding: 0.45rem 0; border-bottom: 1px solid var(--rule); }
+.wl-pages { list-style: none; font-size: 0.92rem; color: var(--ink-2); margin-bottom: var(--s-5); border-top: 1px solid var(--rule); }
+.wl-pages li { display: grid; grid-template-columns: 6.5rem minmax(0, 1fr); gap: var(--s-3); padding: var(--s-2) 0; border-bottom: 1px solid var(--rule); }
 .wl-pages b { color: var(--ink); font-weight: 600; }
 @media (max-width: 620px) { .wl-card { flex-direction: column; } .wl-card > a { flex: none; width: 60%; max-width: 240px; } }
 
-.wl-share { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; }
+.wl-share { display: flex; flex-wrap: wrap; gap: var(--s-3); align-items: center; }
+@media (max-width: 520px) { .wl-share .btn-secondary, .wl-card .btn-primary { flex: 1 1 100%; width: 100%; } }
 .wl-share input { flex: 1 1 16rem; min-width: 0; font: 400 0.92rem 'IBM Plex Mono', monospace; color: var(--ink-2); background: var(--surface); border: 1px solid var(--field); border-radius: var(--radius); padding: 0.7rem 0.8rem; }
 .wl-share-status { font-size: 0.9rem; color: var(--ink-2); min-height: 1.4em; }
 
 .wl-next { list-style: none; border-top: 1px solid var(--rule); max-width: 60ch; }
-.wl-next li { padding: 0.6rem 0; border-bottom: 1px solid var(--rule); color: var(--ink-2); font-size: 0.98rem; }
+.wl-next li { padding: var(--s-3) 0; border-bottom: 1px solid var(--rule); color: var(--ink-2); font-size: 0.98rem; }
 .wl-next a { color: var(--accent-ink); }
 {% endblock %}
 
@@ -85,21 +86,21 @@
     <a href="{% url 'field_sheet' %}" target="_blank" rel="noopener"><img src="{% url 'field_sheet_preview' %}" alt="Weld Field Sheet FDQ-FRM-0037, filled in for a day on Spread 2" width="880" height="1139" /></a>
     <div>
       <p class="ci-label">Free PDF &middot; FDQ-FRM-0037</p>
-      <h2>Weld field sheet</h2>
-      <p>The sheet for the firing line. Write down every weld in the order the line runs: the pipe and heat on each side, and the welder stencils the way they sit on the pipe. At the end of the day the welds and the pipe should match, and that count tells you if something's missing.</p>
+      <h2>Weld Field Sheet</h2>
+      <p>Take your weld notes in the field to transfer to a weld map or weld log. Write down every weld in the order the line runs: the pipe and heat on each side, and the welder stencils the way they sit on the pipe. At the end of the day the welds and the pipe should match, and that count tells you if something's missing.</p>
       <ul class="wl-pages">
         <li><b>Page 1</b> The blank sheet</li>
         <li><b>Page 2</b> How to fill it in. Print it on the back.</li>
         <li><b>Pages 3 to 5</b> Two days on a mainline spread, with a tie-in, a repair, a pup and a cut-out</li>
         <li><b>Pages 6 and 7</b> A station line, with spools, a valve, a field fit, a branch and a socket weld</li>
       </ul>
-      <a href="{% url 'field_sheet' %}" class="btn-primary" target="_blank" rel="noopener">Open the weld field sheet (PDF)</a>
+      <a href="{% url 'field_sheet' %}" class="btn-primary" target="_blank" rel="noopener">Open the Weld Field Sheet (PDF)</a>
     </div>
   </div>
 
   <div class="wl-step">
     <h2>Know a hand who'd use this?</h2>
-    <p>Send them the link. They get the same free lesson and field sheet.</p>
+    <p>Send them the link. They get the same free lesson and Weld Field Sheet.</p>
     <div class="wl-share">
       <input id="share-url" type="text" value="{{ share_url }}" readonly aria-label="Link to the Tier 1 page" />
       <button type="button" class="btn-secondary" id="share-btn">Copy the link</button>
@@ -139,7 +140,7 @@
     document.getElementById('share-btn').addEventListener('click', async () => {
       fdqTrack('share_copy');
       if (navigator.share) {
-        try { await navigator.share({ title: 'FDQ Tier 1: free lesson and weld field sheet', url: input.value }); return; } catch (e) {}
+        try { await navigator.share({ title: 'FDQ Tier 1: free lesson and Weld Field Sheet', url: input.value }); return; } catch (e) {}
       }
       try {
         await navigator.clipboard.writeText(input.value);

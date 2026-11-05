@@ -7,15 +7,18 @@
 .tag-filters {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.6rem;
-  margin-bottom: 3rem;
+  gap: var(--s-2);
+  margin-bottom: var(--s-7);
 }
 
 .tag-btn {
   font-family: 'Public Sans', sans-serif;
-  font-size: 0.68rem;
+  font-size: 0.85rem;
   font-weight: 500;
-  padding: 0.45rem 1rem;
+  padding: 0.6rem 1.1rem;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
   text-decoration: none;
   border: 1px solid var(--border);
   color: var(--muted);
@@ -30,8 +33,7 @@
 .featured-card {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-left: 3px solid var(--amber);
-  margin-bottom: 3rem;
+  margin-bottom: var(--s-7);
   overflow: hidden;
 }
 
@@ -42,7 +44,7 @@
 }
 
 .featured-body {
-  padding: clamp(1.5rem, 4vw, 2.5rem);
+  padding: clamp(1.25rem, 4vw, 2.5rem);
 }
 
 .featured-body h3 {
@@ -50,14 +52,14 @@
   font-weight: 800;
   font-size: clamp(1.4rem, 3vw, 2rem);
   color: var(--white);
-  margin-bottom: 0.6rem;
+  margin-bottom: var(--s-3);
 }
 
 .post-meta {
   font-family: 'Public Sans', sans-serif;
-  font-size: 0.68rem;
+  font-size: 0.85rem;
   color: var(--muted);
-  margin-bottom: 0.8rem;
+  margin-bottom: var(--s-3);
 }
 
 .post-tag {
@@ -75,14 +77,14 @@
   color: var(--muted);
   font-size: 0.95rem;
   line-height: 1.7;
-  margin: 1rem 0;
+  margin: var(--s-4) 0 var(--s-5);
 }
 
 /* ── BLOG GRID ── */
 .blog-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
+  gap: var(--s-5);
 }
 
 @media (max-width: 960px) {
@@ -119,7 +121,7 @@
 }
 
 .blog-card-body {
-  padding: 1.5rem;
+  padding: var(--s-5);
   display: flex;
   flex-direction: column;
   flex-grow: 1;
@@ -130,15 +132,15 @@
   font-weight: 700;
   font-size: 1.15rem;
   color: var(--white);
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--s-2);
 }
 
 .blog-card-body .post-meta {
-  margin-bottom: 0.6rem;
+  margin-bottom: var(--s-3);
 }
 
 .card-summary {
-  font-size: 0.88rem;
+  font-size: 0.95rem;
   color: var(--muted);
   line-height: 1.6;
   display: -webkit-box;
@@ -150,7 +152,7 @@
 
 .read-more {
   font-family: 'Public Sans', sans-serif;
-  font-size: 0.68rem;
+  font-size: 0.9rem;
   color: var(--amber);
   margin-top: auto;
 }
@@ -166,7 +168,7 @@
 
 
 .blog-tier1 { border-top: 1px solid var(--rule); background: var(--surface); }
-.blog-tier1-inner { max-width: 1160px; margin: 0 auto; padding: 2rem clamp(1rem, 4vw, 2.5rem); display: flex; gap: 1rem 2rem; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+.blog-tier1-inner { max-width: var(--page-max); margin: 0 auto; padding: var(--s-7) var(--gutter); display: flex; gap: var(--s-4) var(--s-6); align-items: center; justify-content: space-between; flex-wrap: wrap; }
 .blog-tier1 p { color: var(--ink-2); max-width: 60ch; }
 .blog-tier1 strong { color: var(--ink); }
 {% endblock %}
@@ -200,7 +202,7 @@
         {% endfor %}
       </div>
       <p class="featured-summary">{{ featured_post.summary|striptags }}</p>
-      <a href="{% url 'blog_detail' featured_post.slug %}" class="btn-primary">Read the article</a>
+      <a href="{% url 'blog_detail' featured_post.slug %}" class="btn-primary">Read the post</a>
     </div>
   </div>
   {% endif %}
@@ -219,7 +221,7 @@
             {% endfor %}
           </div>
           <p class="card-summary">{{ post.summary|striptags }}</p>
-          <span class="read-more">Read more</span>
+          <span class="read-more">Read the post</span>
         </div>
       </a>
     </div>

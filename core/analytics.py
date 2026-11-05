@@ -15,7 +15,13 @@ VISITOR_COOKIE_AGE = 365 * 24 * 60 * 60
 
 # Paths that aren't pages a visitor reads.
 SKIP_PREFIXES = ('/admin/', '/static/', '/media/', '/e/', '/staff/', '/ckeditor', '/certifications/webhooks/')
-BOT_UA = re.compile(r'bot|crawl|spider|slurp|preview|facebookexternalhit|embedly|curl|wget|python|headless|monitor', re.I)
+BOT_UA = re.compile(
+    r'bot|crawl|spider|slurp|preview|facebookexternalhit|embedly|curl|wget|python|headless|monitor'
+    r'|render/|health|uptime|kube-probe|go-http-client|okhttp|axios|node-fetch|libwww|httpclient|java/',
+    re.I,
+)
+# Browsers and apps that load a page before anyone taps it say so in one of these headers.
+PREFETCH_HEADERS = ('Sec-Purpose', 'Purpose', 'X-Purpose', 'X-Moz')
 UTM_KEYS = ('utm_source', 'utm_medium', 'utm_campaign', 'utm_content')
 
 
@@ -62,6 +68,9 @@ def _record_page_view(request):
     device, in_app = classify(request.META.get('HTTP_USER_AGENT', ''))
     if device == 'bot':
         return
+    if any(word in request.headers.get(header, '').lower()
+           for header in PREFETCH_HEADERS for word in ('prefetch', 'preview', 'prerender')):
+        return
     SiteEvent.objects.create(
         name='page_view',
         visitor_id=request.visitor_id,
@@ -106,3 +115,24 @@ class VisitorMiddleware:
                 samesite='Lax', secure=request.is_secure(), httponly=True,
             )
         return response
+
+
+def source_label(utm_source, referrer_host, in_app):
+    """A plain name for where a visit came from, for the admin's traffic tables."""
+    tag, host = (utm_source or '').lower(), (referrer_host or '').lower()
+    named = {'fb': 'Facebook', 'facebook': 'Facebook', 'ig': 'Instagram', 'instagram': 'Instagram',
+             'provenhand': 'ProvenHand', 'tiktok': 'TikTok', 'youtube': 'YouTube', 'linkedin': 'LinkedIn',
+             'share': 'Shared link'}
+    if tag:
+        return named.get(tag, tag)
+    if in_app == 'facebook' or 'facebook.com' in host or host == 'fb.me':
+        return 'Facebook'
+    if in_app == 'instagram' or 'instagram.com' in host:
+        return 'Instagram'
+    if 'provenhand' in host:
+        return 'ProvenHand'
+    for needle, name in (('tiktok', 'TikTok'), ('youtube', 'YouTube'), ('linkedin', 'LinkedIn'),
+                         ('google.', 'Search'), ('bing.', 'Search'), ('duckduckgo', 'Search'), ('yahoo.', 'Search')):
+        if needle in host:
+            return name
+    return host or 'Direct or unknown'

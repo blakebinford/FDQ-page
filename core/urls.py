@@ -1,5 +1,5 @@
 from django.urls import path
-from .insights import beacon, funnel
+from .insights import beacon, funnel, test_alert, visitors
 from .views import (
     home, about, contact_view, contact_thanks, privacy,
     waitlist, waitlist_thanks, waitlist_trade, waitlist_resend, lesson_link, unsubscribe,
@@ -28,6 +28,8 @@ urlpatterns = [
     path('tier-1/lesson-1-player.jpg', lesson_1_player_poster, name='lesson_1_player_poster'),
     path('e/', beacon, name='beacon'),
     path('staff/funnel/', funnel, name='staff_funnel'),
+    path('staff/visitors/', visitors, name='staff_visitors'),
+    path('staff/test-alert/', test_alert, name='staff_test_alert'),
     path('favicon.ico', favicon, name='favicon'),
     path('robots.txt', robots_txt, name='robots'),
     path('sitemap.xml', sitemap_xml, name='sitemap'),

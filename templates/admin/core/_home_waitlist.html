@@ -4,9 +4,15 @@
     <div class="fdq-summary">
       <div class="fdq-card"><b>{{ on_list }}</b><span>On the list</span></div>
       <div class="fdq-card"><b>{{ week }}</b><span>New in 7 days</span></div>
+      <div class="fdq-card"><b>{{ visitors_today }}</b><span>Visitors today</span></div>
       <div class="fdq-card"><b>{{ visitors_week }}</b><span>Visitors in 7 days</span></div>
       <div class="fdq-card"><b>{{ spam_week }}</b><span>Bots stopped in 7 days</span></div>
     </div>
-    <p class="fdq-links"><a href="{{ signups_url }}">Signups</a><a href="{{ funnel_url }}">Visitor funnel</a></p>
+    <form method="post" action="{{ test_alert_url }}" class="fdq-alert">
+      {% csrf_token %}
+      <span>Phone alert for each new signup: <b>{% if alerts_on %}on{% else %}off{% endif %}</b></span>
+      {% if alerts_on %}<button type="submit" class="button">Send a test alert</button>{% endif %}
+    </form>
+    <p class="fdq-links"><a href="{{ visitors_url }}">Visitors</a><a href="{{ signups_url }}">Signups</a><a href="{{ funnel_url }}">Visitor funnel</a></p>
   </div>
 </div>

@@ -15,52 +15,70 @@
 .home-hero {
   display: grid;
   grid-template-columns: 1fr 1.1fr;
-  gap: clamp(2rem, 5vw, 4rem);
+  gap: var(--s-6) clamp(2rem, 5vw, 4rem);
   align-items: center;
-  padding-top: clamp(2.5rem, 6vw, 4.5rem);
-  padding-bottom: clamp(2.5rem, 6vw, 4.5rem);
+  padding-top: var(--section-tight);
+  padding-bottom: var(--section);
 }
 .home-hero h1 {
   font-weight: 800;
   font-size: clamp(2.3rem, 5.2vw, 3.8rem);
   line-height: 1.04;
-  margin-bottom: 1.2rem;
+  margin-bottom: var(--s-4);
 }
-.home-hero .lede { font-size: clamp(1.08rem, 2vw, 1.25rem); color: var(--ink-2); max-width: 34ch; margin-bottom: 1.8rem; }
-.home-hero .btns { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+.home-hero .lede { font-size: clamp(1.08rem, 2vw, 1.25rem); color: var(--ink-2); max-width: 34ch; margin-bottom: var(--s-6); }
+.home-hero .btns { display: flex; gap: var(--s-3); flex-wrap: wrap; }
+.home-hero figure img { aspect-ratio: 3 / 2; object-fit: cover; }
 @media (max-width: 860px) {
+  /* On a phone the offer comes first and the photo follows it. */
   .home-hero { grid-template-columns: 1fr; }
-  .home-hero figure { order: -1; }
+  .home-hero figure img { aspect-ratio: 16 / 9; }
+}
+@media (max-width: 520px) {
+  .home-hero .btns a { flex: 1 1 100%; }
 }
 
 .band { background: var(--surface); border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
-.block { padding-top: clamp(2.75rem, 6vw, 4.5rem); padding-bottom: clamp(2.75rem, 6vw, 4.5rem); }
-.block h2 { font-weight: 800; font-size: clamp(1.7rem, 3.4vw, 2.4rem); line-height: 1.12; margin-bottom: 1rem; max-width: 26ch; }
-.block .intro { color: var(--ink-2); max-width: 62ch; margin-bottom: 2rem; }
+.block { padding-top: var(--section); padding-bottom: var(--section); }
+.block h2 { font-weight: 800; font-size: clamp(1.7rem, 3.4vw, 2.4rem); line-height: 1.12; margin-bottom: var(--s-4); max-width: 26ch; }
+.block .intro { color: var(--ink-2); max-width: 62ch; margin-bottom: var(--s-6); }
+.block .more { margin-top: var(--s-6); }
+.two p + p { margin-top: var(--s-4); }
 
 /* One line from the lesson 1 weld log */
 .logline { overflow-x: auto; border: 1px solid var(--rule-2); border-radius: 6px; background: var(--paper); }
 .logline table { border-collapse: collapse; width: 100%; min-width: 760px; font-family: 'IBM Plex Mono', monospace; font-size: 0.85rem; }
 .logline th { text-align: left; font: 600 0.75rem 'Public Sans', sans-serif; color: var(--ink-3); padding: 0.6rem 0.8rem 0.3rem; white-space: nowrap; }
 .logline td { padding: 0.2rem 0.8rem 0.75rem; white-space: nowrap; color: var(--ink); }
-.logline-note { font-size: 0.85rem; color: var(--ink-3); margin-top: 0.6rem; }
+.logline-note { font-size: 0.85rem; color: var(--ink-3); margin-top: var(--s-3); }
+/* On a phone the row reads as a list: each column's name beside its value. */
+@media (max-width: 640px) {
+  .logline { overflow: visible; }
+  .logline table { min-width: 0; }
+  .logline thead { display: none; }
+  .logline tr, .logline td { display: block; }
+  .logline td { display: grid; grid-template-columns: 7.5rem minmax(0, 1fr); gap: var(--s-3); padding: var(--s-2) var(--s-4); border-bottom: 1px solid var(--rule); white-space: normal; }
+  .logline td:last-child { border-bottom: none; }
+  .logline td::before { content: attr(data-label); font: 600 0.8rem 'Public Sans', sans-serif; color: var(--ink-3); padding-top: 0.1rem; }
+}
 
-.two { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(2rem, 5vw, 4rem); }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-6) clamp(2rem, 5vw, 4rem); margin-top: var(--s-5); }
 @media (max-width: 760px) { .two { grid-template-columns: 1fr; } }
-.two h3 { font-size: 1.15rem; font-weight: 700; margin-bottom: 0.6rem; }
+.two h3 { font-size: 1.15rem; font-weight: 700; margin-bottom: var(--s-3); }
 .two p { color: var(--ink-2); }
 
 .can { list-style: none; }
-.can li { padding: 0.75rem 0; border-top: 1px solid var(--rule); }
+.can li { padding: var(--s-3) 0; border-top: 1px solid var(--rule); }
 .can li:last-child { border-bottom: 1px solid var(--rule); }
 
-.lesson { display: grid; grid-template-columns: 1.2fr 1fr; gap: clamp(1.5rem, 4vw, 3rem); align-items: center; }
+.lesson { display: grid; grid-template-columns: 1.2fr 1fr; gap: var(--s-6) clamp(1.5rem, 4vw, 3rem); align-items: center; }
 @media (max-width: 760px) { .lesson { grid-template-columns: 1fr; } }
 .lesson img { display: block; width: 100%; height: auto; border-radius: 4px; border: 1px solid var(--rule); }
-.lesson .length { color: var(--ink-3); font-size: 0.95rem; margin-bottom: 0.5rem; }
+.lesson .length { color: var(--ink-3); font-size: 0.95rem; margin-bottom: var(--s-2); }
 
 .tiers { list-style: none; border-top: 1px solid var(--rule); }
-.tiers li { display: grid; grid-template-columns: 9rem 1fr auto; gap: 0.4rem 1.5rem; padding: 1.2rem 0; border-bottom: 1px solid var(--rule); align-items: baseline; }
+.tiers { margin-top: var(--s-5); }
+.tiers li { display: grid; grid-template-columns: 9rem 1fr auto; gap: var(--s-2) var(--s-5); padding: var(--s-5) 0; border-bottom: 1px solid var(--rule); align-items: baseline; }
 .tiers b { font-weight: 700; }
 .tiers p { color: var(--ink-2); }
 .tiers .when { font-size: 0.9rem; font-weight: 600; color: var(--ink-3); white-space: nowrap; }
@@ -68,8 +86,8 @@
 @media (max-width: 640px) { .tiers li { grid-template-columns: 1fr auto; } .tiers p { grid-column: 1 / -1; } }
 
 .founder { max-width: 66ch; }
-.founder p { margin-bottom: 1rem; }
-.founder a { color: var(--accent-ink); }
+.founder p { margin-bottom: var(--s-4); }
+.founder a { display: inline-block; padding: var(--s-3) 0; color: var(--accent-ink); }
 {% endblock %}
 
 {% block content %}
@@ -100,7 +118,7 @@
           <tr><th>Weld</th><th>Station</th><th>Pipe A / B</th><th>Heat A / B</th><th>Root &amp; hot</th><th>Fill &amp; cap</th><th>WPS</th><th>Date</th><th>NDE</th></tr>
         </thead>
         <tbody>
-          <tr><td>FW-A-RT-0432</td><td>486+40</td><td>2041 / 2042</td><td>Y60184 / Y60197</td><td>W-031, W-044</td><td>W-052, W-058</td><td>WPS-36-01</td><td>08-25-2026</td><td>0432-A ACC</td></tr>
+          <tr><td data-label="Weld">FW-A-RT-0432</td><td data-label="Station">486+40</td><td data-label="Pipe A / B">2041 / 2042</td><td data-label="Heat A / B">Y60184 / Y60197</td><td data-label="Root &amp; hot">W-031, W-044</td><td data-label="Fill &amp; cap">W-052, W-058</td><td data-label="WPS">WPS-36-01</td><td data-label="Date">08-25-2026</td><td data-label="NDE">0432-A ACC</td></tr>
         </tbody>
       </table>
     </div>
@@ -114,7 +132,7 @@
     <div>
       <h3>Who it's for</h3>
       <p>Welders, helpers, operators, laborers and foremen who already know what good work looks like and want to move to the quality side. You don't need a quality background, and you don't need a CWI to start.</p>
-      <p style="margin-top:1rem;">It covers gas and hazardous liquid lines and their stations, under 49 CFR 192 and 195.</p>
+      <p>It covers gas and hazardous liquid lines and their stations, under 49 CFR 192 and 195.</p>
     </div>
     <div>
       <h3>What you'll be able to do</h3>
@@ -128,7 +146,7 @@
       </ul>
     </div>
   </div>
-  <p style="margin-top:1.75rem;"><a href="{% url 'waitlist' %}#modules" class="btn-secondary">See all 12 modules</a></p>
+  <p class="more"><a href="{% url 'waitlist' %}#modules" class="btn-secondary" data-cta="home_all_modules">See all 12 modules</a></p>
 </section>
 
 <section class="band">
@@ -137,7 +155,7 @@
     <div>
       <p class="length">Free lesson &middot; 4 minutes 35 seconds</p>
       <h2>Lesson 1: Why weld maps exist</h2>
-      <p class="intro">The first lesson of the weld mapping module. Put your email on the Tier 1 list and it opens right away, with the weld field sheet to print.</p>
+      <p class="intro">The first lesson of the weld mapping module. Put your email on the Tier 1 list and it opens right away, with the Weld Field Sheet to print.</p>
       <a href="{% url 'waitlist' %}#sign-up" class="btn-primary" data-cta="home_lesson">Get lesson 1 free</a>
     </div>
   </div>
@@ -146,7 +164,7 @@
 <section class="wrap block">
   <h2>Three tiers. Tier 1 opens first.</h2>
   <ul class="tiers">
-    <li><b>Tier 1</b><p>From the crew to your first quality job: contractor QC tech or owner-side junior inspector.</p><span class="when open">Opening soon</span></li>
+    <li><b>Tier 1</b><p>From the crew to your first quality job: contractor QC tech or owner-side junior inspector.</p><span class="when open">{% if tier1_opens %}Opens {{ tier1_opens }}{% else %}Opening soon{% endif %}</span></li>
     <li><b>Tier 2</b><p>For working QC inspectors and quality engineers who run quality on an active project.</p><span class="when">Coming soon</span></li>
     <li><b>Tier 3</b><p>For quality managers and directors who build the program a whole project works in.</p><span class="when">Coming soon</span></li>
   </ul>

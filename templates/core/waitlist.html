@@ -3,9 +3,9 @@
 {% block title %}FDQ Tier 1 | Field Driven Quality{% endblock %}
 
 {% block meta_tags %}
-<meta name="description" content="FDQ Tier 1 is an online course and certification for pipeline hands with no quality background: 12 modules, from how a job runs to running a QC day. Get lesson 1 and the weld field sheet free." />
+<meta name="description" content="FDQ Tier 1 is an online course and certification for pipeline hands with no quality background: 12 modules, from how a job runs to running a QC day. Get lesson 1 and the Weld Field Sheet free." />
 <meta property="og:title" content="FDQ Tier 1: from the crew to your first QC job" />
-<meta property="og:description" content="Get lesson 1 of weld mapping, why weld maps exist, and the weld field sheet, free." />
+<meta property="og:description" content="Get lesson 1 of weld mapping, why weld maps exist, and the Weld Field Sheet, free." />
 <meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{% url 'lesson_1_poster' %}" />
 {% endblock %}
 
@@ -17,26 +17,26 @@
   display: grid;
   grid-template-columns: 1.15fr 1fr;
   grid-template-areas: "intro box" "facts box";
-  gap: 1.5rem clamp(2rem, 5vw, 4rem);
+  gap: var(--s-5) clamp(2rem, 5vw, 4rem);
   align-items: start;
-  padding-top: clamp(1.5rem, 6vw, 4rem);
-  padding-bottom: clamp(2.5rem, 6vw, 4rem);
+  padding-top: var(--section-tight);
+  padding-bottom: var(--section);
 }
 .wl-intro { grid-area: intro; min-width: 0; }
 .wl-box { grid-area: box; min-width: 0; }
 .wl-facts { grid-area: facts; min-width: 0; }
 @media (max-width: 860px) {
-  .wl-hero { grid-template-columns: 1fr; grid-template-areas: "intro" "box" "facts"; gap: 1.25rem; }
+  .wl-hero { grid-template-columns: 1fr; grid-template-areas: "intro" "box" "facts"; gap: var(--s-5); padding-top: var(--s-6); }
 }
-.wl-hero h1 { font-weight: 800; font-size: clamp(2.1rem, 5vw, 3.4rem); line-height: 1.06; margin-bottom: 0.9rem; }
-.wl-intro .page-label { margin-bottom: 0.6rem; }
+.wl-hero h1 { font-weight: 800; font-size: clamp(2.1rem, 5vw, 3.4rem); line-height: 1.06; margin-bottom: var(--s-4); }
+.wl-intro .page-label { margin-bottom: var(--s-3); }
 .wl-facts { list-style: none; color: var(--ink-2); font-size: 1rem; }
-.wl-facts li { padding: 0.55rem 0; border-top: 1px solid var(--rule); }
+.wl-facts li { padding: var(--s-3) 0; border-top: 1px solid var(--rule); }
 .wl-facts li:last-child { border-bottom: 1px solid var(--rule); }
 .wl-facts b { color: var(--ink); font-weight: 600; }
 
-.wl-box { padding: clamp(1.1rem, 3vw, 2rem); }
-.wl-form { display: flex; flex-direction: column; gap: 0.9rem; }
+.wl-box { padding: clamp(1.25rem, 3vw, 2rem); }
+.wl-form { display: flex; flex-direction: column; gap: var(--s-4); }
 .wl-form .btn-primary { width: 100%; font-size: 1.05rem; min-height: 52px; }
 .wl-form .btn-primary[disabled] { opacity: 0.7; cursor: progress; }
 .wl-error { font-size: 0.92rem; font-weight: 600; color: var(--danger); }
@@ -45,77 +45,94 @@
 .wl-fine { font-size: 0.86rem; color: var(--ink-3); line-height: 1.5; }
 .wl-fine a { color: var(--ink-2); }
 .wl-trap { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
-.wl-gets-label { margin: 1.4rem 0 0.5rem; padding-top: 1.1rem; border-top: 1px solid var(--rule); }
-.wl-gets { list-style: none; display: flex; flex-direction: column; gap: 0.75rem; }
-.wl-gets li { display: grid; grid-template-columns: 96px 1fr; gap: 0.85rem; align-items: center; }
+.wl-gets-label { margin: var(--s-5) 0 var(--s-3); padding-top: var(--s-5); border-top: 1px solid var(--rule); }
+.wl-gets { list-style: none; display: flex; flex-direction: column; gap: var(--s-3); }
+.wl-gets li { display: grid; grid-template-columns: 96px 1fr; gap: var(--s-4); align-items: center; }
 .wl-gets img { display: block; width: 96px; height: 54px; object-fit: cover; object-position: top; border-radius: 3px; border: 1px solid var(--rule); background: #fff; }
 .wl-gets b { display: block; font-weight: 700; line-height: 1.25; font-size: 0.98rem; }
 .wl-gets span { display: block; font-size: 0.88rem; color: var(--ink-3); }
 
-.wl-block { padding-top: clamp(2.5rem, 6vw, 4rem); padding-bottom: clamp(2.5rem, 6vw, 4rem); }
-.wl-block > h2, .wl-block h2.wl-h2 { font-weight: 800; font-size: clamp(1.6rem, 3.2vw, 2.2rem); line-height: 1.15; margin-bottom: 0.75rem; }
-.wl-block .intro { color: var(--ink-2); max-width: 64ch; margin-bottom: 1rem; }
+.wl-block { padding-top: var(--section); padding-bottom: var(--section); }
+.wl-block > h2, .wl-block h2.wl-h2 { font-weight: 800; font-size: clamp(1.6rem, 3.2vw, 2.2rem); line-height: 1.15; margin-bottom: var(--s-4); }
+.wl-block .intro { color: var(--ink-2); max-width: 64ch; margin-bottom: var(--s-4); }
 .band { background: var(--surface); border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
 
-.wl-how { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr)); gap: 0; border-top: 1px solid var(--rule); margin-top: 1.5rem; }
-.wl-how div { padding: 1.1rem 1.5rem 1.2rem 0; border-bottom: 1px solid var(--rule); }
-.wl-how dt { font-size: 0.85rem; font-weight: 700; color: var(--ink-3); margin-bottom: 0.3rem; }
+.wl-how { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr)); column-gap: var(--s-5); border-top: 1px solid var(--rule); margin-top: var(--s-5); }
+.wl-how div { padding: var(--s-4) 0 var(--s-5); border-bottom: 1px solid var(--rule); }
+.wl-how dt { font-size: 0.85rem; font-weight: 700; color: var(--ink-3); margin-bottom: var(--s-1); }
 .wl-how dd { color: var(--ink); max-width: 40ch; font-size: 1rem; }
 .wl-how a { color: var(--accent-ink); }
 
-.wl-fit { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(1.5rem, 5vw, 4rem); margin-top: 2.5rem; }
+.wl-fit { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-6) clamp(2rem, 5vw, 4rem); margin-top: var(--s-7); }
 @media (max-width: 760px) { .wl-fit { grid-template-columns: 1fr; } }
-.wl-fit h3 { font-size: 1.15rem; font-weight: 700; margin-bottom: 0.5rem; }
+.wl-fit h3 { font-size: 1.15rem; font-weight: 700; margin-bottom: var(--s-2); }
 .wl-fit p { color: var(--ink-2); max-width: 58ch; }
 
-.wl-index { columns: 3 14rem; column-gap: 2rem; list-style: none; margin: 1.75rem 0 0.5rem; font-size: 0.95rem; }
+.wl-index { columns: 3 14rem; column-gap: var(--s-6); list-style: none; margin: var(--s-6) 0 0; font-size: 0.95rem; }
 .wl-index li { break-inside: avoid; padding: 0.4rem 0; }
 .wl-index a { text-decoration: none; color: var(--ink-2); }
 .wl-index a:hover { color: var(--ink); text-decoration: underline; }
 .wl-index span { display: inline-block; width: 1.8rem; font-weight: 700; color: var(--ink-3); }
 
-.mod { display: grid; grid-template-columns: 15rem minmax(0, 1fr); gap: 0.75rem clamp(2rem, 5vw, 4rem); padding: 2.25rem 0; border-top: 1px solid var(--rule); scroll-margin-top: 5rem; }
-.mod:first-of-type { margin-top: 2rem; }
-@media (max-width: 800px) { .mod { grid-template-columns: 1fr; padding: 1.75rem 0; } }
-.mod-num { font-size: 0.85rem; font-weight: 700; color: var(--ink-3); margin-bottom: 0.3rem; }
+.mod { border-top: 1px solid var(--rule); scroll-margin-top: 5rem; }
+.wl-index + .mod { margin-top: var(--s-6); }
+.mod summary { list-style: none; cursor: pointer; display: grid; grid-template-columns: 15rem minmax(0, 1fr); grid-template-areas: "num lead" "title lead"; column-gap: clamp(2rem, 5vw, 4rem); align-items: start; padding: var(--s-6) 0 var(--s-4); }
+.mod summary::-webkit-details-marker { display: none; }
+.mod summary .mod-num { grid-area: num; }
+.mod summary h3 { grid-area: title; }
+.mod summary .mod-lead { grid-area: lead; }
+.mod-body { margin-left: calc(15rem + clamp(2rem, 5vw, 4rem)); padding-bottom: var(--s-6); }
+.mod-num { display: block; font-size: 0.85rem; font-weight: 700; color: var(--ink-3); margin-bottom: var(--s-1); }
 .mod h3 { font-weight: 800; font-size: 1.35rem; line-height: 1.2; }
-.mod-lead { font-size: 1.08rem; color: var(--ink); max-width: 62ch; margin-bottom: 1rem; }
-.mod h4 { font-size: 0.85rem; font-weight: 700; color: var(--ink-3); margin-bottom: 0.4rem; }
-.mod-skills { list-style: none; max-width: 66ch; color: var(--ink-2); margin-bottom: 1.25rem; }
+.mod-lead { font-size: 1.08rem; color: var(--ink); max-width: 62ch; }
+.mod h4 { font-size: 0.85rem; font-weight: 700; color: var(--ink-3); margin-bottom: var(--s-2); }
+.mod-tap { display: none; }
+@media (max-width: 800px) {
+  .wl-index { display: none; }
+  .mod-tap { display: inline; }
+  .mod summary { display: block; position: relative; padding: var(--s-5) 2.5rem var(--s-5) 0; }
+  .mod summary::after { content: "+"; position: absolute; right: 0.25rem; top: var(--s-5); font-size: 1.5rem; line-height: 1; font-weight: 400; color: var(--ink-3); }
+  .mod[open] summary::after { content: "\2212"; }
+  .mod h3 { font-size: 1.2rem; margin-bottom: var(--s-2); }
+  .mod-lead { font-size: 1rem; color: var(--ink-2); }
+  .mod-body { margin-left: 0; padding-bottom: var(--s-5); }
+}
+.mod-skills { list-style: none; max-width: 66ch; color: var(--ink-2); margin-bottom: var(--s-5); }
 .mod-skills li { position: relative; padding: 0.2rem 0 0.2rem 1.1rem; }
 .mod-skills li::before { content: ""; position: absolute; left: 0; top: 0.95rem; top: calc(0.2rem + 0.5lh); width: 0.45rem; height: 2px; background: var(--rule-2); }
-.mod-ex { background: var(--panel); border: 1px solid var(--rule); border-radius: var(--radius); padding: 0.9rem 1.1rem; max-width: 66ch; color: var(--ink-2); font-size: 0.95rem; }
-.mod-ex + .mod-ex { margin-top: 0.6rem; background: transparent; }
+.mod-ex { background: var(--panel); border: 1px solid var(--rule); border-radius: var(--radius); padding: var(--s-4) var(--s-5); max-width: 66ch; color: var(--ink-2); font-size: 0.95rem; }
+.mod-ex + .mod-ex { margin-top: var(--s-3); background: transparent; }
 .mod-ex h4 { color: var(--ink); }
 .mod-ex a { color: var(--accent-ink); }
 
-.wl-cert { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: clamp(1.5rem, 5vw, 4rem); align-items: start; }
+.wl-cert { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: var(--s-5) clamp(2rem, 5vw, 4rem); align-items: start; }
 @media (max-width: 760px) { .wl-cert { grid-template-columns: 1fr; } }
-.wl-cert p { color: var(--ink-2); max-width: 60ch; margin-bottom: 0.9rem; }
+.wl-cert p { color: var(--ink-2); max-width: 60ch; margin-bottom: var(--s-4); }
 .wl-cert a { color: var(--accent-ink); }
-.wl-issuer { background: var(--panel); border: 1px solid var(--rule); border-radius: var(--radius); padding: 1rem 1.2rem; color: var(--ink-2); }
-.wl-issuer b { display: block; color: var(--ink); margin-bottom: 0.25rem; }
+.wl-issuer { background: var(--panel); border: 1px solid var(--rule); border-radius: var(--radius); padding: var(--s-4) var(--s-5); color: var(--ink-2); }
+.wl-issuer b { display: block; color: var(--ink); margin-bottom: var(--s-1); }
 
-.wl-limits { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(2rem, 5vw, 4rem); }
+.wl-limits { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-6) clamp(2rem, 5vw, 4rem); }
 @media (max-width: 760px) { .wl-limits { grid-template-columns: 1fr; } }
-.wl-limits h3 { font-size: 1.15rem; font-weight: 700; margin-bottom: 0.6rem; }
-.wl-limits p { color: var(--ink-2); margin-bottom: 0.9rem; }
-.wl-limits a { color: var(--accent-ink); }
+.wl-limits h3 { font-size: 1.15rem; font-weight: 700; margin-bottom: var(--s-3); }
+.wl-limits p { color: var(--ink-2); margin-bottom: var(--s-4); }
+.wl-limits a { display: inline-block; padding: var(--s-3) 0; color: var(--accent-ink); }
 
-.wl-faq { border-top: 1px solid var(--rule); margin-top: 1.25rem; max-width: 50rem; }
+.wl-faq { border-top: 1px solid var(--rule); margin-top: var(--s-5); max-width: 50rem; }
 .wl-faq details { border-bottom: 1px solid var(--rule); }
-.wl-faq summary { cursor: pointer; font-weight: 700; padding: 1rem 2rem 1rem 0; list-style: none; position: relative; }
+.wl-faq summary { cursor: pointer; font-weight: 700; padding: var(--s-4) 2.5rem var(--s-4) 0; list-style: none; position: relative; }
 .wl-faq summary::-webkit-details-marker { display: none; }
 .wl-faq summary::after { content: "+"; position: absolute; right: 0.25rem; top: 0.9rem; font-weight: 400; font-size: 1.3rem; color: var(--ink-3); }
 .wl-faq details[open] summary::after { content: "\2212"; }
-.wl-faq details p { color: var(--ink-2); padding: 0 0 1.1rem; max-width: 62ch; }
+.wl-faq details p { color: var(--ink-2); padding: 0 0 var(--s-5); max-width: 62ch; }
 .wl-faq a { color: var(--accent-ink); }
 
-.wl-again { display: flex; flex-wrap: wrap; gap: 1rem 2rem; align-items: center; justify-content: space-between; margin-top: clamp(2.5rem, 6vw, 3.5rem); padding-top: 2rem; border-top: 1px solid var(--rule); }
+.wl-again { display: flex; flex-wrap: wrap; gap: var(--s-4) var(--s-6); align-items: center; justify-content: space-between; margin-top: var(--s-7); padding-top: var(--s-6); border-top: 1px solid var(--rule); }
+@media (max-width: 520px) { .wl-again .btn-primary { flex: 1 1 100%; } }
 .wl-again p { font-weight: 700; font-size: 1.2rem; }
 
 /* Phones only: a way back to the form from anywhere on this long page. */
-.wl-sticky { position: fixed; left: 0; right: 0; bottom: 0; z-index: 90; background: rgba(251, 250, 247, 0.97); border-top: 1px solid var(--rule); padding: 0.6rem clamp(1rem, 4vw, 2.5rem) calc(0.6rem + env(safe-area-inset-bottom, 0px)); }
+.wl-sticky { position: fixed; left: 0; right: 0; bottom: 0; z-index: 90; background: rgba(251, 250, 247, 0.97); border-top: 1px solid var(--rule); padding: var(--s-3) var(--gutter) calc(var(--s-3) + env(safe-area-inset-bottom, 0px)); }
 .wl-sticky .btn-primary { display: block; width: 100%; }
 @media (min-width: 761px) { .wl-sticky { display: none !important; } }
 {% endblock %}
@@ -125,7 +142,7 @@
   <div class="wl-intro">
     <p class="page-label">FDQ Tier 1 &middot; {% if tier1_opens %}Opens {{ tier1_opens }}{% else %}Opening soon{% endif %}</p>
     <h1>From the crew to your first QC job.</h1>
-    <p class="page-sub">An online course and certification for pipeline hands with no quality background. Get lesson 1 and the weld field sheet free now.</p>
+    <p class="page-sub">An online course and certification for pipeline hands with no quality background. Get lesson 1 and the Weld Field Sheet free now.</p>
   </div>
 
   <div class="aside-box wl-box" id="sign-up">
@@ -159,7 +176,7 @@
       </li>
       <li>
         <img src="{% url 'field_sheet_preview' %}" alt="" width="880" height="1139" />
-        <div><b>Weld field sheet</b><span>PDF to print, with filled-in examples</span></div>
+        <div><b>Weld Field Sheet</b><span>Take your weld notes in the field to transfer to a weld map or weld log</span></div>
       </li>
     </ul>
   </div>
@@ -198,7 +215,7 @@
 <section class="band" id="modules">
   <div class="wrap wl-block">
     <h2>What Tier 1 teaches</h2>
-    <p class="intro">Twelve modules. Every skill in them is written as something you'll be able to do on a job, and every module ends with a gate exercise: a packet of sample job paperwork with problems planted in it for you to find.</p>
+    <p class="intro">Twelve modules. Every skill in them is written as something you'll be able to do on a job, and every module ends with a gate exercise: a packet of sample job paperwork with problems planted in it for you to find.<span class="mod-tap"> Tap a module to see its skills and its exercise.</span></p>
     <ol class="wl-index">
       <li><a href="#module-1"><span>1</span>How a job runs</a></li>
       <li><a href="#module-2"><span>2</span>Quality fundamentals</a></li>
@@ -214,10 +231,9 @@
       <li><a href="#module-12"><span>12</span>Conduct on site</a></li>
     </ol>
 
-    <article class="mod" id="module-1">
-      <header><p class="mod-num">Module 1</p><h3>How a job runs and where QC sits</h3></header>
-      <div>
-        <p class="mod-lead">Who's who on a midstream job, where a QC role sits, and what QC checks at every step of construction.</p>
+    <details class="mod" id="module-1" open>
+      <summary><span class="mod-num">Module 1</span><h3>How a job runs and where QC sits</h3><p class="mod-lead">Who's who on a midstream job, where a QC role sits, and what QC checks at every step of construction.</p></summary>
+      <div class="mod-body">
         <h4>You'll learn to</h4>
         <ul class="mod-skills">
           <li>Name the parties on a job (operator, owner's engineer or EPC, prime contractor, subs, third-party inspection, vendors and fab shops) and who employs, pays and directs a contractor QC tech, an owner inspector and an NDE tech on the same job</li>
@@ -229,12 +245,11 @@
         </ul>
         <div class="mod-ex"><h4>Gate exercise</h4><p>Sort shuffled activity cards from a mainline spread and a compressor or pump station into working order. For each one, use the sample inspection and test plan to name the record it produces and who signs it.</p></div>
       </div>
-    </article>
+    </details>
 
-    <article class="mod" id="module-2">
-      <header><p class="mod-num">Module 2</p><h3>Quality fundamentals</h3></header>
-      <div>
-        <p class="mod-lead">How quality is controlled on a job, how a nonconformance gets handled, and how to keep records that survive turnover.</p>
+    <details class="mod" id="module-2" open>
+      <summary><span class="mod-num">Module 2</span><h3>Quality fundamentals</h3><p class="mod-lead">How quality is controlled on a job, how a nonconformance gets handled, and how to keep records that survive turnover.</p></summary>
+      <div class="mod-body">
         <h4>You'll learn to</h4>
         <ul class="mod-skills">
           <li>Tell quality assurance from quality control, and explain why the person checking the work isn't the person building it</li>
@@ -249,12 +264,11 @@
         </ul>
         <div class="mod-ex"><h4>Gate exercise</h4><p>Write an NCR from a field scenario. Find the past-due tools on a site calibration log. Review a torque form and a coating report and find the empty fields, the value out of limits, the out-of-calibration instrument and the record that looks right but isn't. Then find the errors planted in a turnover package.</p></div>
       </div>
-    </article>
+    </details>
 
-    <article class="mod" id="module-3">
-      <header><p class="mod-num">Module 3</p><h3>The paperwork hierarchy</h3></header>
-      <div>
-        <p class="mod-lead">Where every requirement on the job comes from, which document wins when two disagree, and what to read on day one of a new project.</p>
+    <details class="mod" id="module-3" open>
+      <summary><span class="mod-num">Module 3</span><h3>The paperwork hierarchy</h3><p class="mod-lead">Where every requirement on the job comes from, which document wins when two disagree, and what to read on day one of a new project.</p></summary>
+      <div class="mod-body">
         <h4>You'll learn to</h4>
         <ul class="mod-skills">
           <li>Name the layers: 49 CFR 192 and 195 and state rules, the codes they invoke (API 1104, ASME Section IX, B31.8, B31.4 and B31.3), owner specs, the contract and project specs and drawings, approved procedures, and the contractor's QMS</li>
@@ -267,12 +281,11 @@
         </ul>
         <div class="mod-ex"><h4>Gate exercise</h4><p>A requirements trace. From a packet of contract, spec, drawing, WPS and code excerpts, answer six field questions with the governing document and section. One of them hides a conflict you have to raise as an RFI.</p></div>
       </div>
-    </article>
+    </details>
 
-    <article class="mod" id="module-4">
-      <header><p class="mod-num">Module 4</p><h3>Reading drawings</h3></header>
-      <div>
-        <p class="mod-lead">Find the right drawing, read what it requires, and check the built work against it, on the right-of-way and inside the fence.</p>
+    <details class="mod" id="module-4" open>
+      <summary><span class="mod-num">Module 4</span><h3>Reading drawings</h3><p class="mod-lead">Find the right drawing, read what it requires, and check the built work against it, on the right-of-way and inside the fence.</p></summary>
+      <div class="mod-body">
         <h4>You'll learn to</h4>
         <ul class="mod-skills">
           <li>Know the drawing set (alignment sheets, crossing and HDD drawings, P&amp;IDs, plot plans, piping plans, isometrics, spool and support drawings) and the question each one answers</li>
@@ -285,12 +298,11 @@
         </ul>
         <div class="mod-ex"><h4>Gate exercise</h4><p>A drawing packet with an alignment sheet and a facility set. Find the wall, coating and cover at a station, decode a line number and find it on every drawing, find the bill of materials item that's wrong for its class, mark the field welds, and find the sheet that's superseded or on hold.</p></div>
       </div>
-    </article>
+    </details>
 
-    <article class="mod" id="module-5">
-      <header><p class="mod-num">Module 5</p><h3>Material and traceability</h3></header>
-      <div>
-        <p class="mod-lead">Receive material, read its markings and its MTR, match it to the drawing and class sheet, and keep the trail from the mill to the weld unbroken.</p>
+    <details class="mod" id="module-5" open>
+      <summary><span class="mod-num">Module 5</span><h3>Material and traceability</h3><p class="mod-lead">Receive material, read its markings and its MTR, match it to the drawing and class sheet, and keep the trail from the mill to the weld unbroken.</p></summary>
+      <div class="mod-body">
         <h4>You'll learn to</h4>
         <ul class="mod-skills">
           <li>Explain traceability, and sort what needs an MTR on every regulated job from what the project decides</li>
@@ -303,12 +315,11 @@
         </ul>
         <div class="mod-ex"><h4>Gate exercise</h4><p>A receiving lot with marking photos, MTRs, a packing list and an iso bill of materials. Match every item, find the heat with no MTR, the flange in the wrong class and the MTR with yield below spec, then build a tally for six joints, one of them cut.</p></div>
       </div>
-    </article>
+    </details>
 
-    <article class="mod" id="module-6">
-      <header><p class="mod-num">Module 6</p><h3>Weld mapping and weld records</h3></header>
-      <div>
-        <p class="mod-lead">Number and map every weld, tie each one to its material, welders, procedure and NDE, and keep the records complete enough to pass turnover.</p>
+    <details class="mod" id="module-6" open>
+      <summary><span class="mod-num">Module 6</span><h3>Weld mapping and weld records</h3><p class="mod-lead">Number and map every weld, tie each one to its material, welders, procedure and NDE, and keep the records complete enough to pass turnover.</p></summary>
+      <div class="mod-body">
         <h4>You'll learn to</h4>
         <ul class="mod-skills">
           <li>Explain what a weld map is and the records tied to it: the weld log, NDE log, repair log, welder qualification and continuity log, WPS register and tally</li>
@@ -323,12 +334,11 @@
         <div class="mod-ex"><h4>Gate exercise</h4><p>From a day of field data (welder ID photos, a pipe tally, NDE reports), build the weld map for a mainline section and one facility isometric. Then audit a planted weld log and find every error.</p></div>
         <div class="mod-ex"><h4>Where Tier 1 stops</h4><p>You record NDE results from the report. Reading film or UT data belongs to the NDE tech, and visual acceptance of a weld belongs to the CWI or owner welding inspector. Lesson 1 of this module is free: <a href="#sign-up">get on the list</a>.</p></div>
       </div>
-    </article>
+    </details>
 
-    <article class="mod" id="module-7">
-      <header><p class="mod-num">Module 7</p><h3>Welding compliance for a non-CWI QC</h3></header>
-      <div>
-        <p class="mod-lead">Read a WPS and a welder qualification, check the welding in progress against both, and record what you measured.</p>
+    <details class="mod" id="module-7" open>
+      <summary><span class="mod-num">Module 7</span><h3>Welding compliance for a non-CWI QC</h3><p class="mod-lead">Read a WPS and a welder qualification, check the welding in progress against both, and record what you measured.</p></summary>
+      <div class="mod-body">
         <h4>You'll learn to</h4>
         <ul class="mod-skills">
           <li>Tell a WPS from a PQR and a welder qualification, and know which code governs: API 1104, ASME Section IX or AWS D1.1</li>
@@ -342,12 +352,11 @@
         <div class="mod-ex"><h4>Gate exercise</h4><p>Given a WPS, three welder qualifications and field readings for five welds, say which welds were made inside the WPS by a qualified welder, calculate travel speed and heat input, and write the finding for each weld that wasn't.</p></div>
         <div class="mod-ex"><h4>Where Tier 1 stops</h4><p>You check that the welding follows the WPS and that the welder is qualified. Visual acceptance of the finished weld, and qualifying procedures and welders, belong to the CWI or owner welding inspector.</p></div>
       </div>
-    </article>
+    </details>
 
-    <article class="mod" id="module-8">
-      <header><p class="mod-num">Module 8</p><h3>NDE basics</h3></header>
-      <div>
-        <p class="mod-lead">Know the NDE methods on a midstream job, read an NDE report, check a tech's certification, and keep NDE tied to the weld map.</p>
+    <details class="mod" id="module-8" open>
+      <summary><span class="mod-num">Module 8</span><h3>NDE basics</h3><p class="mod-lead">Know the NDE methods on a midstream job, read an NDE report, check a tech's certification, and keep NDE tied to the weld map.</p></summary>
+      <div class="mod-body">
         <h4>You'll learn to</h4>
         <ul class="mod-skills">
           <li>Name VT, RT, UT (including AUT and phased array), MT and PT, what each finds and where each is used</li>
@@ -360,12 +369,11 @@
         <div class="mod-ex"><h4>Gate exercise</h4><p>A set of NDE reports and a weld map. Find the weld with no NDE, the report signed by a tech not certified for the method, the reject that was never re-examined, and the weld number that isn't on the map.</p></div>
         <div class="mod-ex"><h4>Where Tier 1 stops</h4><p>You read results and track coverage. Doing NDE and interpreting it belong to a certified tech, Level II or above for interpretation.</p></div>
       </div>
-    </article>
+    </details>
 
-    <article class="mod" id="module-9">
-      <header><p class="mod-num">Module 9</p><h3>Coating and paint</h3></header>
-      <div>
-        <p class="mod-lead">Confirm the approved coating is applied per the manufacturer and the spec, record the conditions and results, and find damage before the pipe is buried or put in service.</p>
+    <details class="mod" id="module-9" open>
+      <summary><span class="mod-num">Module 9</span><h3>Coating and paint</h3><p class="mod-lead">Confirm the approved coating is applied per the manufacturer and the spec, record the conditions and results, and find damage before the pipe is buried or put in service.</p></summary>
+      <div class="mod-body">
         <h4>You'll learn to</h4>
         <ul class="mod-skills">
           <li>Explain how coating and cathodic protection work together, and why one holiday matters</li>
@@ -380,12 +388,11 @@
         <div class="mod-ex"><h4>Gate exercise</h4><p>From a spec excerpt, a product data sheet and a day of field joint coating readings, find the joint coated inside the dew point margin, the batch past expiry, the film thickness below range and the product that isn't on the approved list. Then set the holiday detector voltage.</p></div>
         <div class="mod-ex"><h4>Where Tier 1 stops</h4><p>You check and record against the spec and the data sheet. This isn't AMPP coating inspector training, and where the project requires a certified coating inspector to accept the work, acceptance is theirs.</p></div>
       </div>
-    </article>
+    </details>
 
-    <article class="mod" id="module-10">
-      <header><p class="mod-num">Module 10</p><h3>Bolted connections</h3></header>
-      <div>
-        <p class="mod-lead">Check a flanged joint is built from the right parts, tightened by the approved method and pattern with calibrated tools, and recorded so every joint can be traced and signed off.</p>
+    <details class="mod" id="module-10" open>
+      <summary><span class="mod-num">Module 10</span><h3>Bolted connections</h3><p class="mod-lead">Check a flanged joint is built from the right parts, tightened by the approved method and pattern with calibrated tools, and recorded so every joint can be traced and signed off.</p></summary>
+      <div class="mod-body">
         <h4>You'll learn to</h4>
         <ul class="mod-skills">
           <li>Match flanges, faces, gaskets, studs and nuts (such as B7 studs with 2H nuts) to the class sheet and drawing</li>
@@ -399,12 +406,11 @@
         <div class="mod-ex"><h4>Gate exercise</h4><p>Given a joint list, a bolting procedure, a tool calibration chart and a completed torque log, convert the target torque to pump pressure, then find the wrong gasket, the joint tightened out of pattern, the out-of-calibration tool and the missing final pass.</p></div>
         <div class="mod-ex"><h4>Where Tier 1 stops</h4><p>You check and record. Setting the bolt load belongs to engineering, and qualifying bolting techs belongs to the bolting contractor where the project requires it.</p></div>
       </div>
-    </article>
+    </details>
 
-    <article class="mod" id="module-11">
-      <header><p class="mod-num">Module 11</p><h3>Tie-ins, fabrication and pressure testing</h3></header>
-      <div>
-        <p class="mod-lead">Follow a tie-in from plan to record, check fabricated piping from the shop to its final position, and carry a pressure test from test package to signed record.</p>
+    <details class="mod" id="module-11" open>
+      <summary><span class="mod-num">Module 11</span><h3>Tie-ins, fabrication and pressure testing</h3><p class="mod-lead">Follow a tie-in from plan to record, check fabricated piping from the shop to its final position, and carry a pressure test from test package to signed record.</p></summary>
+      <div class="mod-body">
         <h4>You'll learn to</h4>
         <ul class="mod-skills">
           <li>Check tie-ins on the right-of-way and inside the fence, and explain why they get extra attention</li>
@@ -417,12 +423,11 @@
         </ul>
         <div class="mod-ex"><h4>Gate exercise</h4><p>A test package with an elevation profile. Calculate the high and low point pressures, then find the weld in the boundary with no NDE, the golden weld nobody flagged, the out-of-date gauge and the pressure that's too high at the low point. Name who approves the package before filling and who accepts the test.</p></div>
       </div>
-    </article>
+    </details>
 
-    <article class="mod" id="module-12">
-      <header><p class="mod-num">Module 12</p><h3>Conduct on site</h3></header>
-      <div>
-        <p class="mod-lead">Work a QC role day to day on either side of the contract: know what your role owns, report what you see, stay safe, and keep your signature worth something.</p>
+    <details class="mod" id="module-12" open>
+      <summary><span class="mod-num">Module 12</span><h3>Conduct on site</h3><p class="mod-lead">Work a QC role day to day on either side of the contract: know what your role owns, report what you see, stay safe, and keep your signature worth something.</p></summary>
+      <div class="mod-body">
         <h4>You'll learn to</h4>
         <ul class="mod-skills">
           <li>Compare contractor QC with owner inspection, and handle it when the two disagree on a result</li>
@@ -436,7 +441,7 @@
         </ul>
         <div class="mod-ex"><h4>Gate exercise</h4><p>A shift scenario: a crew passes a hold point, a foreman asks you to sign for welds you didn't see, a trench has no protection, and a client rep asks for a check outside your scope. Say what you did and who you told at each one, then write the daily report.</p></div>
       </div>
-    </article>
+    </details>
   </div>
 </section>
 
@@ -514,7 +519,7 @@
   </div>
 
   <div class="wl-again">
-    <p>Start with lesson 1 and the weld field sheet.</p>
+    <p>Start with lesson 1 and the Weld Field Sheet.</p>
     <a href="#sign-up" class="btn-primary" data-cta="tier1_bottom">Get lesson 1 free</a>
   </div>
 </section>
@@ -609,6 +614,15 @@
         document.body.style.paddingBottom = past ? '76px' : '';
       }, { threshold: 0.25 }).observe(box);
     }
+    const modules = [...document.querySelectorAll('details.mod')];
+    const openFromHash = () => {
+      const target = location.hash && document.getElementById(location.hash.slice(1));
+      if (target && target.matches('details.mod')) target.open = true;
+    };
+    if (matchMedia('(max-width: 800px)').matches) modules.forEach((m) => { m.open = false; });
+    openFromHash();
+    window.addEventListener('hashchange', openFromHash);
+
     sticky.querySelector('a').addEventListener('click', (event) => {
       event.preventDefault();
       box.scrollIntoView({ behavior: 'smooth', block: 'start' });

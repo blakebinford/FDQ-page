@@ -1,0 +1,120 @@
+{% extends "admin/base_site.html" %}
+
+{% block extrastyle %}
+{{ block.super }}
+<style>
+  .vz-range { display: flex; gap: 0.5rem; margin: 0 0 1.25rem; }
+  .vz-range a { font-size: 0.85rem; padding: 0.35rem 0.8rem; border: 1px solid var(--border-color); border-radius: 999px; text-decoration: none; color: var(--body-medium-color); }
+  .vz-range a[aria-current="page"] { background: var(--secondary); color: var(--primary-fg); border-color: var(--secondary); }
+  .vz-up { color: #1f6b2e; }
+  .vz-down { color: var(--body-quiet-color); }
+  .vz-section { margin: 0 0 1.75rem; }
+  .vz-section h2 { font-size: 1rem; font-weight: 700; margin: 0 0 0.6rem; }
+  .vz-note { font-size: 0.82rem; color: var(--body-quiet-color); margin: 0.4rem 0 0; }
+  .vz-hours { display: grid; grid-template-columns: repeat(48, minmax(0, 1fr)); align-items: end; gap: 2px; height: 120px; background: #fff; border: 1px solid var(--hairline-color); border-radius: 8px; padding: 0.6rem; }
+  .vz-hours span { display: block; background: var(--accent); border-radius: 2px 2px 0 0; min-height: 2px; }
+  .vz-hours span.none { background: var(--hairline-color); }
+  .vz-hour-labels { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--body-quiet-color); margin-top: 0.3rem; }
+  .vz-table { width: 100%; border-collapse: collapse; background: #fff; }
+  .vz-table th { text-align: left; font-size: 0.78rem; color: var(--body-quiet-color); font-weight: 600; padding: 0.45rem 0.7rem; border-bottom: 1px solid var(--border-color); background: var(--darkened-bg); }
+  .vz-table td { padding: 0.45rem 0.7rem; border-bottom: 1px solid var(--hairline-color); font-size: 0.88rem; vertical-align: middle; }
+  .vz-table td.n { font-family: var(--font-family-monospace); text-align: right; white-space: nowrap; }
+  .vz-bar { width: 40%; }
+  .vz-bar i { display: block; height: 10px; background: var(--accent); border-radius: 2px; }
+  .vz-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr)); gap: 1.25rem; }
+  .vz-scroll { overflow-x: auto; }
+</style>
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs"><a href="{% url 'admin:index' %}">Home</a> &rsaquo; Visitors</div>
+{% endblock %}
+
+{% block content %}
+<nav class="vz-range" aria-label="Date range">
+  <a href="?days=7"{% if days == 7 %} aria-current="page"{% endif %}>7 days</a>
+  <a href="?days=14"{% if days == 14 %} aria-current="page"{% endif %}>14 days</a>
+  <a href="?days=30"{% if days == 30 %} aria-current="page"{% endif %}>30 days</a>
+  <a href="?days=90"{% if days == 90 %} aria-current="page"{% endif %}>90 days</a>
+</nav>
+
+<div class="fdq-summary">
+  <div class="fdq-card"><b>{{ today_visitors }}</b><span>Visitors today{% if uptick is not None %}, <strong class="{% if uptick > 0 %}vz-up{% else %}vz-down{% endif %}">{% if uptick > 0 %}+{% endif %}{{ uptick }}%</strong> against the 7-day average ({{ average_7 }}){% endif %}</span></div>
+  <div class="fdq-card"><b>{{ last_24h }}</b><span>Visitors in the last 24 hours</span></div>
+  <div class="fdq-card"><b>{{ range_visitors }}</b><span>Visitors in {{ days }} days</span></div>
+  <div class="fdq-card"><b>{{ range_views }}</b><span>Page views in {{ days }} days</span></div>
+  <div class="fdq-card"><b>{{ range_signups }}</b><span>New signups in {{ days }} days</span></div>
+</div>
+
+<div class="vz-section">
+  <h2>Last 48 hours, by hour</h2>
+  <div class="vz-hours" role="img" aria-label="Visitors per hour for the last 48 hours">
+    {% for h in hourly %}<span class="{% if not h.visitors %}none{% endif %}" style="height: {% if h.visitors %}{{ h.bar }}{% else %}2{% endif %}%" title="{{ h.hour|date:'D g a' }}: {{ h.visitors }} visitor{{ h.visitors|pluralize }}"></span>{% endfor %}
+  </div>
+  <div class="vz-hour-labels"><span>{{ hourly.0.hour|date:"D g a" }}</span><span>{{ hourly.24.hour|date:"D g a" }}</span><span>Now</span></div>
+  <p class="vz-note">Hover a bar for its hour and count. Times are Central.</p>
+</div>
+
+<div class="vz-section">
+  <h2>By day</h2>
+  <div class="vz-scroll">
+    <table class="vz-table">
+      <thead><tr><th>Day</th><th>Visitors</th><th class="vz-bar"></th><th>From Facebook or Instagram</th><th>From ProvenHand</th><th>Page views</th><th>Signups</th></tr></thead>
+      <tbody>
+        {% for d in daily %}
+          <tr>
+            <td>{{ d.date|date:"D M j" }}</td>
+            <td class="n">{{ d.visitors }}</td>
+            <td class="vz-bar"><i style="width: {{ d.bar }}%"></i></td>
+            <td class="n">{{ d.social }}</td>
+            <td class="n">{{ d.provenhand }}</td>
+            <td class="n">{{ d.views }}</td>
+            <td class="n">{{ d.signups }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p class="vz-note">A visitor is one browser, counted once a day. Bots, link previews and Facebook's own prefetching aren't counted. Facebook and Instagram include visits from their in-app browsers even when no link tag says so.</p>
+</div>
+
+<div class="vz-grid">
+  <div class="vz-section">
+    <h2>Where they came from</h2>
+    <table class="vz-table">
+      <thead><tr><th>Source</th><th>Visitors</th><th>Signed up</th><th>Rate</th></tr></thead>
+      <tbody>{% for name, n, joined, rate in by_source %}<tr><td>{{ name }}</td><td class="n">{{ n }}</td><td class="n">{{ joined }}</td><td class="n">{{ rate }}%</td></tr>{% empty %}<tr><td colspan="4">No visits yet.</td></tr>{% endfor %}</tbody>
+    </table>
+  </div>
+  <div class="vz-section">
+    <h2>Campaigns (utm_campaign)</h2>
+    <table class="vz-table">
+      <thead><tr><th>Campaign</th><th>Visitors</th><th>Signed up</th><th>Rate</th></tr></thead>
+      <tbody>{% for name, n, joined, rate in by_campaign %}<tr><td>{{ name }}</td><td class="n">{{ n }}</td><td class="n">{{ joined }}</td><td class="n">{{ rate }}%</td></tr>{% empty %}<tr><td colspan="4">No visits yet.</td></tr>{% endfor %}</tbody>
+    </table>
+  </div>
+  <div class="vz-section">
+    <h2>First page they landed on</h2>
+    <table class="vz-table">
+      <thead><tr><th>Page</th><th>Visitors</th><th>Signed up</th><th>Rate</th></tr></thead>
+      <tbody>{% for name, n, joined, rate in by_landing %}<tr><td>{{ name }}</td><td class="n">{{ n }}</td><td class="n">{{ joined }}</td><td class="n">{{ rate }}%</td></tr>{% empty %}<tr><td colspan="4">No visits yet.</td></tr>{% endfor %}</tbody>
+    </table>
+  </div>
+</div>
+
+<div class="vz-section">
+  <h2>Latest visitors</h2>
+  <div class="vz-scroll">
+    <table class="vz-table">
+      <thead><tr><th>First seen</th><th>Landed on</th><th>Source</th><th>Campaign</th><th>Device</th></tr></thead>
+      <tbody>
+        {% for v in recent %}
+          <tr><td>{{ v.at|date:"M j, g:i a" }}</td><td>{{ v.path }}</td><td>{{ v.source }}</td><td>{{ v.campaign }}</td><td>{{ v.device }}{% if v.in_app %} ({{ v.in_app|capfirst }} app){% endif %}</td></tr>
+        {% empty %}
+          <tr><td colspan="5">No visits yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

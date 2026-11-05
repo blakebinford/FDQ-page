@@ -1,3 +1,4 @@
+import io
 import re
 from unittest import mock
 from urllib.parse import urlparse
@@ -493,3 +494,109 @@ class PageTitleTests(TestCase):
         for name in ('home', 'waitlist', 'about', 'contact', 'privacy'):
             title = re.search(r'<title>(.*?)</title>', self.client.get(reverse(name)).content.decode(), re.S).group(1)
             self.assertNotIn('{', title, name)
+
+
+class VisitorsPageTests(TestCase):
+    def setUp(self):
+        super().setUp()
+        self.staff = get_user_model().objects.create_superuser(email='boss@example.com', password='pw-for-tests-only',
+                                                               first_name='B', last_name='B')
+
+    def test_staff_only(self):
+        self.assertEqual(self.client.get(reverse('staff_visitors')).status_code, 302)
+
+    def test_counts_visitors_by_source_and_hour(self):
+        self.client.get(reverse('waitlist') + '?utm_source=facebook&utm_campaign=reel-12', HTTP_USER_AGENT=FACEBOOK_PHONE)
+        Client().get(reverse('home'), HTTP_REFERER='https://provenhand.com/feed/')
+        Client().get(reverse('home'), HTTP_USER_AGENT='Render/1.0')
+        Client().get(reverse('home'), HTTP_SEC_PURPOSE='prefetch')
+        self.client.force_login(self.staff)
+        response = self.client.get(reverse('staff_visitors') + '?days=7')
+        self.assertContains(response, 'Visitors today')
+        self.assertEqual(response.context['today_visitors'], 2)
+        sources = {name: n for name, n, *_ in response.context['by_source']}
+        self.assertEqual(sources, {'Facebook': 1, 'ProvenHand': 1})
+        self.assertIn(('reel-12', 1, 0, 0), response.context['by_campaign'])
+        self.assertEqual(sum(h['visitors'] for h in response.context['hourly']), 2)
+
+    def test_admin_home_links_the_visitors_page(self):
+        self.client.force_login(self.staff)
+        self.assertContains(self.client.get(reverse('admin:index')), reverse('staff_visitors'))
+
+
+class SourceLabelTests(TestCase):
+    def test_labels(self):
+        from .analytics import source_label
+        self.assertEqual(source_label('fb', '', ''), 'Facebook')
+        self.assertEqual(source_label('', 'l.facebook.com', ''), 'Facebook')
+        self.assertEqual(source_label('', '', 'facebook'), 'Facebook')
+        self.assertEqual(source_label('', 'l.instagram.com', ''), 'Instagram')
+        self.assertEqual(source_label('', 'www.provenhand.com', ''), 'ProvenHand')
+        self.assertEqual(source_label('', 'www.google.com', ''), 'Search')
+        self.assertEqual(source_label('', '', ''), 'Direct or unknown')
+
+
+class SitePolishTests(TestCase):
+    def test_no_public_log_in_link(self):
+        for name in ('home', 'waitlist', 'about'):
+            self.assertNotContains(self.client.get(reverse(name)), 'href="/accounts/login/"')
+
+    def test_modules_open_by_default_and_fold_on_phones(self):
+        response = self.client.get(reverse('waitlist'))
+        self.assertContains(response, '<details class="mod" id="module-6" open>', html=False)
+        self.assertContains(response, "matchMedia('(max-width: 800px)')")
+
+    def test_weld_field_sheet_name_and_description(self):
+        self.assertContains(self.client.get(reverse('waitlist')),
+                            'Take your weld notes in the field to transfer to a weld map or weld log')
+        self.assertNotContains(self.client.get(reverse('home')), 'weld field sheet')
+
+
+class RunNow:
+    """Stands in for threading.Thread so the alert is sent inside the test."""
+
+    def __init__(self, target, args=(), daemon=None):
+        self.target, self.args = target, args
+
+    def start(self):
+        self.target(*self.args)
+
+
+@override_settings(SIGNUP_ALERT_NTFY_TOPIC='fdq-test-topic', NTFY_SERVER='https://ntfy.example')
+class SignupAlertTests(TestCase):
+    def test_new_signup_sends_one_phone_alert_without_the_email(self):
+        sent = []
+        with mock.patch('core.alerts.threading.Thread', RunNow), \
+             mock.patch('core.alerts.urllib.request.urlopen', lambda request, timeout: sent.append(request) or io.BytesIO()):
+            self.client.get(reverse('waitlist') + '?utm_source=facebook&utm_campaign=reel-12', HTTP_USER_AGENT=FACEBOOK_PHONE)
+            form = {'email': 'hand@example.com', 'website': '', 'utm_source': 'facebook', 'utm_campaign': 'reel-12'}
+            self.client.post(reverse('waitlist'), form, HTTP_USER_AGENT=FACEBOOK_PHONE)
+            self.client.post(reverse('waitlist'), form, HTTP_USER_AGENT=FACEBOOK_PHONE)
+        self.assertEqual(len(sent), 1)
+        alert = sent[0]
+        self.assertEqual(alert.full_url, 'https://ntfy.example/fdq-test-topic')
+        self.assertEqual(alert.get_header('Title'), 'New Tier 1 signup')
+        body = alert.data.decode()
+        self.assertIn('Facebook · reel-12 · phone in the Facebook app', body)
+        self.assertIn('1 on the list now.', body)
+        self.assertNotIn('hand@example.com', body)
+        self.assertIn('/admin/core/waitlistsignup/', alert.get_header('Click'))
+
+    def test_admin_test_button(self):
+        staff = get_user_model().objects.create_superuser(email='boss@example.com', password='pw-for-tests-only',
+                                                          first_name='B', last_name='B')
+        self.client.force_login(staff)
+        self.assertContains(self.client.get(reverse('admin:index')), 'Send a test alert')
+        sent = []
+        with mock.patch('core.alerts.threading.Thread', RunNow), \
+             mock.patch('core.alerts.urllib.request.urlopen', lambda request, timeout: sent.append(request) or io.BytesIO()):
+            response = self.client.post(reverse('staff_test_alert'), follow=True)
+        self.assertContains(response, 'Test alert sent.')
+        self.assertEqual(sent[0].get_header('Title'), 'FDQ test alert')
+
+
+class NoAlertsTests(TestCase):
+    def test_off_without_a_topic(self):
+        with mock.patch('core.alerts.threading.Thread') as thread:
+            self.client.post(reverse('waitlist'), {'email': 'hand@example.com', 'website': ''})
+        thread.assert_not_called()
