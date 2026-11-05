@@ -7,9 +7,6 @@
 <meta property="og:title" content="{{ post.title }}">
 <meta property="og:description" content="{{ post.summary|striptags|truncatewords:30 }}">
 <meta property="og:url" content="{{ request.build_absolute_uri }}">
-{% if post.banner_image %}
-<meta property="og:image" content="{{ post.banner_image.url }}">
-{% endif %}
 {% endblock %}
 
 {% block extra_styles %}
@@ -158,12 +155,6 @@
 </div>
 
 <!-- BANNER -->
-{% if post.banner_image %}
-<div class="article-banner">
-  <img src="{{ post.banner_image.url }}" alt="{{ post.title }}">
-</div>
-{% endif %}
-
 <!-- ARTICLE HERO -->
 <div class="article-hero reveal">
   <h1>{{ post.title }}</h1>

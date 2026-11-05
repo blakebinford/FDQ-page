@@ -82,8 +82,7 @@
 .blog-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1px;
-  background: var(--border);
+  gap: 1rem;
 }
 
 @media (max-width: 960px) {
@@ -96,6 +95,8 @@
 
 .blog-card {
   background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 8px;
   display: flex;
   flex-direction: column;
   transition: background 0.2s;
@@ -190,9 +191,6 @@
   <!-- Featured Post -->
   {% if featured_post %}
   <div class="featured-card reveal">
-    {% if featured_post.banner_image %}
-      <img src="{{ featured_post.banner_image.url }}" alt="{{ featured_post.title }}">
-    {% endif %}
     <div class="featured-body">
       <h3>{{ featured_post.title }}</h3>
       <p class="post-meta">{{ featured_post.reading_time }} min read</p>
@@ -212,9 +210,6 @@
     {% for post in posts %}
     <div class="blog-card">
       <a href="{% url 'blog_detail' post.slug %}">
-        {% if post.banner_image %}
-          <img src="{{ post.banner_image.url }}" alt="{{ post.title }}">
-        {% endif %}
         <div class="blog-card-body">
           <h5>{{ post.title }}</h5>
           <p class="post-meta">{{ post.reading_time }} min read</p>
