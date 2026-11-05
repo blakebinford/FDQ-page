@@ -14,7 +14,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
 from .forms import ContactForm, WaitlistForm, SOURCE_FIELDS
-from .analytics import classify, record
+from .analytics import LANDING_SOURCE_KEY, classify, record
 from .emails import (
     LESSON_SALT, UNSUBSCRIBE_SALT, send_lesson_email, signup_from_token, waitlist_email_ready,
 )
@@ -121,11 +121,14 @@ def _bot_check(request, form_name, limit):
 
 
 def _visit_source(request):
-    """The utm tags on the landing URL, and the site that linked here."""
+    """The utm tags on the landing URL and the site that linked here or, when the
+    visitor came from another page of this site, those of the visit's first landing."""
     source = {key: request.GET.get(key, '')[:100] for key in SOURCE_FIELDS if key.startswith('utm_')}
     host = urlparse(request.META.get('HTTP_REFERER', '')).netloc[:255]
     if host and host != request.get_host():
         source['referrer_host'] = host
+    if not any(source.values()):
+        source = dict(request.session.get(LANDING_SOURCE_KEY, {}))
     return source
 
 

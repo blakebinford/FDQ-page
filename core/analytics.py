@@ -23,6 +23,8 @@ BOT_UA = re.compile(
 # Browsers and apps that load a page before anyone taps it say so in one of these headers.
 PREFETCH_HEADERS = ('Sec-Purpose', 'Purpose', 'X-Purpose', 'X-Moz')
 UTM_KEYS = ('utm_source', 'utm_medium', 'utm_campaign', 'utm_content')
+# The visit's first tagged or referred landing, kept so a signup a few pages later still has it.
+LANDING_SOURCE_KEY = 'landing_source'
 
 
 def classify(user_agent):
@@ -71,6 +73,11 @@ def _record_page_view(request):
     if any(word in request.headers.get(header, '').lower()
            for header in PREFETCH_HEADERS for word in ('prefetch', 'preview', 'prerender')):
         return
+    source = {key: request.GET.get(key, '')[:100] for key in UTM_KEYS if request.GET.get(key)}
+    if referrer:
+        source['referrer_host'] = referrer
+    if source and LANDING_SOURCE_KEY not in request.session:
+        request.session[LANDING_SOURCE_KEY] = source
     SiteEvent.objects.create(
         name='page_view',
         visitor_id=request.visitor_id,

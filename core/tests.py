@@ -40,6 +40,12 @@ class WaitlistTests(TestCase):
         self.assertContains(response, 'name="utm_campaign" value="comment-123"')
         self.assertContains(response, 'name="referrer_host" value="l.facebook.com"')
 
+    def test_tags_on_another_landing_page_carry_to_the_form(self):
+        self.client.get(reverse('home') + '?utm_source=facebook&utm_campaign=fdq-page')
+        response = self.client.get(reverse('waitlist'), HTTP_REFERER='http://testserver/')
+        self.assertContains(response, 'name="utm_source" value="facebook"')
+        self.assertContains(response, 'name="utm_campaign" value="fdq-page"')
+
     def test_own_site_is_not_recorded_as_referrer(self):
         response = self.client.get(reverse('waitlist'), HTTP_REFERER='http://testserver/about/')
         self.assertContains(response, 'name="referrer_host" value=""')
