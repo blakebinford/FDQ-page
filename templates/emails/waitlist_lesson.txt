@@ -1,0 +1,15 @@
+{% autoescape off %}Here's lesson 1 of FDQ Tier 1, "Why weld maps exist" (4:35). This link opens it on any phone or computer:
+
+{{ lesson_url }}
+
+The weld field sheet, to print:
+
+{{ sheet_url }}
+
+Tier 1 opens {% if tier1_opens %}{{ tier1_opens }}{% else %}soon{% endif %}. You'll get a few emails around the launch and nothing else.
+
+You got this because {{ email }} signed up at fielddrivenquality.com.
+Leave the list: {{ unsubscribe_url }}
+
+Field Driven Quality
+{{ postal_address }}{% endautoescape %}

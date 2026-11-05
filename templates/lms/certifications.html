@@ -36,7 +36,7 @@
         <div class="tier-act">
           {% if not item.tier.is_active %}
             <span class="tier-when">Coming soon</span>
-            {% if item.tier.order == 1 %}<a href="{% url 'waitlist' %}#sign-up" class="btn-secondary">Get on the list</a>{% endif %}
+            {% if item.tier.order == 1 %}<a href="{% url 'waitlist' %}#sign-up" class="btn-secondary" data-cta="cert_tier1">Get lesson 1 free</a>{% endif %}
           {% else %}
             <span class="tier-price">{{ item.price_display }}</span>
             {% if item.cta == 'certified' %}
@@ -69,7 +69,7 @@
         </div>
         <div class="tier-act">
           <span class="tier-when open">Opening soon</span>
-          <a href="{% url 'waitlist' %}#sign-up" class="btn-primary">Watch lesson 1 free</a>
+          <a href="{% url 'waitlist' %}#sign-up" class="btn-primary" data-cta="cert_tier1">Get lesson 1 free</a>
         </div>
       </li>
       <li class="tier-row">

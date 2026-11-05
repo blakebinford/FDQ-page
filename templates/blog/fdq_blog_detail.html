@@ -158,7 +158,7 @@
 <!-- ARTICLE HERO -->
 <div class="article-hero reveal">
   <h1>{{ post.title }}</h1>
-  <p class="post-meta">{{ post.reading_time }} min read</p>
+  <p class="post-meta"><time datetime="{{ post.created_at|date:'Y-m-d' }}">{{ post.created_at|date:"M j, Y" }}</time> &middot; {{ post.reading_time }} min read</p>
   {% if post.tags.all %}
   <div>
     {% for tag in post.tags.all %}
@@ -176,7 +176,7 @@
 <div class="blog-tier1">
   <div class="blog-tier1-inner">
     <p><strong>FDQ Tier 1</strong> takes a pipeline hand with no quality background into a first QC or inspection job. Lesson 1 is free.</p>
-    <a href="{% url 'waitlist' %}#sign-up" class="btn-primary">Watch lesson 1 free</a>
+    <a href="{% url 'waitlist' %}#sign-up" class="btn-primary" data-cta="blog_post">Get lesson 1 free</a>
   </div>
 </div>
 

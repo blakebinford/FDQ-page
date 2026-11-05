@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}Get the lesson link again | Field Driven Quality{% endblock %}
+
+{% block meta_tags %}<meta name="robots" content="noindex" />{% endblock %}
+
+{% block extra_styles %}
+.resend-form { display: flex; flex-direction: column; gap: 1rem; text-align: left; }
+.resend-form .btn-primary { width: 100%; }
+{% endblock %}
+
+{% block content %}
+<div class="center-wrap">
+  <div class="center-box">
+    {% if sent %}
+      <h1>Check your email.</h1>
+      <p class="center-sub">If that email is on the list, the link to lesson 1 is on its way. It can take a few minutes, and it may land in spam or promotions.</p>
+      <div class="btn-row"><a href="{% url 'waitlist' %}" class="btn-secondary">Back to Tier 1</a></div>
+    {% else %}
+      <h1>Get the lesson link again.</h1>
+      <p class="center-sub">Enter the email you signed up with and we'll send the link to lesson 1 again.</p>
+      <form class="resend-form" method="post">
+        {% csrf_token %}
+        <div class="form-group">
+          <label for="resend-email">Email</label>
+          <input id="resend-email" type="email" name="email" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false" required />
+        </div>
+        <button type="submit" class="btn-primary">Send the link</button>
+      </form>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -3,6 +3,9 @@ import dj_database_url
 
 DEBUG = config("DEBUG", cast=bool, default=False)
 
+# Render ends TLS in front of gunicorn, so links built from a request need this to come out https.
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 OPENAI_API_KEY = config("OPENAI_API_KEY", default="")
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 

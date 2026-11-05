@@ -26,9 +26,43 @@ class WaitlistSignup(models.Model):
     utm_content = models.CharField(max_length=100, blank=True)
     referrer_host = models.CharField(max_length=255, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    # The lesson email: when it last went out, when its link was first opened
+    # (which confirms the address works), and when they left the list.
+    lesson_email_sent_at = models.DateTimeField(null=True, blank=True)
+    confirmed_at = models.DateTimeField(null=True, blank=True)
+    unsubscribed_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         ordering = ['-created_at']
 
     def __str__(self):
         return self.email
+
+
+class SiteEvent(models.Model):
+    """One first-party analytics event: a page view, a tap or a signup step.
+
+    Tied to a random visitor ID cookie, never to an IP address. The utm and
+    device fields are filled on page views; other events carry their details
+    in props.
+    """
+
+    name = models.CharField(max_length=40, db_index=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+    visitor_id = models.CharField(max_length=32, blank=True, db_index=True)
+    path = models.CharField(max_length=255, blank=True)
+    referrer_host = models.CharField(max_length=255, blank=True)
+    utm_source = models.CharField(max_length=100, blank=True)
+    utm_medium = models.CharField(max_length=100, blank=True)
+    utm_campaign = models.CharField(max_length=100, blank=True)
+    utm_content = models.CharField(max_length=100, blank=True)
+    device = models.CharField(max_length=10, blank=True)
+    in_app = models.CharField(max_length=10, blank=True)
+    fbclid_present = models.BooleanField(default=False)
+    props = models.JSONField(default=dict, blank=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f'{self.name} {self.path}'

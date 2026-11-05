@@ -1,7 +1,8 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Field Driven Quality | From the crew to your first quality job{% endblock %}
+{% block title %}Field Driven Quality | From the crew to your first quality job.btns-note { font-size: 0.9rem; color: var(--ink-3); margin-top: 0.75rem; }
+{% endblock %}
 
 {% block meta_tags %}
 <meta name="description" content="FDQ Tier 1 is an online course for pipeline hands with no quality background. It teaches the work of a contractor QC tech or owner-side junior inspector." />
@@ -74,13 +75,14 @@
 {% block content %}
 <section class="wrap home-hero">
   <div>
-    <p class="page-label">FDQ Tier 1 &middot; Opening soon</p>
+    <p class="page-label">FDQ Tier 1 &middot; {% if tier1_opens %}Opens {{ tier1_opens }}{% else %}Opening soon{% endif %}</p>
     <h1>From the crew to your first quality job.</h1>
     <p class="lede">Tier 1 is an online course for pipeline hands with no quality background. It teaches the work of a contractor QC tech or an owner-side junior inspector, on the right-of-way and inside the fence.</p>
     <div class="btns">
-      <a href="{% url 'waitlist' %}#sign-up" class="btn-primary">Watch lesson 1 free</a>
-      <a href="{% url 'waitlist' %}" class="btn-secondary">What Tier 1 covers</a>
+      <a href="{% url 'waitlist' %}#sign-up" class="btn-primary" data-cta="home_hero">Get lesson 1 free</a>
+      <a href="{% url 'waitlist' %}#modules" class="btn-secondary" data-cta="home_modules">What Tier 1 covers</a>
     </div>
+    <p class="btns-note">Free with your email. Tier 1 isn't open yet, and this doesn't enroll you.</p>
   </div>
   <figure class="photo">
     <img src="{% static 'images/photos/line3-welding-shack.jpg' %}" alt="A welding shack hanging from a sideboom over a pipeline joint on the right-of-way" width="1600" height="1067" />
@@ -136,7 +138,7 @@
       <p class="length">Free lesson &middot; 4 minutes 35 seconds</p>
       <h2>Lesson 1: Why weld maps exist</h2>
       <p class="intro">The first lesson of the weld mapping module. Put your email on the Tier 1 list and it opens right away, with the weld field sheet to print.</p>
-      <a href="{% url 'waitlist' %}#sign-up" class="btn-primary">Watch lesson 1 free</a>
+      <a href="{% url 'waitlist' %}#sign-up" class="btn-primary" data-cta="home_lesson">Get lesson 1 free</a>
     </div>
   </div>
 </section>

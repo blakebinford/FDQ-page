@@ -8,6 +8,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="icon" href="{% url 'favicon' %}" sizes="any" />
+  <link rel="icon" type="image/png" href="{% static 'images/favicon-32.png' %}" />
+  <link rel="apple-touch-icon" href="{% static 'images/apple-touch-icon.png' %}" />
   {% block meta_tags %}{% endblock %}
   {% block extra_head %}{% endblock %}
   <style>
@@ -24,6 +27,7 @@
       --accent:     #f78331;  /* FDQ orange: fills and the logo only */
       --accent-ink: #a8490b;  /* orange for text on paper */
       --danger:     #b3261e;
+      --field:      #8f897d;  /* form field borders: 3.3:1 or better on paper and white */
       --radius:     6px;
 
       /* Older names the course, blog and account pages still use. */
@@ -40,7 +44,8 @@
       --steel:    #3d5a72;
     }
 
-    html { scroll-behavior: smooth; }
+    /* The sticky nav is 64px; keep anchors and focused fields out from under it. */
+    html { scroll-behavior: smooth; scroll-padding-top: 76px; }
 
     body {
       background: var(--paper);
@@ -220,7 +225,7 @@
     .lf-group label, .form-group label { font-size: 0.95rem; font-weight: 600; color: var(--ink); }
     .lf-group input, .form-group input, .form-group select, .form-group textarea {
       background: var(--surface);
-      border: 1px solid var(--rule-2);
+      border: 1px solid var(--field);
       border-radius: var(--radius);
       color: var(--ink);
       font: 400 1rem 'Public Sans', sans-serif;
@@ -279,6 +284,7 @@
     .footer-links a { color: var(--ink-2); text-decoration: none; font-size: 0.95rem; }
     .footer-links a:hover { color: var(--ink); text-decoration: underline; }
     .footer-copy { font-size: 0.85rem; color: var(--ink-3); }
+    .footer-address { font-size: 0.85rem; color: var(--ink-3); white-space: pre-line; }
 
     {% block extra_styles %}{% endblock %}
   </style>
@@ -332,13 +338,29 @@
       <li><a href="{% url 'about' %}">About</a></li>
       <li><a href="{% url 'blog_list' %}">Blog</a></li>
       <li><a href="{% url 'contact' %}">Contact</a></li>
+      <li><a href="{% url 'privacy' %}">Privacy</a></li>
       {% if not user.is_authenticated %}<li><a href="{% url 'accounts:login' %}">Log in</a></li>{% endif %}
     </ul>
     <span class="footer-copy">&copy; {% now "Y" %} Field Driven Quality</span>
+    {% if business_postal_address %}<span class="footer-address">{{ business_postal_address }}</span>{% endif %}
   </div>
 </footer>
 
 <script>
+  // First-party events: see core/analytics.py. Never throws.
+  const fdqTrack = (name, props = {}) => {
+    try {
+      const body = JSON.stringify({ name, props: { ...props, page: location.pathname } });
+      if (!(navigator.sendBeacon && navigator.sendBeacon('/e/', new Blob([body], { type: 'application/json' })))) {
+        fetch('/e/', { method: 'POST', body, headers: { 'Content-Type': 'application/json' }, keepalive: true });
+      }
+    } catch (e) {}
+  };
+  document.addEventListener('click', (event) => {
+    const cta = event.target.closest('[data-cta]');
+    if (cta) fdqTrack('cta_click', { cta_id: cta.dataset.cta });
+  });
+
   const hamburger = document.getElementById('hamburger');
   const navLinks = document.getElementById('navLinks');
   hamburger.addEventListener('click', () => {

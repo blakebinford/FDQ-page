@@ -25,7 +25,11 @@
       <button type="submit" class="btn-primary" style="width:100%;text-align:center;margin-top:0.5rem;">Sign In</button>
     </form>
     <div class="login-divider"></div>
-    <p class="login-link">No account yet? <a href="{% url 'accounts:register' %}">Create an account</a></p>
+    {% if account_signup_open %}
+      <p class="login-link">No account yet? <a href="{% url 'accounts:register' %}">Create an account</a></p>
+    {% else %}
+      <p class="login-link">Tier 1 isn't open yet. <a href="{% url 'waitlist' %}#sign-up" data-cta="login_waitlist">Get on the list</a> and lesson 1 opens right away.</p>
+    {% endif %}
     <p class="login-link" style="margin-top:0.7rem;"><a href="{% url 'accounts:password_reset' %}">Forgot your password?</a></p>
   </div>
 </div>

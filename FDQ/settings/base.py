@@ -50,6 +50,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'core.analytics.VisitorMiddleware',
 ]
 
 ROOT_URLCONF = 'FDQ.urls'
@@ -64,6 +65,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'core.context_processors.site_facts',
             ],
         },
     },
@@ -117,3 +119,18 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 CONTACT_EMAIL = config('CONTACT_EMAIL', default='binford.blake@gmail.com')
 ADMIN_EMAIL = config('ADMIN_EMAIL', default='binford.blake@gmail.com')
+
+# Waitlist email. Nothing is sent until the sender is set up on the domain
+# (SPF, DKIM, DMARC) and there's a postal address for the footer, which
+# CAN-SPAM requires in every marketing email.
+WAITLIST_EMAILS_ENABLED = config('WAITLIST_EMAILS_ENABLED', cast=bool, default=False)
+WAITLIST_FROM_EMAIL = config('WAITLIST_FROM_EMAIL', default='')
+BUSINESS_POSTAL_ADDRESS = config('BUSINESS_POSTAL_ADDRESS', default='')
+EMAIL_TIMEOUT = 10
+
+# Tier 1 facts that wait on the owner. Left empty, the site leaves them out.
+TIER1_OPENS = config('TIER1_OPENS', default='')  # e.g. "Wed Nov 18"
+
+# Accounts open with Tier 1. Until then a new account would only reach an
+# application for a course that isn't open.
+ACCOUNT_SIGNUP_OPEN = config('ACCOUNT_SIGNUP_OPEN', cast=bool, default=False)

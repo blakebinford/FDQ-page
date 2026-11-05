@@ -193,7 +193,7 @@
   <div class="featured-card reveal">
     <div class="featured-body">
       <h3>{{ featured_post.title }}</h3>
-      <p class="post-meta">{{ featured_post.reading_time }} min read</p>
+      <p class="post-meta"><time datetime="{{ featured_post.created_at|date:'Y-m-d' }}">{{ featured_post.created_at|date:"M j, Y" }}</time> &middot; {{ featured_post.reading_time }} min read</p>
       <div>
         {% for tag in featured_post.tags.all %}
           <span class="post-tag">{{ tag.name }}</span>
@@ -212,7 +212,7 @@
       <a href="{% url 'blog_detail' post.slug %}">
         <div class="blog-card-body">
           <h5>{{ post.title }}</h5>
-          <p class="post-meta">{{ post.reading_time }} min read</p>
+          <p class="post-meta"><time datetime="{{ post.created_at|date:'Y-m-d' }}">{{ post.created_at|date:"M j, Y" }}</time> &middot; {{ post.reading_time }} min read</p>
           <div style="margin-bottom: 0.6rem;">
             {% for tag in post.tags.all %}
               <span class="post-tag">{{ tag.name }}</span>
@@ -233,7 +233,7 @@
 <div class="blog-tier1">
   <div class="blog-tier1-inner">
     <p><strong>FDQ Tier 1</strong> takes a pipeline hand with no quality background into a first QC or inspection job. Lesson 1 is free.</p>
-    <a href="{% url 'waitlist' %}#sign-up" class="btn-primary">Watch lesson 1 free</a>
+    <a href="{% url 'waitlist' %}#sign-up" class="btn-primary" data-cta="blog_list">Get lesson 1 free</a>
   </div>
 </div>
 {% endblock %}

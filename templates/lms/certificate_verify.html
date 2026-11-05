@@ -59,8 +59,9 @@
 
 .vd-label {
   font-family: 'Public Sans', sans-serif;
-  font-size: 0.65rem;
-  color: var(--amber);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink-3);
   margin-bottom: 0.2rem;
 }
 
@@ -74,6 +75,8 @@
   color: var(--muted);
   line-height: 1.7;
 }
+.verify-note { font-size: 0.9rem; color: var(--ink-3); margin-top: 1.5rem; }
+.verify-invalid-msg a { color: var(--accent-ink); }
 {% endblock %}
 
 {% block content %}
@@ -104,8 +107,9 @@
     <div class="verify-badge invalid">&#10007;</div>
     <div class="verify-status invalid">Not Found</div>
     <p class="verify-invalid-msg">
-      This certificate could not be verified. The ID may be incorrect or the certificate may not exist.
+      No certificate has this ID. Check it against the certificate, or <a href="{% url 'lms:certificate_lookup' %}">look it up with the holder's last name</a>.
     </p>
   {% endif %}
+  <p class="verify-note">FDQ certificates are issued by Field Driven Quality. They aren't affiliated with, endorsed by or accredited by API, AWS, AMPP, PHMSA or any operator.</p>
 </div>
 {% endblock %}

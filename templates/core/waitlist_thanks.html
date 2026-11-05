@@ -16,26 +16,43 @@
   border-radius: 4px;
   margin: 1.75rem 0 0.6rem;
 }
-.wl-credits { font-size: 0.75rem; color: var(--muted); line-height: 1.6; }
+.wl-credits { font-size: 0.75rem; color: var(--ink-3); line-height: 1.6; }
 .wl-credits a { color: inherit; }
-.wl-card { display: flex; gap: clamp(1.4rem, 4vw, 2.5rem); align-items: flex-start; margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--rule); }
+
+.wl-step { margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--rule); }
+.wl-step h2 { font-weight: 700; font-size: 1.3rem; margin-bottom: 0.4rem; }
+.wl-step > p { font-size: 0.98rem; color: var(--ink-2); line-height: 1.6; margin-bottom: 1rem; max-width: 60ch; }
+
+.wl-trades { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.wl-trades button { font: 500 0.98rem 'Public Sans', sans-serif; color: var(--ink); background: var(--surface); border: 1px solid var(--field); border-radius: 999px; padding: 0.6rem 1rem; min-height: 44px; cursor: pointer; }
+.wl-trades button:hover { border-color: var(--ink); }
+.wl-trade-done { font-weight: 600; color: var(--ink); }
+
+.wl-card { display: flex; gap: clamp(1.4rem, 4vw, 2.5rem); align-items: flex-start; }
 .wl-card > a { flex: 0 0 220px; }
 .wl-card img { display: block; width: 100%; height: auto; border: 1px solid var(--rule-2); background: #fff; }
-.wl-card h2 { font-weight: 700; font-size: 1.3rem; margin-bottom: 0.4rem; }
 .wl-card p { font-size: 0.95rem; color: var(--ink-2); line-height: 1.6; margin-bottom: 1rem; }
 .wl-pages { list-style: none; font-size: 0.92rem; color: var(--ink-2); margin-bottom: 1.4rem; border-top: 1px solid var(--rule); }
 .wl-pages li { display: grid; grid-template-columns: 6.5rem minmax(0, 1fr); gap: 0.75rem; padding: 0.45rem 0; border-bottom: 1px solid var(--rule); }
 .wl-pages b { color: var(--ink); font-weight: 600; }
 @media (max-width: 620px) { .wl-card { flex-direction: column; } .wl-card > a { flex: none; width: 60%; max-width: 240px; } }
+
+.wl-share { display: flex; flex-wrap: wrap; gap: 0.6rem; align-items: center; }
+.wl-share input { flex: 1 1 16rem; min-width: 0; font: 400 0.92rem 'IBM Plex Mono', monospace; color: var(--ink-2); background: var(--surface); border: 1px solid var(--field); border-radius: var(--radius); padding: 0.7rem 0.8rem; }
+.wl-share-status { font-size: 0.9rem; color: var(--ink-2); min-height: 1.4em; }
+
+.wl-next { list-style: none; border-top: 1px solid var(--rule); max-width: 60ch; }
+.wl-next li { padding: 0.6rem 0; border-bottom: 1px solid var(--rule); color: var(--ink-2); font-size: 0.98rem; }
+.wl-next a { color: var(--accent-ink); }
 {% endblock %}
 
 {% block content %}
-<section class="wl-lesson">
+<section class="wl-lesson" id="lesson">
   <p class="page-label">FDQ Tier 1 &middot; Weld mapping &middot; Lesson 01</p>
   <h1>You're on the list.</h1>
-  <p class="page-sub">Here's lesson 1: why weld maps exist. Turn your sound on. I'll email you when Tier 1 opens.</p>
+  <p class="page-sub">Here's lesson 1: why weld maps exist. Turn your sound on.{% if lesson_emailed and signup %} We sent the link to {{ signup.email }} so you can watch it later.{% endif %}</p>
 
-  <video controls playsinline preload="metadata" poster="{% url 'lesson_1_player_poster' %}">
+  <video id="lesson-1" controls playsinline preload="metadata" poster="{% url 'lesson_1_player_poster' %}">
     <source src="{% url 'lesson_1_video' %}" type="video/mp4" />
     <track kind="captions" src="{% url 'lesson_1_captions' %}" srclang="en" label="English" />
     <a href="{% url 'lesson_1_video' %}">Download lesson 1 (MP4)</a>
@@ -46,7 +63,25 @@
     Music: &ldquo;Gustav Sting&rdquo; by Kevin MacLeod (incompetech.com), <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.
   </p>
 
-  <div class="wl-card">
+  {% if signup %}
+    <div class="wl-step" id="trade">
+      {% if signup.trade %}
+        <h2>Thanks.</h2>
+        <p class="wl-trade-done">Noted: {{ signup.get_trade_display }}.</p>
+      {% else %}
+        <h2>One question: what do you do now?</h2>
+        <p>One tap, and you can skip it. It tells us who Tier 1 is reaching.</p>
+        <form class="wl-trades" method="post" action="{% url 'waitlist_trade' %}">
+          {% csrf_token %}
+          {% for value, label in trade_choices %}
+            <button type="submit" name="trade" value="{{ value }}">{{ label }}</button>
+          {% endfor %}
+        </form>
+      {% endif %}
+    </div>
+  {% endif %}
+
+  <div class="wl-step wl-card">
     <a href="{% url 'field_sheet' %}" target="_blank" rel="noopener"><img src="{% url 'field_sheet_preview' %}" alt="Weld Field Sheet FDQ-FRM-0037, filled in for a day on Spread 2" width="880" height="1139" /></a>
     <div>
       <p class="ci-label">Free PDF &middot; FDQ-FRM-0037</p>
@@ -61,5 +96,59 @@
       <a href="{% url 'field_sheet' %}" class="btn-primary" target="_blank" rel="noopener">Open the weld field sheet (PDF)</a>
     </div>
   </div>
+
+  <div class="wl-step">
+    <h2>Know a hand who'd use this?</h2>
+    <p>Send them the link. They get the same free lesson and field sheet.</p>
+    <div class="wl-share">
+      <input id="share-url" type="text" value="{{ share_url }}" readonly aria-label="Link to the Tier 1 page" />
+      <button type="button" class="btn-secondary" id="share-btn">Copy the link</button>
+    </div>
+    <p class="wl-share-status" id="share-status" role="status"></p>
+  </div>
+
+  <div class="wl-step">
+    <h2>What happens next</h2>
+    <ul class="wl-next">
+      <li>Tier 1 opens {% if tier1_opens %}{{ tier1_opens }}{% else %}soon{% endif %}. You'll hear first, by email.</li>
+      <li>You'll get a few emails around the launch and nothing else.{% if waitlist_email_ready %} Each one has a link to leave the list.{% endif %}</li>
+      <li>{% if waitlist_email_ready %}Lost this page? The link in your email opens it again, or <a href="{% url 'waitlist_resend' %}">have it sent again</a>.{% else %}Lost this page? Sign up again with the same email on the <a href="{% url 'waitlist' %}#sign-up">Tier 1 page</a> and it opens right away.{% endif %}</li>
+      <li><a href="{% url 'waitlist' %}#modules">See all 12 Tier 1 modules</a></li>
+    </ul>
+  </div>
 </section>
+{% endblock %}
+
+{% block extra_js %}
+  (() => {
+    const video = document.getElementById('lesson-1');
+    const marks = [25, 50, 75];
+    let played = false;
+    video.addEventListener('play', () => {
+      if (!played) { played = true; fdqTrack('lesson_play'); }
+    });
+    video.addEventListener('timeupdate', () => {
+      if (!video.duration) return;
+      const percent = (video.currentTime / video.duration) * 100;
+      while (marks.length && percent >= marks[0]) fdqTrack('lesson_progress', { percent: marks.shift() });
+    });
+    video.addEventListener('ended', () => fdqTrack('lesson_complete'));
+
+    const input = document.getElementById('share-url');
+    const status = document.getElementById('share-status');
+    document.getElementById('share-btn').addEventListener('click', async () => {
+      fdqTrack('share_copy');
+      if (navigator.share) {
+        try { await navigator.share({ title: 'FDQ Tier 1: free lesson and weld field sheet', url: input.value }); return; } catch (e) {}
+      }
+      try {
+        await navigator.clipboard.writeText(input.value);
+        status.textContent = 'Copied. Paste it in a text or a group chat.';
+      } catch (e) {
+        input.focus();
+        input.select();
+        status.textContent = 'Selected. Copy it from the box.';
+      }
+    });
+  })();
 {% endblock %}

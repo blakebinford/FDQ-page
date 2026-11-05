@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+
+{% block title %}Waitlist funnel | Field Driven Quality{% endblock %}
+
+{% block meta_tags %}<meta name="robots" content="noindex" />{% endblock %}
+
+{% block extra_styles %}
+.fn { max-width: 1160px; margin: 0 auto; padding: clamp(2rem, 5vw, 3rem) clamp(1rem, 4vw, 2.5rem) 4rem; }
+.fn h1 { font-weight: 800; font-size: clamp(1.8rem, 4vw, 2.4rem); margin-bottom: 0.4rem; }
+.fn h2 { font-weight: 700; font-size: 1.15rem; margin: 2.4rem 0 0.7rem; }
+.fn-sub { color: var(--ink-2); margin-bottom: 1.2rem; }
+.fn-range { display: flex; gap: 0.5rem; margin-bottom: 1.5rem; }
+.fn-range a { font-size: 0.92rem; padding: 0.35rem 0.8rem; border: 1px solid var(--rule-2); border-radius: 999px; text-decoration: none; color: var(--ink-2); }
+.fn-range a[aria-current="page"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.fn-totals { display: flex; flex-wrap: wrap; gap: 0.5rem 2rem; color: var(--ink-2); font-size: 0.95rem; }
+.fn-totals b { color: var(--ink); font-family: 'IBM Plex Mono', monospace; }
+.fn-steps { list-style: none; max-width: 46rem; }
+.fn-steps li { display: grid; grid-template-columns: 13rem 1fr 4.5rem; gap: 0.75rem; align-items: center; padding: 0.4rem 0; font-size: 0.95rem; }
+.fn-bar { height: 14px; background: var(--panel); border-radius: 3px; overflow: hidden; }
+.fn-bar span { display: block; height: 100%; background: var(--accent); }
+.fn-num { font-family: 'IBM Plex Mono', monospace; text-align: right; }
+.fn-scroll { overflow-x: auto; }
+.fn table { border-collapse: collapse; width: 100%; font-size: 0.92rem; }
+.fn th { text-align: left; font-weight: 600; color: var(--ink-3); font-size: 0.82rem; padding: 0.4rem 0.8rem 0.4rem 0; border-bottom: 1px solid var(--rule-2); white-space: nowrap; }
+.fn td { padding: 0.45rem 0.8rem 0.45rem 0; border-bottom: 1px solid var(--rule); vertical-align: top; }
+.fn td.n { font-family: 'IBM Plex Mono', monospace; text-align: right; }
+.fn-note { font-size: 0.88rem; color: var(--ink-3); margin-top: 0.6rem; max-width: 60ch; }
+{% endblock %}
+
+{% block content %}
+<section class="fn">
+  <h1>Waitlist funnel</h1>
+  <p class="fn-sub">Unique visitors, from first-party events only. Bots and link-preview crawlers aren't counted.</p>
+  <nav class="fn-range" aria-label="Date range">
+    <a href="?days=7"{% if days == 7 %} aria-current="page"{% endif %}>7 days</a>
+    <a href="?days=30"{% if days == 30 %} aria-current="page"{% endif %}>30 days</a>
+    <a href="?days=90"{% if days == 90 %} aria-current="page"{% endif %}>90 days</a>
+  </nav>
+  <div class="fn-totals">
+    <span>On the list now: <b>{{ signup_total }}</b></span>
+    <span>New in range: <b>{{ signups_in_range }}</b></span>
+    <span>Opened the email link: <b>{{ confirmed_in_range }}</b></span>
+    <span>Left the list: <b>{{ unsubscribed_total }}</b></span>
+    <span>Form errors / submits: <b>{{ errors }} / {{ submits }}</b></span>
+    <span>Came through the Facebook or Instagram app: <b>{{ in_app }}</b></span>
+  </div>
+
+  <h2>Steps</h2>
+  <ol class="fn-steps">
+    {% for label, count, share in steps %}
+      <li><span>{{ label }}</span><span class="fn-bar"><span style="width: {{ share }}%"></span></span><span class="fn-num">{{ count }}</span></li>
+    {% endfor %}
+  </ol>
+  <p class="fn-note">Each bar is a share of everyone who visited. Visits before analytics was added on the day it went live aren't counted.</p>
+
+  <h2>By campaign (first visit)</h2>
+  <div class="fn-scroll">
+    <table>
+      <thead><tr><th>Campaign (source)</th><th>Visitors</th><th>Signed up</th><th>Rate</th></tr></thead>
+      <tbody>
+        {% for name, visitors, signed, rate in by_campaign %}
+          <tr><td>{{ name }}</td><td class="n">{{ visitors }}</td><td class="n">{{ signed }}</td><td class="n">{{ rate }}%</td></tr>
+        {% empty %}
+          <tr><td colspan="4">No visits in this range yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <h2>By device (first visit)</h2>
+  <div class="fn-scroll">
+    <table>
+      <thead><tr><th>Device</th><th>Visitors</th><th>Signed up</th><th>Rate</th></tr></thead>
+      <tbody>
+        {% for name, visitors, signed, rate in by_device %}
+          <tr><td>{{ name }}</td><td class="n">{{ visitors }}</td><td class="n">{{ signed }}</td><td class="n">{{ rate }}%</td></tr>
+        {% empty %}
+          <tr><td colspan="4">No visits in this range yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <h2>Latest signups</h2>
+  <div class="fn-scroll">
+    <table>
+      <thead><tr><th>Signed up</th><th>Email</th><th>Trade</th><th>Source</th><th>Campaign</th><th>Email link</th></tr></thead>
+      <tbody>
+        {% for s in latest %}
+          <tr>
+            <td>{{ s.created_at|date:"M j, g:i a" }}</td>
+            <td>{{ s.email }}{% if s.unsubscribed_at %} (left){% endif %}</td>
+            <td>{{ s.get_trade_display|default:"" }}</td>
+            <td>{{ s.utm_source|default:s.referrer_host }}</td>
+            <td>{{ s.utm_campaign }}</td>
+            <td>{% if s.confirmed_at %}opened{% elif s.lesson_email_sent_at %}sent{% endif %}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="6">No signups yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}404 — Page Not Found | Field Driven Quality{% endblock %}
+{% block title %}Page not found | Field Driven Quality{% endblock %}
 
 {% block extra_styles %}
 .error-number {
@@ -21,8 +21,8 @@
     <h1>That page isn't here.</h1>
     <p class="center-sub">The page you're looking for doesn't exist or has been moved.</p>
     <div class="btn-row">
-      <a href="{% url 'home' %}" class="btn-primary">Go Home</a>
-      <a href="{% url 'lms:tier_list' %}" class="btn-secondary">View Certifications</a>
+      <a href="{% url 'waitlist' %}#sign-up" class="btn-primary" data-cta="not_found">Get lesson 1 free</a>
+      <a href="{% url 'home' %}" class="btn-secondary">Go to the home page</a>
     </div>
   </div>
 </div>

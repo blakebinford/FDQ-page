@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import (
@@ -7,7 +8,7 @@ from django.contrib.auth.views import (
     PasswordResetCompleteView,
 )
 from django.shortcuts import redirect, render
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 
 from .models import CERTIFICATION_CHOICES, WorkHistory
 
@@ -37,6 +38,9 @@ def logout_view(request):
 def register_view(request):
     if request.user.is_authenticated:
         return redirect('lms:dashboard')
+    if not settings.ACCOUNT_SIGNUP_OPEN:
+        # Before Tier 1 opens the only thing to join is the list.
+        return redirect(reverse('waitlist') + '#sign-up')
     if request.method == 'POST':
         first_name = request.POST.get('first_name', '').strip()
         last_name = request.POST.get('last_name', '').strip()

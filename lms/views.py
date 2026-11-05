@@ -7,6 +7,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import SetPasswordForm
 from django.contrib.auth.tokens import default_token_generator
+from django.core.exceptions import ValidationError
 from django.core.mail import send_mail
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -1032,6 +1033,25 @@ def certificate_pdf(request, tier_slug):
     return response
 
 
+def certificate_lookup(request):
+    """Check a certificate by its ID and the holder's last name, the two things
+    printed on it, so an employer can check one without the full link."""
+    cert_id = request.GET.get('id', '').strip()
+    last_name = request.GET.get('last_name', '').strip()
+    if cert_id and last_name:
+        try:
+            certificate = Certificate.objects.select_related('user').get(certificate_id=cert_id)
+        except (Certificate.DoesNotExist, ValueError, ValidationError):
+            certificate = None
+        if certificate and certificate.user.last_name.strip().lower() == last_name.lower():
+            return redirect('lms:certificate_verify', certificate_number=certificate.certificate_id)
+    return render(request, 'lms/certificate_lookup.html', {
+        'searched': bool(cert_id or last_name),
+        'cert_id': cert_id,
+        'last_name': last_name,
+    })
+
+
 def certificate_verify(request, certificate_number):
     """Public certificate verification page."""
     certificate = None
@@ -1041,7 +1061,7 @@ def certificate_verify(request, certificate_number):
             certificate_id=certificate_number
         )
         valid = True
-    except (Certificate.DoesNotExist, ValueError):
+    except (Certificate.DoesNotExist, ValueError, ValidationError):
         pass
 
     return render(request, 'lms/certificate_verify.html', {

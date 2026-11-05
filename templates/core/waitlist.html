@@ -3,49 +3,71 @@
 {% block title %}FDQ Tier 1 | Field Driven Quality{% endblock %}
 
 {% block meta_tags %}
-<meta name="description" content="FDQ Tier 1 takes someone with no quality background into a first QC job on a pipeline or station job: 12 modules, from how a job runs to running a QC day. Get on the list for lesson 1 and the weld field sheet free." />
-<meta property="og:title" content="FDQ Tier 1: from the crew to the quality side" />
-<meta property="og:description" content="Get on the list for lesson 1 of weld mapping, why weld maps exist, and the weld field sheet, free." />
+<meta name="description" content="FDQ Tier 1 is an online course and certification for pipeline hands with no quality background: 12 modules, from how a job runs to running a QC day. Get lesson 1 and the weld field sheet free." />
+<meta property="og:title" content="FDQ Tier 1: from the crew to your first QC job" />
+<meta property="og:description" content="Get lesson 1 of weld mapping, why weld maps exist, and the weld field sheet, free." />
 <meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{% url 'lesson_1_poster' %}" />
 {% endblock %}
 
 {% block extra_styles %}
+/* On a phone the order is intro, form, facts, so the field and button sit in the first screen. */
 .wl-hero {
   display: grid;
   grid-template-columns: 1.15fr 1fr;
-  gap: clamp(2rem, 5vw, 4rem);
+  grid-template-areas: "intro box" "facts box";
+  gap: 1.5rem clamp(2rem, 5vw, 4rem);
   align-items: start;
-  padding-top: clamp(2rem, 6vw, 4rem);
+  padding-top: clamp(1.5rem, 6vw, 4rem);
   padding-bottom: clamp(2.5rem, 6vw, 4rem);
 }
-@media (max-width: 860px) { .wl-hero { grid-template-columns: 1fr; } }
-.wl-hero > div { min-width: 0; }
-.wl-hero h1 { font-weight: 800; font-size: clamp(2.1rem, 5vw, 3.4rem); line-height: 1.06; margin-bottom: 1rem; }
-.wl-hero .page-sub { margin-bottom: 1.5rem; }
+.wl-intro { grid-area: intro; min-width: 0; }
+.wl-box { grid-area: box; min-width: 0; }
+.wl-facts { grid-area: facts; min-width: 0; }
+@media (max-width: 860px) {
+  .wl-hero { grid-template-columns: 1fr; grid-template-areas: "intro" "box" "facts"; gap: 1.25rem; }
+}
+.wl-hero h1 { font-weight: 800; font-size: clamp(2.1rem, 5vw, 3.4rem); line-height: 1.06; margin-bottom: 0.9rem; }
+.wl-intro .page-label { margin-bottom: 0.6rem; }
 .wl-facts { list-style: none; color: var(--ink-2); font-size: 1rem; }
 .wl-facts li { padding: 0.55rem 0; border-top: 1px solid var(--rule); }
 .wl-facts li:last-child { border-bottom: 1px solid var(--rule); }
 .wl-facts b { color: var(--ink); font-weight: 600; }
 
-.wl-gets { list-style: none; display: flex; flex-direction: column; gap: 0.75rem; margin: 0.35rem 0 1.4rem; }
-.wl-gets li { display: grid; grid-template-columns: 112px 1fr; gap: 0.9rem; align-items: center; }
-.wl-gets img { display: block; width: 112px; height: 63px; object-fit: cover; object-position: top; border-radius: 3px; border: 1px solid var(--rule); background: #fff; }
-.wl-gets b { display: block; font-weight: 700; line-height: 1.25; }
-.wl-gets span { display: block; font-size: 0.9rem; color: var(--ink-3); }
-.wl-form { display: flex; flex-direction: column; gap: 1rem; }
-.wl-form .btn-primary { width: 100%; font-size: 1.05rem; }
-.wl-optional { font-weight: 400; color: var(--ink-3); }
-.wl-error { font-size: 0.9rem; color: var(--danger); }
-.wl-fine { font-size: 0.88rem; color: var(--ink-3); margin-top: 1rem; }
+.wl-box { padding: clamp(1.1rem, 3vw, 2rem); }
+.wl-form { display: flex; flex-direction: column; gap: 0.9rem; }
+.wl-form .btn-primary { width: 100%; font-size: 1.05rem; min-height: 52px; }
+.wl-form .btn-primary[disabled] { opacity: 0.7; cursor: progress; }
+.wl-error { font-size: 0.92rem; font-weight: 600; color: var(--danger); }
+.wl-hint { font-size: 0.92rem; color: var(--ink-2); }
+.wl-hint button { font: inherit; font-weight: 600; color: var(--accent-ink); background: none; border: none; padding: 0.35rem 0; text-decoration: underline; cursor: pointer; }
+.wl-fine { font-size: 0.86rem; color: var(--ink-3); line-height: 1.5; }
+.wl-fine a { color: var(--ink-2); }
 .wl-trap { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+.wl-gets-label { margin: 1.4rem 0 0.5rem; padding-top: 1.1rem; border-top: 1px solid var(--rule); }
+.wl-gets { list-style: none; display: flex; flex-direction: column; gap: 0.75rem; }
+.wl-gets li { display: grid; grid-template-columns: 96px 1fr; gap: 0.85rem; align-items: center; }
+.wl-gets img { display: block; width: 96px; height: 54px; object-fit: cover; object-position: top; border-radius: 3px; border: 1px solid var(--rule); background: #fff; }
+.wl-gets b { display: block; font-weight: 700; line-height: 1.25; font-size: 0.98rem; }
+.wl-gets span { display: block; font-size: 0.88rem; color: var(--ink-3); }
 
 .wl-block { padding-top: clamp(2.5rem, 6vw, 4rem); padding-bottom: clamp(2.5rem, 6vw, 4rem); }
-.wl-block > h2 { font-weight: 800; font-size: clamp(1.6rem, 3.2vw, 2.2rem); line-height: 1.15; margin-bottom: 0.75rem; }
+.wl-block > h2, .wl-block h2.wl-h2 { font-weight: 800; font-size: clamp(1.6rem, 3.2vw, 2.2rem); line-height: 1.15; margin-bottom: 0.75rem; }
 .wl-block .intro { color: var(--ink-2); max-width: 64ch; margin-bottom: 1rem; }
 .band { background: var(--surface); border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
 
+.wl-how { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr)); gap: 0; border-top: 1px solid var(--rule); margin-top: 1.5rem; }
+.wl-how div { padding: 1.1rem 1.5rem 1.2rem 0; border-bottom: 1px solid var(--rule); }
+.wl-how dt { font-size: 0.85rem; font-weight: 700; color: var(--ink-3); margin-bottom: 0.3rem; }
+.wl-how dd { color: var(--ink); max-width: 40ch; font-size: 1rem; }
+.wl-how a { color: var(--accent-ink); }
+
+.wl-fit { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(1.5rem, 5vw, 4rem); margin-top: 2.5rem; }
+@media (max-width: 760px) { .wl-fit { grid-template-columns: 1fr; } }
+.wl-fit h3 { font-size: 1.15rem; font-weight: 700; margin-bottom: 0.5rem; }
+.wl-fit p { color: var(--ink-2); max-width: 58ch; }
+
 .wl-index { columns: 3 14rem; column-gap: 2rem; list-style: none; margin: 1.75rem 0 0.5rem; font-size: 0.95rem; }
-.wl-index li { break-inside: avoid; padding: 0.3rem 0; }
+.wl-index li { break-inside: avoid; padding: 0.4rem 0; }
 .wl-index a { text-decoration: none; color: var(--ink-2); }
 .wl-index a:hover { color: var(--ink); text-decoration: underline; }
 .wl-index span { display: inline-block; width: 1.8rem; font-weight: 700; color: var(--ink-3); }
@@ -65,56 +87,53 @@
 .mod-ex h4 { color: var(--ink); }
 .mod-ex a { color: var(--accent-ink); }
 
+.wl-cert { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: clamp(1.5rem, 5vw, 4rem); align-items: start; }
+@media (max-width: 760px) { .wl-cert { grid-template-columns: 1fr; } }
+.wl-cert p { color: var(--ink-2); max-width: 60ch; margin-bottom: 0.9rem; }
+.wl-cert a { color: var(--accent-ink); }
+.wl-issuer { background: var(--panel); border: 1px solid var(--rule); border-radius: var(--radius); padding: 1rem 1.2rem; color: var(--ink-2); }
+.wl-issuer b { display: block; color: var(--ink); margin-bottom: 0.25rem; }
+
 .wl-limits { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(2rem, 5vw, 4rem); }
 @media (max-width: 760px) { .wl-limits { grid-template-columns: 1fr; } }
 .wl-limits h3 { font-size: 1.15rem; font-weight: 700; margin-bottom: 0.6rem; }
 .wl-limits p { color: var(--ink-2); margin-bottom: 0.9rem; }
 .wl-limits a { color: var(--accent-ink); }
+
+.wl-faq { border-top: 1px solid var(--rule); margin-top: 1.25rem; max-width: 50rem; }
+.wl-faq details { border-bottom: 1px solid var(--rule); }
+.wl-faq summary { cursor: pointer; font-weight: 700; padding: 1rem 2rem 1rem 0; list-style: none; position: relative; }
+.wl-faq summary::-webkit-details-marker { display: none; }
+.wl-faq summary::after { content: "+"; position: absolute; right: 0.25rem; top: 0.9rem; font-weight: 400; font-size: 1.3rem; color: var(--ink-3); }
+.wl-faq details[open] summary::after { content: "\2212"; }
+.wl-faq details p { color: var(--ink-2); padding: 0 0 1.1rem; max-width: 62ch; }
+.wl-faq a { color: var(--accent-ink); }
+
 .wl-again { display: flex; flex-wrap: wrap; gap: 1rem 2rem; align-items: center; justify-content: space-between; margin-top: clamp(2.5rem, 6vw, 3.5rem); padding-top: 2rem; border-top: 1px solid var(--rule); }
 .wl-again p { font-weight: 700; font-size: 1.2rem; }
+
+/* Phones only: a way back to the form from anywhere on this long page. */
+.wl-sticky { position: fixed; left: 0; right: 0; bottom: 0; z-index: 90; background: rgba(251, 250, 247, 0.97); border-top: 1px solid var(--rule); padding: 0.6rem clamp(1rem, 4vw, 2.5rem) calc(0.6rem + env(safe-area-inset-bottom, 0px)); }
+.wl-sticky .btn-primary { display: block; width: 100%; }
+@media (min-width: 761px) { .wl-sticky { display: none !important; } }
 {% endblock %}
 
 {% block content %}
 <section class="wrap wl-hero">
-  <div>
-    <p class="page-label">FDQ Tier 1 &middot; Opening soon</p>
-    <h1>The best quality hands came up through the crew.</h1>
-    <p class="page-sub">Tier 1 takes someone with no quality background into a first quality job: contractor QC tech or owner-side junior inspector, on the right-of-way and inside the fence. Get on the list and start with the first lesson now.</p>
-    <ul class="wl-facts">
-      <li><b>12 modules and 228 skills</b>, from how a job runs to running a QC day</li>
-      <li><b>A gate exercise</b> at the end of every module, worked on sample job paperwork</li>
-      <li><b>Online</b>, at your own pace</li>
-      <li><b>Gas and liquid lines</b> and their stations, under 49 CFR 192 and 195</li>
-    </ul>
+  <div class="wl-intro">
+    <p class="page-label">FDQ Tier 1 &middot; {% if tier1_opens %}Opens {{ tier1_opens }}{% else %}Opening soon{% endif %}</p>
+    <h1>From the crew to your first QC job.</h1>
+    <p class="page-sub">An online course and certification for pipeline hands with no quality background. Get lesson 1 and the weld field sheet free now.</p>
   </div>
 
-  <div class="aside-box" id="sign-up">
-    <p class="ci-label">Free when you get on the list</p>
-    <ul class="wl-gets">
-      <li>
-        <img src="{% url 'lesson_1_poster' %}" alt="" width="1280" height="720" />
-        <div><b>Lesson 1: Why weld maps exist</b><span>Video, 4:35</span></div>
-      </li>
-      <li>
-        <img src="{% url 'field_sheet_preview' %}" alt="" width="880" height="1139" />
-        <div><b>Weld field sheet</b><span>PDF to print, with filled-in examples</span></div>
-      </li>
-    </ul>
-
-    <form class="wl-form" action="{% url 'waitlist' %}" method="POST" novalidate>
+  <div class="aside-box wl-box" id="sign-up">
+    <form class="wl-form" id="wl-form" action="{% url 'waitlist' %}#sign-up" method="POST" novalidate>
       {% csrf_token %}
       <div class="form-group">
         <label for="wl-email">Email</label>
-        <input id="wl-email" type="email" name="email" value="{{ form.email.value|default_if_none:'' }}" placeholder="you@example.com" autocomplete="email" required />
-        {% if form.email.errors %}<p class="wl-error">Enter an email address that can get mail.</p>{% endif %}
-      </div>
-      <div class="form-group">
-        <label for="wl-trade">What do you do now? <span class="wl-optional">(optional)</span></label>
-        <select id="wl-trade" name="trade">
-          {% for value, label in form.fields.trade.choices %}
-            <option value="{{ value }}"{% if form.trade.value == value %} selected{% endif %}>{{ label }}</option>
-          {% endfor %}
-        </select>
+        <input id="wl-email" type="email" name="email" value="{{ form.email.value|default_if_none:'' }}" placeholder="you@example.com" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false" enterkeyhint="go" required{% if form.email.errors %} aria-invalid="true" aria-describedby="wl-email-error" autofocus{% endif %} />
+        <p class="wl-error" id="wl-email-error" role="alert"{% if not form.email.errors %} hidden{% endif %}>Enter an email address that can get mail.</p>
+        <p class="wl-hint" id="wl-email-hint" hidden>Did you mean <button type="button" id="wl-email-fix"></button>?</p>
       </div>
       <div class="wl-trap" aria-hidden="true">
         <label for="wl-website">Leave this empty</label>
@@ -125,9 +144,50 @@
       <input type="hidden" name="utm_campaign" value="{{ form.utm_campaign.value|default_if_none:'' }}" />
       <input type="hidden" name="utm_content" value="{{ form.utm_content.value|default_if_none:'' }}" />
       <input type="hidden" name="referrer_host" value="{{ form.referrer_host.value|default_if_none:'' }}" />
-      <button type="submit" class="btn-primary">Get lesson 1 and the sheet</button>
+      <button type="submit" class="btn-primary" id="wl-submit">Get lesson 1 free</button>
+      <p class="wl-fine">Plays on the next page{% if waitlist_email_ready %}, and we email you the link{% endif %}. Tier 1 isn't open yet: this puts you on the list. It doesn't enroll you or cost anything. <a href="{% url 'privacy' %}">Privacy</a></p>
     </form>
-    <p class="wl-fine">Both open right away. After that, a few emails around the Tier 1 launch and nothing else. Reply to any of them to come off the list.</p>
+    <p class="ci-label wl-gets-label">Free when you get on the list</p>
+    <ul class="wl-gets">
+      <li>
+        <img src="{% url 'lesson_1_poster' %}" alt="" width="1280" height="720" />
+        <div><b>Lesson 1: Why weld maps exist</b><span>Video, 4:35</span></div>
+      </li>
+      <li>
+        <img src="{% url 'field_sheet_preview' %}" alt="" width="880" height="1139" />
+        <div><b>Weld field sheet</b><span>PDF to print, with filled-in examples</span></div>
+      </li>
+    </ul>
+  </div>
+
+  <ul class="wl-facts">
+    <li><b>12 modules and 228 skills</b>, from how a job runs to running a QC day</li>
+    <li><b>A gate exercise</b> at the end of every module, worked on sample job paperwork</li>
+    <li><b>Online</b>, at your own pace</li>
+    <li><b>Gas and liquid lines</b> and their stations, under 49 CFR 192 and 195</li>
+  </ul>
+</section>
+
+<section class="band" id="how-it-works">
+  <div class="wrap wl-block">
+    <h2>How Tier 1 works</h2>
+    <dl class="wl-how">
+      <div><dt>Format</dt><dd>Online and at your own pace, on a phone or a computer. Twelve modules.</dd></div>
+      <div><dt>Proving it</dt><dd>Every module ends with a gate exercise: sample job paperwork with problems planted in it. A final exam comes after the last module. The passing score goes on this page before Tier 1 opens.</dd></div>
+      <div><dt>Certificate</dt><dd>The FDQ Tier 1 certificate, a PDF with its own ID that anyone can check on this site. <a href="#certificate">What it is and isn't</a></dd></div>
+      <div><dt>Price</dt><dd>Goes on this page before Tier 1 opens. Getting on the list is free and doesn't commit you to anything.</dd></div>
+      <div><dt>Opens</dt><dd>{% if tier1_opens %}{{ tier1_opens }}.{% else %}Soon.{% endif %} People on the list hear first.</dd></div>
+    </dl>
+    <div class="wl-fit">
+      <div>
+        <h3>Who it's for</h3>
+        <p>Welders, helpers, operators, laborers and foremen with field time who want the quality side of the job. You don't need a quality background.</p>
+      </div>
+      <div>
+        <h3>Who it isn't for</h3>
+        <p>Anyone who needs a cert to accept or reject work. Tier 1 doesn't replace a CWI, API 1169, AMPP or NDE cert, and it doesn't teach you to sign for work that needs one. It covers the ground those certs build on.</p>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -376,22 +436,179 @@
   </div>
 </section>
 
-<section class="wrap wl-block">
-  <div class="wl-limits">
+<section class="wrap wl-block" id="certificate">
+  <div class="wl-cert">
     <div>
-      <h3>Where Tier 1 stops</h3>
-      <p>Tier 1 teaches you to spot a problem and get it on the record. It doesn't replace a CWI, API 1169, AMPP or NDE cert, and it won't teach you to accept work that needs one of them to sign. Every module that touches one of those certs says where the line is.</p>
-      <p>Where a requirement changes from job to job, you learn where to find it in the project documents.</p>
+      <h2 class="wl-h2">The certificate</h2>
+      <p>Pass the gate exercises and the final exam and you get the FDQ Tier 1 certificate: a PDF with your name, the date it was issued and a certificate ID.</p>
+      <p>Anyone can check a certificate on this site, an employer included, with its ID and the holder's last name. <a href="{% url 'lms:certificate_lookup' %}">Check a certificate</a></p>
     </div>
-    <div>
-      <h3>Who built it</h3>
-      <p>I started as a field inspector and have worked quality on pipeline, LNG, compressor station and industrial jobs. Tier 1 is for the hand who already knows what good work looks like and wants the quality side next.</p>
-      <p><a href="{% url 'about' %}">More about FDQ</a></p>
-    </div>
-  </div>
-  <div class="wl-again">
-    <p>Start with lesson 1 and the weld field sheet.</p>
-    <a href="#sign-up" class="btn-primary">Get on the list</a>
+    <p class="wl-issuer"><b>Is it accredited?</b>No. The FDQ Tier 1 certificate is issued by Field Driven Quality. It isn't affiliated with, endorsed by or accredited by API, AWS, AMPP, PHMSA or any operator. It shows you finished the course and passed its assessments.</p>
   </div>
 </section>
+
+<section class="band">
+  <div class="wrap wl-block">
+    <div class="wl-limits">
+      <div>
+        <h3>Where Tier 1 stops</h3>
+        <p>Tier 1 teaches you to spot a problem and get it on the record. It doesn't replace a CWI, API 1169, AMPP or NDE cert, and it won't teach you to accept work that needs one of them to sign. Every module that touches one of those certs says where the line is.</p>
+        <p>Where a requirement changes from job to job, you learn where to find it in the project documents.</p>
+      </div>
+      <div>
+        <h3>Who built it</h3>
+        <p>I started as a field inspector and have worked quality on pipeline, LNG, compressor station and industrial jobs. The best quality hands I've worked with came up through the crew. Tier 1 is for the hand who already knows what good work looks like and wants the quality side next.</p>
+        <p><a href="{% url 'about' %}">More about FDQ</a></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="wrap wl-block" id="questions">
+  <h2>Questions</h2>
+  <div class="wl-faq">
+    <details>
+      <summary>What does Tier 1 cost?</summary>
+      <p>The price goes on this page before Tier 1 opens. Getting on the list is free and doesn't commit you to anything.</p>
+    </details>
+    <details>
+      <summary>When does it open?</summary>
+      <p>{% if tier1_opens %}{{ tier1_opens }}.{% else %}Soon.{% endif %} Everyone on the list gets an email when it does.</p>
+    </details>
+    <details>
+      <summary>Do I need a CWI or API 1169 first?</summary>
+      <p>No. Tier 1 is for hands with no quality background. It doesn't replace those certs either. It teaches the work of a first QC or junior inspector job, and every module says where a certified inspector takes over.</p>
+    </details>
+    <details>
+      <summary>Is the certificate accredited?</summary>
+      <p>No. It's issued by Field Driven Quality and isn't affiliated with, endorsed by or accredited by API, AWS, AMPP, PHMSA or any operator. <a href="#certificate">More about the certificate</a></p>
+    </details>
+    <details>
+      <summary>Can I do it on my phone?</summary>
+      <p>Yes. Tier 1 is online and the lessons play on a phone. Lesson 1 is a good test: it plays on the next page after you sign up.</p>
+    </details>
+    <details>
+      <summary>Is it in Spanish?</summary>
+      <p>Tier 1 is in English.</p>
+    </details>
+    <details>
+      <summary>Can my company put a crew through it?</summary>
+      <p>Tell us the job, the timeline and how many people on the <a href="{% url 'contact' %}">contact page</a>.</p>
+    </details>
+    <details>
+      <summary>What happens to my email?</summary>
+      <p>It's used to send lesson 1 and a few emails around the Tier 1 launch. It isn't sold, or shared with anyone for their marketing. {% if waitlist_email_ready %}Every email has a link to leave the list. {% endif %}The <a href="{% url 'privacy' %}">privacy notice</a> has the details.</p>
+    </details>
+    <details>
+      <summary>I lost the lesson. How do I get it back?</summary>
+      {% if waitlist_email_ready %}
+        <p>Open the link in the email we sent, or <a href="{% url 'waitlist_resend' %}">have it sent again</a>.</p>
+      {% else %}
+        <p>Sign up again with the same email at the top of this page. It plays again right away, and you won't be added to the list twice.</p>
+      {% endif %}
+    </details>
+  </div>
+
+  <div class="wl-again">
+    <p>Start with lesson 1 and the weld field sheet.</p>
+    <a href="#sign-up" class="btn-primary" data-cta="tier1_bottom">Get lesson 1 free</a>
+  </div>
+</section>
+
+<div class="wl-sticky" id="wl-sticky" hidden>
+  <a href="#sign-up" class="btn-primary" data-cta="tier1_sticky">Get lesson 1 free</a>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+  (() => {
+    const form = document.getElementById('wl-form');
+    const email = document.getElementById('wl-email');
+    const error = document.getElementById('wl-email-error');
+    const hint = document.getElementById('wl-email-hint');
+    const fix = document.getElementById('wl-email-fix');
+    const submit = document.getElementById('wl-submit');
+    const box = document.getElementById('sign-up');
+    const sticky = document.getElementById('wl-sticky');
+
+    // Same rule as the server: something@domain.tld
+    const looksValid = (value) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value.trim());
+    const typos = {
+      'gmial.com': 'gmail.com', 'gmal.com': 'gmail.com', 'gamil.com': 'gmail.com', 'gmai.com': 'gmail.com',
+      'gnail.com': 'gmail.com', 'gmail.co': 'gmail.com', 'gmail.con': 'gmail.com', 'gmail.cm': 'gmail.com',
+      'yahooo.com': 'yahoo.com', 'yaho.com': 'yahoo.com', 'yahoo.co': 'yahoo.com', 'yahoo.con': 'yahoo.com',
+      'hotmial.com': 'hotmail.com', 'hotmal.com': 'hotmail.com', 'hotmail.co': 'hotmail.com', 'hotmail.con': 'hotmail.com',
+      'outlok.com': 'outlook.com', 'outllok.com': 'outlook.com', 'outlook.co': 'outlook.com',
+      'iclod.com': 'icloud.com', 'icloud.co': 'icloud.com', 'aol.co': 'aol.com',
+    };
+
+    const showError = (show) => {
+      error.hidden = !show;
+      if (show) {
+        email.setAttribute('aria-invalid', 'true');
+        email.setAttribute('aria-describedby', 'wl-email-error');
+      } else {
+        email.removeAttribute('aria-invalid');
+        if (email.getAttribute('aria-describedby') === 'wl-email-error') email.removeAttribute('aria-describedby');
+      }
+    };
+    const checkTypo = () => {
+      const [name, domain] = email.value.trim().toLowerCase().split('@');
+      const better = domain && typos[domain];
+      hint.hidden = !better;
+      if (better) fix.textContent = `${name}@${better}`;
+    };
+
+    // Errors show when the visitor leaves the field or submits, never while typing.
+    email.addEventListener('blur', () => {
+      if (email.value.trim()) showError(!looksValid(email.value));
+      checkTypo();
+    });
+    let started = false;
+    email.addEventListener('input', () => {
+      if (!started) { started = true; fdqTrack('form_start'); }
+      if (!error.hidden && looksValid(email.value)) showError(false);
+    });
+    fix.addEventListener('click', () => {
+      email.value = fix.textContent;
+      hint.hidden = true;
+      showError(false);
+      email.focus();
+    });
+    form.addEventListener('submit', (event) => {
+      if (!looksValid(email.value)) {
+        event.preventDefault();
+        showError(true);
+        // After the tap has finished moving focus to the button.
+        setTimeout(() => email.focus(), 0);
+        return;
+      }
+      fdqTrack('form_submit');
+      submit.disabled = true;
+      submit.textContent = 'Sending…';
+    });
+    // Coming back with the Back button shouldn't leave the button stuck.
+    window.addEventListener('pageshow', () => {
+      submit.disabled = false;
+      submit.textContent = 'Get lesson 1 free';
+    });
+
+    if ('IntersectionObserver' in window) {
+      let seen = false;
+      new IntersectionObserver((entries) => {
+        const entry = entries[0];
+        if (entry.isIntersecting && !seen) { seen = true; fdqTrack('signup_view'); }
+        // Show the phone bar only once the box has scrolled up out of view.
+        const past = !entry.isIntersecting && entry.boundingClientRect.top < 0;
+        sticky.hidden = !past;
+        document.documentElement.style.scrollPaddingBottom = past ? '84px' : '';
+        document.body.style.paddingBottom = past ? '76px' : '';
+      }, { threshold: 0.25 }).observe(box);
+    }
+    sticky.querySelector('a').addEventListener('click', (event) => {
+      event.preventDefault();
+      box.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      setTimeout(() => email.focus({ preventScroll: true }), 450);
+    });
+  })();
 {% endblock %}

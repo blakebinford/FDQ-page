@@ -13,6 +13,7 @@ urlpatterns = [
     path('<slug:tier_slug>/quiz/results/', views.quiz_results, name='quiz_results'),
     path('<slug:tier_slug>/certificate/', views.certificate_view, name='certificate'),
     path('<slug:tier_slug>/certificate/pdf/', views.certificate_pdf, name='certificate_pdf'),
+    path('verify/', views.certificate_lookup, name='certificate_lookup'),
     path('verify/<str:certificate_number>/', views.certificate_verify, name='certificate_verify'),
     path('checkout/success/', views.checkout_success, name='checkout_success'),
     path('checkout/cancel/', views.checkout_cancel, name='checkout_cancel'),

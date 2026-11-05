@@ -8,9 +8,16 @@ from django.urls import reverse
 from django.core.mail import send_mail
 from django.conf import settings
 from django.contrib import messages
-from django.http import FileResponse, HttpResponse, StreamingHttpResponse
+from django.http import FileResponse, Http404, HttpResponse, StreamingHttpResponse
+from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
 
 from .forms import ContactForm, WaitlistForm, SOURCE_FIELDS
+from .analytics import record
+from .emails import (
+    LESSON_SALT, UNSUBSCRIBE_SALT, send_lesson_email, signup_from_token, waitlist_email_ready,
+)
 from .models import WaitlistSignup
 
 logger = logging.getLogger(__name__)
@@ -26,9 +33,12 @@ LESSON_1_POSTER = FILES_DIR / 'lesson-1-poster.jpg'
 # The player shows a frame from inside the lesson: the opening is the same title
 # card as LESSON_1_POSTER, so a started video would look like it hadn't.
 LESSON_1_PLAYER_POSTER = FILES_DIR / 'lesson-1-player.jpg'
+FAVICON = FILES_DIR / 'favicon.ico'
 
 # Set on signup; the thanks page (and lesson 1 on it) is for people who signed up.
 WAITLIST_SESSION_KEY = 'waitlist_signed_up'
+WAITLIST_SIGNUP_KEY = 'waitlist_signup_id'
+LESSON_EMAILED_KEY = 'waitlist_lesson_emailed'
 
 
 def custom_404(request, exception=None):
@@ -77,7 +87,7 @@ def contact_view(request):
                 )
             except Exception:
                 logger.exception("Failed to send contact form email")
-                messages.error(request, "Something went wrong sending your message. Please try again or email us directly at binford.blake@gmail.com.")
+                messages.error(request, "Something went wrong sending your message. Please try again in a few minutes.")
                 return render(request, 'core/contact.html', {'form': form})
 
             return redirect('contact_thanks')
@@ -104,25 +114,109 @@ def waitlist(request):
             # A filled honeypot gets the same thanks page but nothing is saved.
             if not data['website']:
                 # First touch wins: a repeat signup keeps its original source.
-                WaitlistSignup.objects.get_or_create(
+                signup, created = WaitlistSignup.objects.get_or_create(
                     email=data['email'],
                     defaults={'trade': data['trade'], **{key: data[key] for key in SOURCE_FIELDS}},
                 )
+                if signup.unsubscribed_at:
+                    # Signing up again is asking to be back on the list.
+                    signup.unsubscribed_at = None
+                    signup.save(update_fields=['unsubscribed_at'])
                 request.session[WAITLIST_SESSION_KEY] = True
-            return redirect('waitlist_thanks')
+                request.session[WAITLIST_SIGNUP_KEY] = signup.pk
+                request.session[LESSON_EMAILED_KEY] = send_lesson_email(request, signup) or bool(signup.lesson_email_sent_at)
+                record(request, 'signup_success', is_new=created, trade=signup.trade,
+                       utm_campaign=signup.utm_campaign, utm_source=signup.utm_source)
+            # Its own fragment, or the browser carries the form's #sign-up along.
+            return redirect(reverse('waitlist_thanks') + '#lesson')
+        record(request, 'form_error', field='email',
+               code='empty' if not request.POST.get('email', '').strip() else 'invalid')
     else:
         form = WaitlistForm(initial=_visit_source(request))
 
     return render(request, 'core/waitlist.html', {'form': form})
 
 
+def _session_signup(request):
+    pk = request.session.get(WAITLIST_SIGNUP_KEY)
+    return WaitlistSignup.objects.filter(pk=pk).first() if pk else None
+
+
 def waitlist_thanks(request):
     if not request.session.get(WAITLIST_SESSION_KEY):
         return redirect(reverse('waitlist') + '#sign-up')
-    return render(request, 'core/waitlist_thanks.html')
+    signup = _session_signup(request)
+    return render(request, 'core/waitlist_thanks.html', {
+        'signup': signup,
+        'lesson_emailed': request.session.get(LESSON_EMAILED_KEY, False),
+        'trade_choices': WaitlistSignup.TRADE_CHOICES,
+        'share_url': request.build_absolute_uri(reverse('waitlist')) + '?utm_source=share&utm_medium=link&utm_campaign=thanks-page',
+    })
+
+
+@require_POST
+def waitlist_trade(request):
+    """The one-tap "What do you do now?" answer on the thanks page."""
+    signup = _session_signup(request)
+    trade = request.POST.get('trade', '')
+    if signup and trade in dict(WaitlistSignup.TRADE_CHOICES):
+        signup.trade = trade
+        signup.save(update_fields=['trade'])
+        record(request, 'trade_pick', trade=trade)
+    return redirect(reverse('waitlist_thanks') + '#trade')
+
+
+def lesson_link(request, token):
+    """The link in the lesson email: opens the lesson in any browser."""
+    signup = signup_from_token(token, LESSON_SALT)
+    if signup is None:
+        raise Http404
+    if not signup.confirmed_at:
+        signup.confirmed_at = timezone.now()
+        signup.save(update_fields=['confirmed_at'])
+        record(request, 'email_confirm')
+    request.session[WAITLIST_SESSION_KEY] = True
+    request.session[WAITLIST_SIGNUP_KEY] = signup.pk
+    request.session[LESSON_EMAILED_KEY] = True
+    return redirect('waitlist_thanks')
+
+
+def waitlist_resend(request):
+    """Send the lesson link again. The answer never says who is on the list."""
+    if not waitlist_email_ready():
+        return redirect(reverse('waitlist') + '#sign-up')
+    sent = False
+    if request.method == 'POST':
+        email = request.POST.get('email', '').strip().lower()
+        signup = WaitlistSignup.objects.filter(email=email).first() if email else None
+        if signup:
+            send_lesson_email(request, signup)
+        record(request, 'lesson_resend')
+        sent = True
+    return render(request, 'core/waitlist_resend.html', {'sent': sent})
+
+
+@csrf_exempt
+def unsubscribe(request, token):
+    """Leave the list. Mail apps' one-click unsubscribe POSTs here with no CSRF token."""
+    signup = signup_from_token(token, UNSUBSCRIBE_SALT)
+    if signup is None:
+        raise Http404
+    if request.method == 'POST':
+        if not signup.unsubscribed_at:
+            signup.unsubscribed_at = timezone.now()
+            signup.save(update_fields=['unsubscribed_at'])
+            record(request, 'unsubscribe')
+        return render(request, 'core/unsubscribe.html', {'done': True, 'email': signup.email})
+    return render(request, 'core/unsubscribe.html', {'done': bool(signup.unsubscribed_at), 'email': signup.email})
+
+
+def privacy(request):
+    return render(request, 'core/privacy.html')
 
 
 def field_sheet(request):
+    record(request, 'sheet_download')
     return FileResponse(open(FIELD_SHEET_PDF, 'rb'), content_type='application/pdf',
                         filename='FDQ-FRM-0037-Weld-Field-Sheet.pdf')
 
@@ -181,3 +275,34 @@ def lesson_1_poster(request):
 
 def lesson_1_player_poster(request):
     return FileResponse(open(LESSON_1_PLAYER_POSTER, 'rb'), content_type='image/jpeg')
+
+
+def favicon(request):
+    response = FileResponse(open(FAVICON, 'rb'), content_type='image/x-icon')
+    response['Cache-Control'] = 'public, max-age=604800'
+    return response
+
+
+def robots_txt(request):
+    lines = [
+        'User-agent: *',
+        'Disallow: /admin/',
+        'Disallow: /accounts/',
+        'Disallow: /apply/',
+        'Disallow: /staff/',
+        'Disallow: /tier-1/thanks/',
+        'Disallow: /tier-1/lesson/',
+        'Disallow: /tier-1/leave/',
+        f"Sitemap: {request.build_absolute_uri(reverse('sitemap'))}",
+    ]
+    return HttpResponse('\n'.join(lines) + '\n', content_type='text/plain')
+
+
+def sitemap_xml(request):
+    from blog.models import BlogPost
+
+    pages = ['home', 'waitlist', 'about', 'contact', 'lms:tier_list', 'blog_list', 'privacy']
+    urls = [request.build_absolute_uri(reverse(name)) for name in pages]
+    urls += [request.build_absolute_uri(reverse('blog_detail', args=[post.slug]))
+             for post in BlogPost.objects.only('slug')]
+    return render(request, 'sitemap.xml', {'urls': urls}, content_type='application/xml')
