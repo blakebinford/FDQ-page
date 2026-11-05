@@ -2,7 +2,7 @@ from django.db import models
 
 
 class WaitlistSignup(models.Model):
-    """Someone who asked to hear when Tier 1 opens, and got the field card for it.
+    """Someone who asked to hear when Tier 1 opens, and got lesson 1 and the weld field sheet for it.
 
     The utm_* fields and referrer_host record the post that sent them, so a
     signup can be traced to the Reel or comment link it came from.

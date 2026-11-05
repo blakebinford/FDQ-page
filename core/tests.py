@@ -52,23 +52,23 @@ class WaitlistTests(TestCase):
         self.assertFalse(WaitlistSignup.objects.exists())
         self.assertRedirects(self.client.get(reverse('waitlist_thanks')), reverse('waitlist') + '#sign-up')
 
-    def test_field_card_files_are_served(self):
-        pdf = self.client.get(reverse('field_card'))
+    def test_field_sheet_files_are_served(self):
+        pdf = self.client.get(reverse('field_sheet'))
         self.assertEqual(pdf['Content-Type'], 'application/pdf')
         self.assertTrue(b''.join(pdf.streaming_content).startswith(b'%PDF'))
-        png = self.client.get(reverse('field_card_preview'))
-        self.assertEqual(png['Content-Type'], 'image/png')
+        jpg = self.client.get(reverse('field_sheet_preview'))
+        self.assertEqual(jpg['Content-Type'], 'image/jpeg')
 
     def test_thanks_page_needs_a_signup(self):
         response = self.client.get(reverse('waitlist_thanks'))
         self.assertRedirects(response, reverse('waitlist') + '#sign-up')
 
-    def test_thanks_page_plays_lesson_1_and_links_the_field_card(self):
+    def test_thanks_page_plays_lesson_1_and_links_the_field_sheet(self):
         self.post()
         response = self.client.get(reverse('waitlist_thanks'))
         self.assertContains(response, reverse('lesson_1_video'))
         self.assertContains(response, reverse('lesson_1_captions'))
-        self.assertContains(response, reverse('field_card'))
+        self.assertContains(response, reverse('field_sheet'))
 
     def test_lesson_1_video_is_served_whole(self):
         response = self.client.get(reverse('lesson_1_video'))

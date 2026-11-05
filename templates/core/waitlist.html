@@ -3,9 +3,9 @@
 {% block title %}FDQ Tier 1 | Field Driven Quality{% endblock %}
 
 {% block meta_tags %}
-<meta name="description" content="FDQ Tier 1 takes someone with no quality background into a first QC job on a pipeline or station job. Get on the list and watch lesson 1 of weld mapping free." />
+<meta name="description" content="FDQ Tier 1 takes someone with no quality background into a first QC job on a pipeline or station job: 12 modules, from how a job runs to running a QC day. Get on the list for lesson 1 and the weld field sheet free." />
 <meta property="og:title" content="FDQ Tier 1: from the crew to the quality side" />
-<meta property="og:description" content="Get on the list and watch lesson 1 of weld mapping free: why weld maps exist." />
+<meta property="og:description" content="Get on the list for lesson 1 of weld mapping, why weld maps exist, and the weld field sheet, free." />
 <meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{% url 'lesson_1_poster' %}" />
 {% endblock %}
 
@@ -19,6 +19,7 @@
   padding-bottom: clamp(2.5rem, 6vw, 4rem);
 }
 @media (max-width: 860px) { .wl-hero { grid-template-columns: 1fr; } }
+.wl-hero > div { min-width: 0; }
 .wl-hero h1 { font-weight: 800; font-size: clamp(2.1rem, 5vw, 3.4rem); line-height: 1.06; margin-bottom: 1rem; }
 .wl-hero .page-sub { margin-bottom: 1.5rem; }
 .wl-facts { list-style: none; color: var(--ink-2); font-size: 1rem; }
@@ -26,10 +27,11 @@
 .wl-facts li:last-child { border-bottom: 1px solid var(--rule); }
 .wl-facts b { color: var(--ink); font-weight: 600; }
 
-.wl-offer { display: grid; grid-template-columns: 132px 1fr; gap: 1rem; align-items: center; margin-bottom: 1.4rem; }
-.wl-offer img { display: block; width: 100%; height: auto; border-radius: 3px; border: 1px solid var(--rule); }
-.wl-offer .ci-label { margin-bottom: 0.15rem; }
-.wl-offer h2 { font-size: 1.25rem; font-weight: 700; line-height: 1.2; }
+.wl-gets { list-style: none; display: flex; flex-direction: column; gap: 0.75rem; margin: 0.35rem 0 1.4rem; }
+.wl-gets li { display: grid; grid-template-columns: 112px 1fr; gap: 0.9rem; align-items: center; }
+.wl-gets img { display: block; width: 112px; height: 63px; object-fit: cover; object-position: top; border-radius: 3px; border: 1px solid var(--rule); background: #fff; }
+.wl-gets b { display: block; font-weight: 700; line-height: 1.25; }
+.wl-gets span { display: block; font-size: 0.9rem; color: var(--ink-3); }
 .wl-form { display: flex; flex-direction: column; gap: 1rem; }
 .wl-form .btn-primary { width: 100%; font-size: 1.05rem; }
 .wl-optional { font-weight: 400; color: var(--ink-3); }
@@ -38,22 +40,38 @@
 .wl-trap { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
 
 .wl-block { padding-top: clamp(2.5rem, 6vw, 4rem); padding-bottom: clamp(2.5rem, 6vw, 4rem); }
-.wl-block h2 { font-weight: 800; font-size: clamp(1.6rem, 3.2vw, 2.2rem); line-height: 1.15; margin-bottom: 0.75rem; }
-.wl-block .intro { color: var(--ink-2); max-width: 62ch; margin-bottom: 1.75rem; }
+.wl-block > h2 { font-weight: 800; font-size: clamp(1.6rem, 3.2vw, 2.2rem); line-height: 1.15; margin-bottom: 0.75rem; }
+.wl-block .intro { color: var(--ink-2); max-width: 64ch; margin-bottom: 1rem; }
 .band { background: var(--surface); border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
 
-.wl-modules { columns: 2; column-gap: clamp(2rem, 5vw, 4rem); list-style: none; counter-reset: mod; }
-@media (max-width: 680px) { .wl-modules { columns: 1; } }
-.wl-modules li { break-inside: avoid; padding: 0.9rem 0 0.9rem 2.6rem; border-top: 1px solid var(--rule); position: relative; counter-increment: mod; }
-.wl-modules li::before { content: counter(mod); position: absolute; left: 0; top: 0.9rem; font-weight: 700; color: var(--ink-3); width: 2rem; }
-.wl-modules b { display: block; font-weight: 700; }
-.wl-modules span { display: block; color: var(--ink-2); font-size: 0.95rem; margin-top: 0.15rem; }
+.wl-index { columns: 3 14rem; column-gap: 2rem; list-style: none; margin: 1.75rem 0 0.5rem; font-size: 0.95rem; }
+.wl-index li { break-inside: avoid; padding: 0.3rem 0; }
+.wl-index a { text-decoration: none; color: var(--ink-2); }
+.wl-index a:hover { color: var(--ink); text-decoration: underline; }
+.wl-index span { display: inline-block; width: 1.8rem; font-weight: 700; color: var(--ink-3); }
+
+.mod { display: grid; grid-template-columns: 15rem minmax(0, 1fr); gap: 0.75rem clamp(2rem, 5vw, 4rem); padding: 2.25rem 0; border-top: 1px solid var(--rule); scroll-margin-top: 5rem; }
+.mod:first-of-type { margin-top: 2rem; }
+@media (max-width: 800px) { .mod { grid-template-columns: 1fr; padding: 1.75rem 0; } }
+.mod-num { font-size: 0.85rem; font-weight: 700; color: var(--ink-3); margin-bottom: 0.3rem; }
+.mod h3 { font-weight: 800; font-size: 1.35rem; line-height: 1.2; }
+.mod-lead { font-size: 1.08rem; color: var(--ink); max-width: 62ch; margin-bottom: 1rem; }
+.mod h4 { font-size: 0.85rem; font-weight: 700; color: var(--ink-3); margin-bottom: 0.4rem; }
+.mod-skills { list-style: none; max-width: 66ch; color: var(--ink-2); margin-bottom: 1.25rem; }
+.mod-skills li { position: relative; padding: 0.2rem 0 0.2rem 1.1rem; }
+.mod-skills li::before { content: ""; position: absolute; left: 0; top: 0.95rem; top: calc(0.2rem + 0.5lh); width: 0.45rem; height: 2px; background: var(--rule-2); }
+.mod-ex { background: var(--panel); border: 1px solid var(--rule); border-radius: var(--radius); padding: 0.9rem 1.1rem; max-width: 66ch; color: var(--ink-2); font-size: 0.95rem; }
+.mod-ex + .mod-ex { margin-top: 0.6rem; background: transparent; }
+.mod-ex h4 { color: var(--ink); }
+.mod-ex a { color: var(--accent-ink); }
 
 .wl-limits { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(2rem, 5vw, 4rem); }
 @media (max-width: 760px) { .wl-limits { grid-template-columns: 1fr; } }
 .wl-limits h3 { font-size: 1.15rem; font-weight: 700; margin-bottom: 0.6rem; }
 .wl-limits p { color: var(--ink-2); margin-bottom: 0.9rem; }
 .wl-limits a { color: var(--accent-ink); }
+.wl-again { display: flex; flex-wrap: wrap; gap: 1rem 2rem; align-items: center; justify-content: space-between; margin-top: clamp(2.5rem, 6vw, 3.5rem); padding-top: 2rem; border-top: 1px solid var(--rule); }
+.wl-again p { font-weight: 700; font-size: 1.2rem; }
 {% endblock %}
 
 {% block content %}
@@ -61,22 +79,27 @@
   <div>
     <p class="page-label">FDQ Tier 1 &middot; Opening soon</p>
     <h1>The best quality hands came up through the crew.</h1>
-    <p class="page-sub">Tier 1 takes someone with no quality background into a first quality job: contractor QC tech or owner-side junior inspector, on the right-of-way and inside the fence. Get on the list and watch the first lesson now.</p>
+    <p class="page-sub">Tier 1 takes someone with no quality background into a first quality job: contractor QC tech or owner-side junior inspector, on the right-of-way and inside the fence. Get on the list and start with the first lesson now.</p>
     <ul class="wl-facts">
-      <li><b>12 modules</b>, from how a job runs to running a QC day</li>
+      <li><b>12 modules and 228 skills</b>, from how a job runs to running a QC day</li>
+      <li><b>A gate exercise</b> at the end of every module, worked on sample job paperwork</li>
       <li><b>Online</b>, at your own pace</li>
       <li><b>Gas and liquid lines</b> and their stations, under 49 CFR 192 and 195</li>
     </ul>
   </div>
 
   <div class="aside-box" id="sign-up">
-    <div class="wl-offer">
-      <img src="{% url 'lesson_1_poster' %}" alt="Tier 1, weld mapping, lesson 01: Why weld maps exist" width="1280" height="720" />
-      <div>
-        <p class="ci-label">Free lesson &middot; 4:35</p>
-        <h2>Lesson 1: Why weld maps exist</h2>
-      </div>
-    </div>
+    <p class="ci-label">Free when you get on the list</p>
+    <ul class="wl-gets">
+      <li>
+        <img src="{% url 'lesson_1_poster' %}" alt="" width="1280" height="720" />
+        <div><b>Lesson 1: Why weld maps exist</b><span>Video, 4:35</span></div>
+      </li>
+      <li>
+        <img src="{% url 'field_sheet_preview' %}" alt="" width="880" height="1139" />
+        <div><b>Weld field sheet</b><span>PDF to print, with filled-in examples</span></div>
+      </li>
+    </ul>
 
     <form class="wl-form" action="{% url 'waitlist' %}" method="POST" novalidate>
       {% csrf_token %}
@@ -102,30 +125,254 @@
       <input type="hidden" name="utm_campaign" value="{{ form.utm_campaign.value|default_if_none:'' }}" />
       <input type="hidden" name="utm_content" value="{{ form.utm_content.value|default_if_none:'' }}" />
       <input type="hidden" name="referrer_host" value="{{ form.referrer_host.value|default_if_none:'' }}" />
-      <button type="submit" class="btn-primary">Watch lesson 1</button>
+      <button type="submit" class="btn-primary">Get lesson 1 and the sheet</button>
     </form>
-    <p class="wl-fine">The lesson opens right away, with the weld map field card to print. After that, a few emails around the Tier 1 launch and nothing else. Reply to any of them to come off the list.</p>
+    <p class="wl-fine">Both open right away. After that, a few emails around the Tier 1 launch and nothing else. Reply to any of them to come off the list.</p>
   </div>
 </section>
 
 <section class="band" id="modules">
   <div class="wrap wl-block">
-    <h2>What Tier 1 covers</h2>
-    <p class="intro">Twelve modules, each ending with what you can do after it.</p>
-    <ol class="wl-modules">
-      <li><b>How a job runs and where QC sits</b><span>Who's who on a midstream job, and what QC checks at each step of construction.</span></li>
-      <li><b>Quality fundamentals</b><span>How quality is controlled, how a nonconformance gets handled, and records that survive turnover.</span></li>
-      <li><b>The paperwork hierarchy</b><span>Where every requirement comes from, and which document wins when two disagree.</span></li>
-      <li><b>Reading drawings</b><span>Find the right drawing and check the built work against it.</span></li>
-      <li><b>Material and traceability</b><span>Markings, mill certs, and the trail from the mill to the weld.</span></li>
-      <li><b>Weld mapping and weld records</b><span>Number and map every weld and tie it to its pipe, welders, procedure and NDE.</span></li>
-      <li><b>Welding compliance for a non-CWI QC</b><span>Check the welding against the WPS and the welder's qualification.</span></li>
-      <li><b>NDE basics</b><span>The methods, the reports, and keeping NDE tied to the weld map.</span></li>
-      <li><b>Coating and paint</b><span>The approved system, applied and recorded right, and damage found before burial.</span></li>
-      <li><b>Bolted connections</b><span>The right parts, the approved tightening method, and a record for every joint.</span></li>
-      <li><b>Tie-ins, fabrication and pressure testing</b><span>From the tie-in plan and the shop to a signed test record.</span></li>
-      <li><b>Conduct on site</b><span>Running a QC day, reporting what you see, and keeping your signature worth something.</span></li>
+    <h2>What Tier 1 teaches</h2>
+    <p class="intro">Twelve modules. Every skill in them is written as something you'll be able to do on a job, and every module ends with a gate exercise: a packet of sample job paperwork with problems planted in it for you to find.</p>
+    <ol class="wl-index">
+      <li><a href="#module-1"><span>1</span>How a job runs</a></li>
+      <li><a href="#module-2"><span>2</span>Quality fundamentals</a></li>
+      <li><a href="#module-3"><span>3</span>The paperwork hierarchy</a></li>
+      <li><a href="#module-4"><span>4</span>Reading drawings</a></li>
+      <li><a href="#module-5"><span>5</span>Material and traceability</a></li>
+      <li><a href="#module-6"><span>6</span>Weld mapping and weld records</a></li>
+      <li><a href="#module-7"><span>7</span>Welding compliance</a></li>
+      <li><a href="#module-8"><span>8</span>NDE basics</a></li>
+      <li><a href="#module-9"><span>9</span>Coating and paint</a></li>
+      <li><a href="#module-10"><span>10</span>Bolted connections</a></li>
+      <li><a href="#module-11"><span>11</span>Tie-ins, fabrication and testing</a></li>
+      <li><a href="#module-12"><span>12</span>Conduct on site</a></li>
     </ol>
+
+    <article class="mod" id="module-1">
+      <header><p class="mod-num">Module 1</p><h3>How a job runs and where QC sits</h3></header>
+      <div>
+        <p class="mod-lead">Who's who on a midstream job, where a QC role sits, and what QC checks at every step of construction.</p>
+        <h4>You'll learn to</h4>
+        <ul class="mod-skills">
+          <li>Name the parties on a job (operator, owner's engineer or EPC, prime contractor, subs, third-party inspection, vendors and fab shops) and who employs, pays and directs a contractor QC tech, an owner inspector and an NDE tech on the same job</li>
+          <li>Sketch the owner's inspection organization and the contractor's QC organization, and say why QC reports separately from production</li>
+          <li>Put the mainline crews in working order, from survey and clearing through hydrotest and cleanup, and name the record each one produces: the tally, the bend log, the weld map, NDE reports, coating records, depth of cover, the test package</li>
+          <li>Read and write station numbers (125+50 is 12,550 feet from the start of the line) and station equations</li>
+          <li>Put the facility sequence in order, from foundations to turnover, and explain why a station takes more QC per foot than the right-of-way</li>
+          <li>Explain how a facility breaks into systems, subsystems and test packages, and why every record rolls up to one</li>
+        </ul>
+        <div class="mod-ex"><h4>Gate exercise</h4><p>Sort shuffled activity cards from a mainline spread and a compressor or pump station into working order. For each one, use the sample inspection and test plan to name the record it produces and who signs it.</p></div>
+      </div>
+    </article>
+
+    <article class="mod" id="module-2">
+      <header><p class="mod-num">Module 2</p><h3>Quality fundamentals</h3></header>
+      <div>
+        <p class="mod-lead">How quality is controlled on a job, how a nonconformance gets handled, and how to keep records that survive turnover.</p>
+        <h4>You'll learn to</h4>
+        <ul class="mod-skills">
+          <li>Tell quality assurance from quality control, and explain why the person checking the work isn't the person building it</li>
+          <li>Work hold, witness and review points, and know what the crew may do at each</li>
+          <li>Carry an NCR from finding and tagging to closure, and write one that states the requirement, what you found, where, and the evidence, with no blame</li>
+          <li>Run a basic root cause with 5 Whys and a fishbone, and tell a correction from a corrective action</li>
+          <li>Work document control: confirm you have the current revision, deal with a superseded copy, read transmittals and status codes, and handle redlines</li>
+          <li>Keep records by the rules: from the source, at the time, never backfilled, corrected with a single line, no blanks</li>
+          <li>Keep the site calibration log, and trace every reading made with a tool found out of calibration</li>
+          <li>Review a completed record, tell a record that's filled out right from one that's true, and spot the signs that a clean-looking record isn't</li>
+          <li>Check a turnover package against its index and find what's missing</li>
+        </ul>
+        <div class="mod-ex"><h4>Gate exercise</h4><p>Write an NCR from a field scenario. Find the past-due tools on a site calibration log. Review a torque form and a coating report and find the empty fields, the value out of limits, the out-of-calibration instrument and the record that looks right but isn't. Then find the errors planted in a turnover package.</p></div>
+      </div>
+    </article>
+
+    <article class="mod" id="module-3">
+      <header><p class="mod-num">Module 3</p><h3>The paperwork hierarchy</h3></header>
+      <div>
+        <p class="mod-lead">Where every requirement on the job comes from, which document wins when two disagree, and what to read on day one of a new project.</p>
+        <h4>You'll learn to</h4>
+        <ul class="mod-skills">
+          <li>Name the layers: 49 CFR 192 and 195 and state rules, the codes they invoke (API 1104, ASME Section IX, B31.8, B31.4 and B31.3), owner specs, the contract and project specs and drawings, approved procedures, and the contractor's QMS</li>
+          <li>Explain why code is the minimum (the owner can require more, never less) and which requirements nobody on a project can waive</li>
+          <li>Look up a regulation in the eCFR and find which code edition is in force on your job</li>
+          <li>Read an ITP line and build one for a single activity, such as torquing a bolted joint</li>
+          <li>Apply the contract's order of precedence when documents disagree, and raise an RFI when it doesn't settle it</li>
+          <li>Explain RFIs, field changes and deviation requests, and why a verbal answer isn't a change</li>
+          <li>Trace a field question (what preheat, what holiday test voltage, is this bolt grade allowed) to the governing document and section</li>
+        </ul>
+        <div class="mod-ex"><h4>Gate exercise</h4><p>A requirements trace. From a packet of contract, spec, drawing, WPS and code excerpts, answer six field questions with the governing document and section. One of them hides a conflict you have to raise as an RFI.</p></div>
+      </div>
+    </article>
+
+    <article class="mod" id="module-4">
+      <header><p class="mod-num">Module 4</p><h3>Reading drawings</h3></header>
+      <div>
+        <p class="mod-lead">Find the right drawing, read what it requires, and check the built work against it, on the right-of-way and inside the fence.</p>
+        <h4>You'll learn to</h4>
+        <ul class="mod-skills">
+          <li>Know the drawing set (alignment sheets, crossing and HDD drawings, P&amp;IDs, plot plans, piping plans, isometrics, spool and support drawings) and the question each one answers</li>
+          <li>Read title blocks, revision clouds, holds and notes, and know which drawings you can build from</li>
+          <li>Find the wall, grade, coating, cover and crossings at any station on an alignment sheet, and where each one changes</li>
+          <li>Read a P&amp;ID, decode a line number, use a piping class sheet, and read an isometric with its bill of materials, shop and field welds and spool breaks</li>
+          <li>Read plan, section and detail views, dimensions in feet and inches, decimal feet and millimeters, and plant coordinates, and never scale a drawing</li>
+          <li>Read piping symbols and basic weld symbols</li>
+          <li>Check installed pipe against its iso, catch field-fit dimensions, and route a difference as a redline or an RFI</li>
+        </ul>
+        <div class="mod-ex"><h4>Gate exercise</h4><p>A drawing packet with an alignment sheet and a facility set. Find the wall, coating and cover at a station, decode a line number and find it on every drawing, find the bill of materials item that's wrong for its class, mark the field welds, and find the sheet that's superseded or on hold.</p></div>
+      </div>
+    </article>
+
+    <article class="mod" id="module-5">
+      <header><p class="mod-num">Module 5</p><h3>Material and traceability</h3></header>
+      <div>
+        <p class="mod-lead">Receive material, read its markings and its MTR, match it to the drawing and class sheet, and keep the trail from the mill to the weld unbroken.</p>
+        <h4>You'll learn to</h4>
+        <ul class="mod-skills">
+          <li>Explain traceability, and sort what needs an MTR on every regulated job from what the project decides</li>
+          <li>Tell a heat number from a pipe number, and transfer both before pipe is cut</li>
+          <li>Read line pipe, fitting, flange and valve markings: spec, grade, PSL, diameter, wall, heat</li>
+          <li>Explain what a grade means (X52 is 52,000 psi minimum yield), PSL1 against PSL2, and matching fittings and flanges to the pipe (X65 pipe takes WPHY 65 fittings and F65 flanges)</li>
+          <li>Read an MTR, check it against the spec, and recognize the signs of a bad one</li>
+          <li>Do a receiving inspection, build and check a pipe tally, and store and stack material without damaging it</li>
+          <li>Tag and quarantine material with no MTR, a mismatched MTR or markings you can't read</li>
+        </ul>
+        <div class="mod-ex"><h4>Gate exercise</h4><p>A receiving lot with marking photos, MTRs, a packing list and an iso bill of materials. Match every item, find the heat with no MTR, the flange in the wrong class and the MTR with yield below spec, then build a tally for six joints, one of them cut.</p></div>
+      </div>
+    </article>
+
+    <article class="mod" id="module-6">
+      <header><p class="mod-num">Module 6</p><h3>Weld mapping and weld records</h3></header>
+      <div>
+        <p class="mod-lead">Number and map every weld, tie each one to its material, welders, procedure and NDE, and keep the records complete enough to pass turnover.</p>
+        <h4>You'll learn to</h4>
+        <ul class="mod-skills">
+          <li>Explain what a weld map is and the records tied to it: the weld log, NDE log, repair log, welder qualification and continuity log, WPS register and tally</li>
+          <li>Number mainline and facility welds by the project's convention, including repairs, cut-outs and replacement welds, so no number is ever reused</li>
+          <li>Record each mainline weld: number, station, pipe and heat on both sides, wall and grade, the welder on each pass, the WPS and the date</li>
+          <li>Map tie-ins, crossings, HDD pull sections and golden welds into the mainline record</li>
+          <li>Reconcile welds against the tally (on one string, welds equal joints minus one) and find the cause when they don't agree</li>
+          <li>Record facility welds by line and iso: joint type, size and schedule, piece marks, welders, NDE selection and progressive sampling</li>
+          <li>Post NDE results, track repairs and cut-outs, and check each welder was qualified and in continuity on the day of the weld</li>
+          <li>Audit a weld log, and explain what 49 CFR 192 and 195 require the operator to keep</li>
+        </ul>
+        <div class="mod-ex"><h4>Gate exercise</h4><p>From a day of field data (welder ID photos, a pipe tally, NDE reports), build the weld map for a mainline section and one facility isometric. Then audit a planted weld log and find every error.</p></div>
+        <div class="mod-ex"><h4>Where Tier 1 stops</h4><p>You record NDE results from the report. Reading film or UT data belongs to the NDE tech, and visual acceptance of a weld belongs to the CWI or owner welding inspector. Lesson 1 of this module is free: <a href="#sign-up">get on the list</a>.</p></div>
+      </div>
+    </article>
+
+    <article class="mod" id="module-7">
+      <header><p class="mod-num">Module 7</p><h3>Welding compliance for a non-CWI QC</h3></header>
+      <div>
+        <p class="mod-lead">Read a WPS and a welder qualification, check the welding in progress against both, and record what you measured.</p>
+        <h4>You'll learn to</h4>
+        <ul class="mod-skills">
+          <li>Tell a WPS from a PQR and a welder qualification, and know which code governs: API 1104, ASME Section IX or AWS D1.1</li>
+          <li>Explain essential variables, and check the joint is inside the WPS</li>
+          <li>Read a welder qualification and check continuity against the date of each weld, under ASME Section IX and 49 CFR 192.229 and 195.222</li>
+          <li>Match the welder ID at the joint to a welder qualified for that pass</li>
+          <li>Check fit-up, filler metal and rod ovens, shielding gas and wind protection</li>
+          <li>Measure amps, volts and polarity with a calibrated meter, and calculate travel speed and heat input</li>
+          <li>Check preheat and interpass temperature, and review a PWHT chart</li>
+        </ul>
+        <div class="mod-ex"><h4>Gate exercise</h4><p>Given a WPS, three welder qualifications and field readings for five welds, say which welds were made inside the WPS by a qualified welder, calculate travel speed and heat input, and write the finding for each weld that wasn't.</p></div>
+        <div class="mod-ex"><h4>Where Tier 1 stops</h4><p>You check that the welding follows the WPS and that the welder is qualified. Visual acceptance of the finished weld, and qualifying procedures and welders, belong to the CWI or owner welding inspector.</p></div>
+      </div>
+    </article>
+
+    <article class="mod" id="module-8">
+      <header><p class="mod-num">Module 8</p><h3>NDE basics</h3></header>
+      <div>
+        <p class="mod-lead">Know the NDE methods on a midstream job, read an NDE report, check a tech's certification, and keep NDE tied to the weld map.</p>
+        <h4>You'll learn to</h4>
+        <ul class="mod-skills">
+          <li>Name VT, RT, UT (including AUT and phased array), MT and PT, what each finds and where each is used</li>
+          <li>Work safely around RT</li>
+          <li>Explain technician Levels I, II and III, and check a cert covers the method in use</li>
+          <li>Find where acceptance criteria and the extent of examination come from: API 1104, B31.3 or the owner spec</li>
+          <li>Read an NDE report, and explain porosity, slag, lack of fusion, burn-through, undercut and cracks in plain terms</li>
+          <li>Reconcile reports with the weld map, confirm repairs were re-examined, and apply the timing rules (no coating before NDE accepts the weld)</li>
+        </ul>
+        <div class="mod-ex"><h4>Gate exercise</h4><p>A set of NDE reports and a weld map. Find the weld with no NDE, the report signed by a tech not certified for the method, the reject that was never re-examined, and the weld number that isn't on the map.</p></div>
+        <div class="mod-ex"><h4>Where Tier 1 stops</h4><p>You read results and track coverage. Doing NDE and interpreting it belong to a certified tech, Level II or above for interpretation.</p></div>
+      </div>
+    </article>
+
+    <article class="mod" id="module-9">
+      <header><p class="mod-num">Module 9</p><h3>Coating and paint</h3></header>
+      <div>
+        <p class="mod-lead">Confirm the approved coating is applied per the manufacturer and the spec, record the conditions and results, and find damage before the pipe is buried or put in service.</p>
+        <h4>You'll learn to</h4>
+        <ul class="mod-skills">
+          <li>Explain how coating and cathodic protection work together, and why one holiday matters</li>
+          <li>Know the systems: FBE, abrasion-resistant overcoat for bores and HDDs, three-layer PE and PP, liquid epoxy, heat-shrink sleeves, concrete weights and above-ground paint</li>
+          <li>Find the approved product and read its data sheet limits: prep, temperatures, dew point, mix ratio, pot life, film thickness, recoat and cure</li>
+          <li>Record batch numbers and expiry dates, and reject expired material</li>
+          <li>Measure air and steel temperature, humidity and dew point, and check surface prep and anchor profile</li>
+          <li>Measure wet and dry film thickness with a calibrated gauge</li>
+          <li>Set and verify a holiday detector, check sleeves and repairs, and protect coated pipe through lower-in</li>
+          <li>Write a coating report</li>
+        </ul>
+        <div class="mod-ex"><h4>Gate exercise</h4><p>From a spec excerpt, a product data sheet and a day of field joint coating readings, find the joint coated inside the dew point margin, the batch past expiry, the film thickness below range and the product that isn't on the approved list. Then set the holiday detector voltage.</p></div>
+        <div class="mod-ex"><h4>Where Tier 1 stops</h4><p>You check and record against the spec and the data sheet. This isn't AMPP coating inspector training, and where the project requires a certified coating inspector to accept the work, acceptance is theirs.</p></div>
+      </div>
+    </article>
+
+    <article class="mod" id="module-10">
+      <header><p class="mod-num">Module 10</p><h3>Bolted connections</h3></header>
+      <div>
+        <p class="mod-lead">Check a flanged joint is built from the right parts, tightened by the approved method and pattern with calibrated tools, and recorded so every joint can be traced and signed off.</p>
+        <h4>You'll learn to</h4>
+        <ul class="mod-skills">
+          <li>Match flanges, faces, gaskets, studs and nuts (such as B7 studs with 2H nuts) to the class sheet and drawing</li>
+          <li>Check gaskets, flange faces, stud protrusion and the approved lubricant, and explain why a different lubricant changes the bolt load</li>
+          <li>Check alignment before bolting, and why a joint is never pulled in with its bolts</li>
+          <li>Follow manual torque, hydraulic torque and tensioning procedures: the passes, the pattern and ASME PCC-1</li>
+          <li>Convert a target torque to pump pressure from that tool's chart</li>
+          <li>Check tool calibration, and trace every joint tightened with a tool that failed</li>
+          <li>Number and tag joints, keep the torque record, track temporary gaskets and test blinds, and walk down finished joints</li>
+        </ul>
+        <div class="mod-ex"><h4>Gate exercise</h4><p>Given a joint list, a bolting procedure, a tool calibration chart and a completed torque log, convert the target torque to pump pressure, then find the wrong gasket, the joint tightened out of pattern, the out-of-calibration tool and the missing final pass.</p></div>
+        <div class="mod-ex"><h4>Where Tier 1 stops</h4><p>You check and record. Setting the bolt load belongs to engineering, and qualifying bolting techs belongs to the bolting contractor where the project requires it.</p></div>
+      </div>
+    </article>
+
+    <article class="mod" id="module-11">
+      <header><p class="mod-num">Module 11</p><h3>Tie-ins, fabrication and pressure testing</h3></header>
+      <div>
+        <p class="mod-lead">Follow a tie-in from plan to record, check fabricated piping from the shop to its final position, and carry a pressure test from test package to signed record.</p>
+        <h4>You'll learn to</h4>
+        <ul class="mod-skills">
+          <li>Check tie-ins on the right-of-way and inside the fence, and explain why they get extra attention</li>
+          <li>Identify golden welds before they're made, and get the extra NDE and approval into the ITP</li>
+          <li>Trace pretested pipe to its test record, and recognize hot taps and line stops as specialty work</li>
+          <li>Review a shop data book and check a spool on receipt, then check field fabrication and supports against the details</li>
+          <li>Find the test requirements in 49 CFR 192 Subpart J, 195 Subpart E and the code, and know who approves what</li>
+          <li>Build a test package, and calculate test pressure at the high and low points (water adds about 0.433 psi per foot of head)</li>
+          <li>Witness a test, handle a failed one, reinstate the line after, and complete the test record the operator keeps</li>
+        </ul>
+        <div class="mod-ex"><h4>Gate exercise</h4><p>A test package with an elevation profile. Calculate the high and low point pressures, then find the weld in the boundary with no NDE, the golden weld nobody flagged, the out-of-date gauge and the pressure that's too high at the low point. Name who approves the package before filling and who accepts the test.</p></div>
+      </div>
+    </article>
+
+    <article class="mod" id="module-12">
+      <header><p class="mod-num">Module 12</p><h3>Conduct on site</h3></header>
+      <div>
+        <p class="mod-lead">Work a QC role day to day on either side of the contract: know what your role owns, report what you see, stay safe, and keep your signature worth something.</p>
+        <h4>You'll learn to</h4>
+        <ul class="mod-skills">
+          <li>Compare contractor QC with owner inspection, and handle it when the two disagree on a result</li>
+          <li>Know who can change your priorities and who can't</li>
+          <li>Run a QC day, from the safety meeting and JSA to the daily report</li>
+          <li>Write a daily report in facts, and keep field notes that hold up in an audit</li>
+          <li>Work safe as a QC tech: permits, swing radius, line of fire, and never in a trench 5 feet or deeper without a protective system</li>
+          <li>Use stop-work authority</li>
+          <li>Keep your signature honest: never sign for work you didn't see, never backdate, never record a reading you didn't take</li>
+          <li>Handle pressure to pass work, gifts and conflicts of interest, and own a mistake in the record</li>
+        </ul>
+        <div class="mod-ex"><h4>Gate exercise</h4><p>A shift scenario: a crew passes a hold point, a foreman asks you to sign for welds you didn't see, a trench has no protection, and a client rep asks for a check outside your scope. Say what you did and who you told at each one, then write the daily report.</p></div>
+      </div>
+    </article>
   </div>
 </section>
 
@@ -133,7 +380,7 @@
   <div class="wl-limits">
     <div>
       <h3>Where Tier 1 stops</h3>
-      <p>Tier 1 teaches you to spot a problem and get it on the record. It doesn't replace a CWI, API 1169, AMPP or NDE cert, and it won't teach you to accept work that needs one of them to sign. Every module says where that line is.</p>
+      <p>Tier 1 teaches you to spot a problem and get it on the record. It doesn't replace a CWI, API 1169, AMPP or NDE cert, and it won't teach you to accept work that needs one of them to sign. Every module that touches one of those certs says where the line is.</p>
       <p>Where a requirement changes from job to job, you learn where to find it in the project documents.</p>
     </div>
     <div>
@@ -141,6 +388,10 @@
       <p>I started as a field inspector and have worked quality on pipeline, LNG, compressor station and industrial jobs. Tier 1 is for the hand who already knows what good work looks like and wants the quality side next.</p>
       <p><a href="{% url 'about' %}">More about FDQ</a></p>
     </div>
+  </div>
+  <div class="wl-again">
+    <p>Start with lesson 1 and the weld field sheet.</p>
+    <a href="#sign-up" class="btn-primary">Get on the list</a>
   </div>
 </section>
 {% endblock %}

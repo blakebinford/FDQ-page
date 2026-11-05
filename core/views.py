@@ -17,8 +17,9 @@ logger = logging.getLogger(__name__)
 
 # Served by views rather than /static/, which the live site doesn't serve.
 FILES_DIR = Path(__file__).resolve().parent / 'files'
-FIELD_CARD_PDF = FILES_DIR / 'weld-map-field-card.pdf'
-FIELD_CARD_PREVIEW = FILES_DIR / 'weld-map-field-card-preview.png'
+FIELD_SHEET_PDF = FILES_DIR / 'weld-field-sheet.pdf'
+# Page 3, the first filled-in example, shows what the sheet is better than the blank.
+FIELD_SHEET_PREVIEW = FILES_DIR / 'weld-field-sheet-preview.jpg'
 LESSON_1_VIDEO = FILES_DIR / 'lesson-1-why-weld-maps-exist.mp4'
 LESSON_1_CAPTIONS = FILES_DIR / 'lesson-1-why-weld-maps-exist.vtt'
 LESSON_1_POSTER = FILES_DIR / 'lesson-1-poster.jpg'
@@ -121,13 +122,13 @@ def waitlist_thanks(request):
     return render(request, 'core/waitlist_thanks.html')
 
 
-def field_card(request):
-    return FileResponse(open(FIELD_CARD_PDF, 'rb'), content_type='application/pdf',
-                        filename='FDQ-weld-map-field-card.pdf')
+def field_sheet(request):
+    return FileResponse(open(FIELD_SHEET_PDF, 'rb'), content_type='application/pdf',
+                        filename='FDQ-FRM-0037-Weld-Field-Sheet.pdf')
 
 
-def field_card_preview(request):
-    return FileResponse(open(FIELD_CARD_PREVIEW, 'rb'), content_type='image/png')
+def field_sheet_preview(request):
+    return FileResponse(open(FIELD_SHEET_PREVIEW, 'rb'), content_type='image/jpeg')
 
 
 def _file_chunks(path, start, length, chunk_size=64 * 1024):

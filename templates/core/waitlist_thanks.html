@@ -18,12 +18,15 @@
 }
 .wl-credits { font-size: 0.75rem; color: var(--muted); line-height: 1.6; }
 .wl-credits a { color: inherit; }
-.wl-card { display: flex; gap: 1.4rem; align-items: center; margin-top: 3rem; }
-.wl-card { padding-top: 2rem; border-top: 1px solid var(--rule); }
-.wl-card img { width: 110px; flex-shrink: 0; border: 1px solid var(--rule); background: #fff; }
+.wl-card { display: flex; gap: clamp(1.4rem, 4vw, 2.5rem); align-items: flex-start; margin-top: 3rem; padding-top: 2rem; border-top: 1px solid var(--rule); }
+.wl-card > a { flex: 0 0 220px; }
+.wl-card img { display: block; width: 100%; height: auto; border: 1px solid var(--rule-2); background: #fff; }
 .wl-card h2 { font-weight: 700; font-size: 1.3rem; margin-bottom: 0.4rem; }
-.wl-card p { font-size: 0.92rem; color: var(--muted); line-height: 1.6; margin-bottom: 1rem; }
-@media (max-width: 520px) { .wl-card { flex-direction: column; align-items: flex-start; } }
+.wl-card p { font-size: 0.95rem; color: var(--ink-2); line-height: 1.6; margin-bottom: 1rem; }
+.wl-pages { list-style: none; font-size: 0.92rem; color: var(--ink-2); margin-bottom: 1.4rem; border-top: 1px solid var(--rule); }
+.wl-pages li { display: grid; grid-template-columns: 6.5rem minmax(0, 1fr); gap: 0.75rem; padding: 0.45rem 0; border-bottom: 1px solid var(--rule); }
+.wl-pages b { color: var(--ink); font-weight: 600; }
+@media (max-width: 620px) { .wl-card { flex-direction: column; } .wl-card > a { flex: none; width: 60%; max-width: 240px; } }
 {% endblock %}
 
 {% block content %}
@@ -44,12 +47,18 @@
   </p>
 
   <div class="wl-card">
-    <a href="{% url 'field_card' %}" target="_blank" rel="noopener"><img src="{% url 'field_card_preview' %}" alt="Weld Map Field Card, side A" width="110" height="143" /></a>
+    <a href="{% url 'field_sheet' %}" target="_blank" rel="noopener"><img src="{% url 'field_sheet_preview' %}" alt="Weld Field Sheet FDQ-FRM-0037, filled in for a day on Spread 2" width="880" height="1139" /></a>
     <div>
-      <p class="ci-label">Free PDF</p>
-      <h2>Weld map field card</h2>
-      <p>Every field a weld map carries, for mainline and for stations, and the three checks before you leave for the day. Print it on letter paper, both sides, and keep it with the map.</p>
-      <a href="{% url 'field_card' %}" class="btn-primary" target="_blank" rel="noopener">Open the field card (PDF)</a>
+      <p class="ci-label">Free PDF &middot; FDQ-FRM-0037</p>
+      <h2>Weld field sheet</h2>
+      <p>The sheet for the firing line. Write down every weld in the order the line runs: the pipe and heat on each side, and the welder stencils the way they sit on the pipe. At the end of the day the welds and the pipe should match, and that count tells you if something's missing.</p>
+      <ul class="wl-pages">
+        <li><b>Page 1</b> The blank sheet</li>
+        <li><b>Page 2</b> How to fill it in. Print it on the back.</li>
+        <li><b>Pages 3 to 5</b> Two days on a mainline spread, with a tie-in, a repair, a pup and a cut-out</li>
+        <li><b>Pages 6 and 7</b> A station line, with spools, a valve, a field fit, a branch and a socket weld</li>
+      </ul>
+      <a href="{% url 'field_sheet' %}" class="btn-primary" target="_blank" rel="noopener">Open the weld field sheet (PDF)</a>
     </div>
   </div>
 </section>
