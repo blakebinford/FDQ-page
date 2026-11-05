@@ -1,12 +1,12 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Field Driven Quality | From the crew to your first quality job{% endblock %}
+{% block title %}Field Driven Quality | Quality starts in the field{% endblock %}
 
 {% block meta_tags %}
 <meta name="description" content="FDQ Tier 1 is an online course for pipeline hands with no quality background. It teaches the work of a contractor QC tech or owner-side junior inspector." />
 <meta property="og:title" content="Field Driven Quality" />
-<meta property="og:description" content="From the crew to your first quality job. Watch lesson 1 of FDQ Tier 1 free." />
+<meta property="og:description" content="Quality starts in the field. Watch lesson 1 of FDQ Tier 1 free." />
 <meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{% url 'lesson_1_poster' %}" />
 {% endblock %}
 
@@ -94,7 +94,7 @@
 <section class="wrap home-hero">
   <div>
     <p class="page-label">FDQ Tier 1 &middot; {% if tier1_opens %}Opens {{ tier1_opens }}{% else %}Opening soon{% endif %}</p>
-    <h1>From the crew to your first quality job.</h1>
+    <h1>Quality starts in the field.</h1>
     <p class="lede">Tier 1 is an online course for pipeline hands with no quality background. It teaches the work of a contractor QC tech or an owner-side junior inspector, on the right-of-way and inside the fence.</p>
     <div class="btns">
       <a href="{% url 'waitlist' %}#sign-up" class="btn-primary" data-cta="home_hero">Get lesson 1 free</a>
@@ -164,7 +164,7 @@
 <section class="wrap block">
   <h2>Three tiers. Tier 1 opens first.</h2>
   <ul class="tiers">
-    <li><b>Tier 1</b><p>From the crew to your first quality job: contractor QC tech or owner-side junior inspector.</p><span class="when open">{% if tier1_opens %}Opens {{ tier1_opens }}{% else %}Opening soon{% endif %}</span></li>
+    <li><b>Tier 1</b><p>Pipeline and station QC, from how a job runs to running a QC day: the work of a contractor QC tech or owner-side junior inspector.</p><span class="when open">{% if tier1_opens %}Opens {{ tier1_opens }}{% else %}Opening soon{% endif %}</span></li>
     <li><b>Tier 2</b><p>For working QC inspectors and quality engineers who run quality on an active project.</p><span class="when">Coming soon</span></li>
     <li><b>Tier 3</b><p>For quality managers and directors who build the program a whole project works in.</p><span class="when">Coming soon</span></li>
   </ul>
