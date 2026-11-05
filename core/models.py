@@ -28,6 +28,10 @@ class WaitlistSignup(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     # The lesson email: when it last went out, when its link was first opened
     # (which confirms the address works), and when they left the list.
+    # The browser that signed up, so the admin can show its visits before signing up.
+    visitor_id = models.CharField(max_length=32, blank=True)
+    device = models.CharField(max_length=10, blank=True)
+    in_app = models.CharField(max_length=10, blank=True)
     lesson_email_sent_at = models.DateTimeField(null=True, blank=True)
     confirmed_at = models.DateTimeField(null=True, blank=True)
     unsubscribed_at = models.DateTimeField(null=True, blank=True)

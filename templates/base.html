@@ -359,6 +359,21 @@
     if (cta) fdqTrack('cta_click', { cta_id: cta.dataset.cta });
   });
 
+  // Cloudflare Turnstile: a form that's submitted before its check finishes
+  // waits for it, then goes. Listening on document runs after the form's own
+  // checks, so a form they stopped stays stopped.
+  window.fdqTurnstileReady = () => document.dispatchEvent(new Event('fdq:turnstile'));
+  document.addEventListener('submit', (event) => {
+    const form = event.target;
+    const token = form.querySelector('[name="cf-turnstile-response"]');
+    if (event.defaultPrevented || !form.querySelector('.cf-turnstile') || (token && token.value)) return;
+    event.preventDefault();
+    const go = () => { clearTimeout(timer); form.requestSubmit ? form.requestSubmit() : form.submit(); };
+    // If the check never finishes, send it anyway and let the server say so.
+    const timer = setTimeout(() => form.submit(), 8000);
+    document.addEventListener('fdq:turnstile', go, { once: true });
+  });
+
   const hamburger = document.getElementById('hamburger');
   const navLinks = document.getElementById('navLinks');
   hamburger.addEventListener('click', () => {

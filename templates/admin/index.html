@@ -1,0 +1,7 @@
+{% extends "admin/index.html" %}
+{% load fdq_admin %}
+
+{% block content %}
+  {% if perms.core.view_waitlistsignup %}{% waitlist_panel %}{% endif %}
+  {{ block.super }}
+{% endblock %}

@@ -2,6 +2,8 @@
 
 {% block title %}Contact | Field Driven Quality{% endblock %}
 
+{% block extra_head %}{% if turnstile_site_key %}<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>{% endif %}{% endblock %}
+
 {% block extra_styles %}
 .contact-grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: clamp(2rem, 6vw, 5rem); align-items: start; }
 @media (max-width: 760px) { .contact-grid { grid-template-columns: 1fr; } }
@@ -10,6 +12,7 @@
 .contact-note { color: var(--ink-2); }
 .contact-note p { margin-bottom: 1rem; }
 .contact-note a { color: var(--accent-ink); }
+.contact-trap { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
 .form-message { background: #fdecea; border: 1px solid #f1b8b3; border-radius: var(--radius); padding: 0.9rem 1rem; margin-bottom: 1.25rem; font-size: 0.95rem; }
 {% endblock %}
 
@@ -56,6 +59,12 @@
           <label for="c-message">Message</label>
           <textarea id="c-message" name="message" required></textarea>
         </div>
+        <div class="contact-trap" aria-hidden="true">
+          <label for="c-website">Leave this empty</label>
+          <input id="c-website" type="text" name="website" tabindex="-1" autocomplete="off" />
+        </div>
+        {% include 'core/_turnstile.html' with action='contact' %}
+        {% if form_error %}<div class="form-message" role="alert">{{ form_error }}</div>{% endif %}
         <button type="submit" class="btn-primary">Send message</button>
       </form>
     </div>

@@ -1,8 +1,10 @@
 import re
+from unittest import mock
 from urllib.parse import urlparse
 
 from django.contrib.auth import get_user_model
 from django.core import mail
+from django.core.cache import cache
 from django.test import Client, TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
@@ -12,6 +14,14 @@ from lms.models import Certificate, Tier
 from .analytics import VISITOR_COOKIE
 from .models import SiteEvent, WaitlistSignup
 from .views import LESSON_1_VIDEO
+
+
+class TestCase(TestCase):
+    """Every test starts with an empty cache, so the forms' rate limit doesn't carry over."""
+
+    def setUp(self):
+        super().setUp()
+        cache.clear()
 
 
 class WaitlistTests(TestCase):
@@ -353,3 +363,133 @@ class WaitlistSmtpTests(TestCase):
         self.assertIn('PO Box 100', mail.outbox[0].body)
         for name in ('home', 'privacy', 'waitlist'):
             self.assertNotContains(self.client.get(reverse(name)), 'PO Box 100')
+
+
+TURNSTILE_ON = {'TURNSTILE_SITE_KEY': '1x00000000000000000000AA', 'TURNSTILE_SECRET_KEY': 'test-secret'}
+
+
+def cloudflare_says(**result):
+    """A stand-in for urlopen that answers like Turnstile's siteverify."""
+    import io
+    import json as _json
+
+    def fake_urlopen(url, data=None, timeout=None):
+        fake_urlopen.sent = data
+        return io.BytesIO(_json.dumps(result).encode())
+    return fake_urlopen
+
+
+@override_settings(**TURNSTILE_ON)
+class TurnstileTests(TestCase):
+    def post(self, **extra):
+        return self.client.post(reverse('waitlist'), {'email': 'hand@example.com', 'website': '', **extra},
+                                HTTP_X_FORWARDED_FOR='203.0.113.9, 10.0.0.1')
+
+    def test_widget_and_script_show_when_keys_are_set(self):
+        response = self.client.get(reverse('waitlist'))
+        self.assertContains(response, 'challenges.cloudflare.com/turnstile/v0/api.js')
+        self.assertContains(response, 'data-sitekey="1x00000000000000000000AA"')
+
+    def test_missing_token_is_refused_with_a_message(self):
+        response = self.post()
+        self.assertContains(response, "We couldn&#x27;t confirm you&#x27;re a person.")
+        self.assertFalse(WaitlistSignup.objects.exists())
+        self.assertEqual(SiteEvent.objects.get(name='spam_blocked').props['reason'], 'turnstile')
+
+    def test_confirmed_token_signs_up_and_sends_the_visitor_ip(self):
+        fake = cloudflare_says(success=True)
+        with mock.patch('core.spam.urllib.request.urlopen', fake):
+            response = self.post(**{'cf-turnstile-response': 'token-from-widget'})
+        self.assertRedirects(response, reverse('waitlist_thanks') + '#lesson', fetch_redirect_response=False)
+        self.assertTrue(WaitlistSignup.objects.exists())
+        self.assertIn(b'remoteip=203.0.113.9', fake.sent)
+
+    def test_rejected_token_is_refused(self):
+        with mock.patch('core.spam.urllib.request.urlopen', cloudflare_says(success=False, **{'error-codes': ['invalid-input-response']})):
+            self.post(**{'cf-turnstile-response': 'forged'})
+        self.assertFalse(WaitlistSignup.objects.exists())
+
+    def test_our_own_bad_keys_or_an_outage_never_lock_people_out(self):
+        with mock.patch('core.spam.urllib.request.urlopen', cloudflare_says(success=False, **{'error-codes': ['invalid-input-secret']})):
+            self.post(**{'cf-turnstile-response': 't'}, email='one@example.com')
+        with mock.patch('core.spam.urllib.request.urlopen', side_effect=OSError('down')):
+            self.post(**{'cf-turnstile-response': 't'}, email='two@example.com')
+        self.assertEqual(WaitlistSignup.objects.count(), 2)
+
+    def test_contact_and_resend_forms_carry_the_widget(self):
+        self.assertContains(self.client.get(reverse('contact')), 'data-action="contact"')
+        with override_settings(**EMAIL_ON):
+            self.assertContains(self.client.get(reverse('waitlist_resend')), 'data-action="resend"')
+
+
+class BotLimitTests(TestCase):
+    def test_one_connection_is_limited_to_eight_signups_an_hour(self):
+        for n in range(9):
+            response = self.client.post(reverse('waitlist'), {'email': f'hand{n}@example.com', 'website': ''})
+        self.assertContains(response, 'Too many tries from this connection.')
+        self.assertEqual(WaitlistSignup.objects.count(), 8)
+        self.assertEqual(SiteEvent.objects.filter(name='spam_blocked', props__reason='rate_limit').count(), 1)
+
+    def test_honeypot_is_counted(self):
+        self.client.post(reverse('waitlist'), {'email': 'bot@example.com', 'website': 'http://spam.example'})
+        self.assertEqual(SiteEvent.objects.get(name='spam_blocked').props, {'form': 'waitlist', 'reason': 'honeypot'})
+
+    def test_contact_honeypot_sends_nothing(self):
+        response = self.client.post(reverse('contact'), {'name': 'Bot', 'email': 'bot@example.com',
+                                                         'message': 'buy now', 'website': 'x'})
+        self.assertRedirects(response, reverse('contact_thanks'))
+        self.assertEqual(len(mail.outbox), 0)
+
+    def test_signup_remembers_the_browser_it_came_from(self):
+        self.client.get(reverse('waitlist'), HTTP_USER_AGENT=FACEBOOK_PHONE)
+        self.client.post(reverse('waitlist'), {'email': 'hand@example.com', 'website': ''}, HTTP_USER_AGENT=FACEBOOK_PHONE)
+        signup = WaitlistSignup.objects.get()
+        self.assertEqual((signup.device, signup.in_app), ('phone', 'facebook'))
+        self.assertEqual(signup.visitor_id, SiteEvent.objects.filter(name='page_view').first().visitor_id)
+
+
+class AdminTests(TestCase):
+    def setUp(self):
+        super().setUp()
+        self.staff = get_user_model().objects.create_superuser(email='boss@example.com', password='pw-for-tests-only',
+                                                               first_name='B', last_name='B')
+        self.client.get(reverse('waitlist') + '?utm_source=facebook&utm_campaign=cm03')
+        self.client.post(reverse('waitlist'), {'email': 'hand@example.com', 'website': ''})
+        self.client.post(reverse('waitlist'), {'email': 'bot@example.com', 'website': 'x'})
+        self.client.force_login(self.staff)
+
+    def test_home_shows_the_waitlist_panel_in_fdq_colors(self):
+        response = self.client.get(reverse('admin:index'))
+        self.assertContains(response, 'Tier 1 waitlist')
+        self.assertContains(response, '--header-bg: #17191b;')
+        self.assertNotContains(response, 'dark_mode.css')
+
+    def test_signup_list_has_the_summary(self):
+        response = self.client.get(reverse('admin:core_waitlistsignup_changelist'))
+        self.assertContains(response, 'On the list now')
+        self.assertContains(response, 'Hidden field filled')
+        self.assertContains(response, 'hand@example.com')
+
+    def test_signup_page_shows_its_visits(self):
+        signup = WaitlistSignup.objects.get(email='hand@example.com')
+        response = self.client.get(reverse('admin:core_waitlistsignup_change', args=[signup.pk]))
+        self.assertContains(response, 'class="fdq-trail"')
+        self.assertContains(response, 'cm03')
+
+    def test_events_are_read_only(self):
+        response = self.client.get(reverse('admin:core_siteevent_changelist'))
+        self.assertContains(response, 'page_view')
+        self.assertEqual(self.client.get(reverse('admin:core_siteevent_add')).status_code, 403)
+
+    def test_csv_export_carries_the_new_columns(self):
+        response = self.client.post(reverse('admin:core_waitlistsignup_changelist'), {
+            'action': 'export_csv', '_selected_action': list(WaitlistSignup.objects.values_list('pk', flat=True)),
+        })
+        self.assertIn(b'device,in_app,created_at,lesson_email_sent_at,confirmed_at,unsubscribed_at', response.content)
+
+
+class PageTitleTests(TestCase):
+    def test_titles_are_plain_text(self):
+        for name in ('home', 'waitlist', 'about', 'contact', 'privacy'):
+            title = re.search(r'<title>(.*?)</title>', self.client.get(reverse(name)).content.decode(), re.S).group(1)
+            self.assertNotIn('{', title, name)

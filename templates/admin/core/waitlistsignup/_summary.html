@@ -1,0 +1,24 @@
+<div class="fdq-summary">
+  <div class="fdq-card"><b>{{ summary.on_list }}</b><span>On the list now</span></div>
+  <div class="fdq-card"><b>{{ summary.today }}</b><span>New today</span></div>
+  <div class="fdq-card"><b>{{ summary.week }}</b><span>New in 7 days</span></div>
+  <div class="fdq-card"><b>{{ summary.month }}</b><span>New in 30 days</span></div>
+  <div class="fdq-card"><b>{% if summary.opened_rate is not None %}{{ summary.opened_rate }}%{% else %}&ndash;{% endif %}</b><span>Opened the lesson email ({{ summary.opened }} of {{ summary.sent }})</span></div>
+  <div class="fdq-card"><b>{{ summary.left }}</b><span>Left the list</span></div>
+  <div class="fdq-card"><b>{{ summary.spam_week_total }}</b><span>Bot sign-ups stopped in 7 days</span></div>
+</div>
+<div class="fdq-lists">
+  <div>
+    <h3>What they do now</h3>
+    <ul>{% for label, n in summary.trades %}<li><span>{{ label }}</span><b>{{ n }}</b></li>{% empty %}<li><span>No signups yet</span></li>{% endfor %}</ul>
+  </div>
+  <div>
+    <h3>Where they came from</h3>
+    <ul>{% for source, n in summary.sources %}<li><span>{{ source }}</span><b>{{ n }}</b></li>{% empty %}<li><span>No signups yet</span></li>{% endfor %}</ul>
+  </div>
+  <div>
+    <h3>Bots stopped in 7 days, by check</h3>
+    <ul>{% for reason, n in summary.spam_week %}<li><span>{% if reason == 'honeypot' %}Hidden field filled{% elif reason == 'turnstile' %}Failed Cloudflare check{% elif reason == 'rate_limit' %}Too many from one connection{% else %}{{ reason }}{% endif %}</span><b>{{ n }}</b></li>{% empty %}<li><span>None</span></li>{% endfor %}</ul>
+  </div>
+</div>
+<p class="fdq-links"><a href="{{ summary.funnel_url }}">Visitor funnel</a><a href="{% url 'admin:core_siteevent_changelist' %}">All site events</a><a href="{% url 'admin:core_siteevent_changelist' %}?name__exact=spam_blocked">Stopped bots</a></p>

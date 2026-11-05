@@ -14,11 +14,12 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
 from .forms import ContactForm, WaitlistForm, SOURCE_FIELDS
-from .analytics import record
+from .analytics import classify, record
 from .emails import (
     LESSON_SALT, UNSUBSCRIBE_SALT, send_lesson_email, signup_from_token, waitlist_email_ready,
 )
 from .models import WaitlistSignup
+from .spam import passes_turnstile, rate_limited
 
 logger = logging.getLogger(__name__)
 
@@ -59,9 +60,15 @@ def contact_thanks(request):
     return render(request, 'core/contact_thanks.html')
 
 def contact_view(request):
+    form_error = ''
     if request.method == 'POST':
         form = ContactForm(request.POST)
-        if form.is_valid():
+        if form.is_valid() and form.cleaned_data['website']:
+            # A filled honeypot gets the thanks page and no email.
+            record(request, 'spam_blocked', form='contact', reason='honeypot')
+            return redirect('contact_thanks')
+        form_error = _bot_check(request, 'contact', limit=5)
+        if form.is_valid() and not form_error:
             name = form.cleaned_data['name']
             email = form.cleaned_data['email']
             company = form.cleaned_data.get('company', '')
@@ -94,7 +101,22 @@ def contact_view(request):
     else:
         form = ContactForm()
 
-    return render(request, 'core/contact.html', {'form': form})
+    return render(request, 'core/contact.html', {'form': form, 'form_error': form_error})
+
+
+ROBOT_CHECK_FAILED = "We couldn't confirm you're a person. Wait for the check above the button to finish, then try again."
+TOO_MANY = 'Too many tries from this connection. Try again in an hour.'
+
+
+def _bot_check(request, form_name, limit):
+    """The message to show if this submission fails Turnstile or the rate limit, else ''."""
+    if not passes_turnstile(request):
+        record(request, 'spam_blocked', form=form_name, reason='turnstile')
+        return ROBOT_CHECK_FAILED
+    if rate_limited(request, form_name, limit, 3600):
+        record(request, 'spam_blocked', form=form_name, reason='rate_limit')
+        return TOO_MANY
+    return ''
 
 
 def _visit_source(request):
@@ -107,16 +129,28 @@ def _visit_source(request):
 
 
 def waitlist(request):
+    form_error = ''
     if request.method == 'POST':
         form = WaitlistForm(request.POST)
         if form.is_valid():
             data = form.cleaned_data
-            # A filled honeypot gets the same thanks page but nothing is saved.
-            if not data['website']:
+            if data['website']:
+                # A filled honeypot gets the same thanks page but nothing is saved.
+                record(request, 'spam_blocked', form='waitlist', reason='honeypot')
+                return redirect(reverse('waitlist_thanks') + '#lesson')
+            form_error = _bot_check(request, 'waitlist', limit=8)
+            if not form_error:
+                device, in_app = classify(request.META.get('HTTP_USER_AGENT', ''))
                 # First touch wins: a repeat signup keeps its original source.
                 signup, created = WaitlistSignup.objects.get_or_create(
                     email=data['email'],
-                    defaults={'trade': data['trade'], **{key: data[key] for key in SOURCE_FIELDS}},
+                    defaults={
+                        'trade': data['trade'],
+                        'visitor_id': request.visitor_id,
+                        'device': device,
+                        'in_app': in_app,
+                        **{key: data[key] for key in SOURCE_FIELDS},
+                    },
                 )
                 if signup.unsubscribed_at:
                     # Signing up again is asking to be back on the list.
@@ -127,14 +161,15 @@ def waitlist(request):
                 request.session[LESSON_EMAILED_KEY] = send_lesson_email(request, signup) or bool(signup.lesson_email_sent_at)
                 record(request, 'signup_success', is_new=created, trade=signup.trade,
                        utm_campaign=signup.utm_campaign, utm_source=signup.utm_source)
-            # Its own fragment, or the browser carries the form's #sign-up along.
-            return redirect(reverse('waitlist_thanks') + '#lesson')
-        record(request, 'form_error', field='email',
-               code='empty' if not request.POST.get('email', '').strip() else 'invalid')
+                # Its own fragment, or the browser carries the form's #sign-up along.
+                return redirect(reverse('waitlist_thanks') + '#lesson')
+        else:
+            record(request, 'form_error', field='email',
+                   code='empty' if not request.POST.get('email', '').strip() else 'invalid')
     else:
         form = WaitlistForm(initial=_visit_source(request))
 
-    return render(request, 'core/waitlist.html', {'form': form})
+    return render(request, 'core/waitlist.html', {'form': form, 'form_error': form_error})
 
 
 def _session_signup(request):
@@ -186,14 +221,21 @@ def waitlist_resend(request):
     if not waitlist_email_ready():
         return redirect(reverse('waitlist') + '#sign-up')
     sent = False
+    form_error = ''
     if request.method == 'POST':
-        email = request.POST.get('email', '').strip().lower()
-        signup = WaitlistSignup.objects.filter(email=email).first() if email else None
-        if signup:
-            send_lesson_email(request, signup)
-        record(request, 'lesson_resend')
-        sent = True
-    return render(request, 'core/waitlist_resend.html', {'sent': sent})
+        if request.POST.get('website'):
+            record(request, 'spam_blocked', form='resend', reason='honeypot')
+            sent = True
+        else:
+            form_error = _bot_check(request, 'resend', limit=5)
+        if not sent and not form_error:
+            email = request.POST.get('email', '').strip().lower()
+            signup = WaitlistSignup.objects.filter(email=email).first() if email else None
+            if signup:
+                send_lesson_email(request, signup)
+            record(request, 'lesson_resend')
+            sent = True
+    return render(request, 'core/waitlist_resend.html', {'sent': sent, 'form_error': form_error})
 
 
 @csrf_exempt

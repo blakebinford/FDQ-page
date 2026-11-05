@@ -8,6 +8,8 @@ class ContactForm(forms.Form):
     company = forms.CharField(max_length=200, required=False)
     interest = forms.CharField(max_length=200, required=False)
     message = forms.CharField(widget=forms.Textarea())
+    # Honeypot: hidden from people, filled in by bots.
+    website = forms.CharField(required=False)
 
 
 SOURCE_FIELDS = ('utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'referrer_host')

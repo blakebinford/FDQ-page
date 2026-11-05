@@ -9,6 +9,8 @@
 <meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{% url 'lesson_1_poster' %}" />
 {% endblock %}
 
+{% block extra_head %}{% if turnstile_site_key %}<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>{% endif %}{% endblock %}
+
 {% block extra_styles %}
 /* On a phone the order is intro, form, facts, so the field and button sit in the first screen. */
 .wl-hero {
@@ -144,6 +146,8 @@
       <input type="hidden" name="utm_campaign" value="{{ form.utm_campaign.value|default_if_none:'' }}" />
       <input type="hidden" name="utm_content" value="{{ form.utm_content.value|default_if_none:'' }}" />
       <input type="hidden" name="referrer_host" value="{{ form.referrer_host.value|default_if_none:'' }}" />
+      {% include 'core/_turnstile.html' with action='waitlist' %}
+      {% if form_error %}<p class="wl-error" role="alert">{{ form_error }}</p>{% endif %}
       <button type="submit" class="btn-primary" id="wl-submit">Get lesson 1 free</button>
       <p class="wl-fine">Plays on the next page{% if waitlist_email_ready %}, and we email you the link{% endif %}. Tier 1 isn't open yet: this puts you on the list. It doesn't enroll you or cost anything. <a href="{% url 'privacy' %}">Privacy</a></p>
     </form>

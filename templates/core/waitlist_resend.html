@@ -4,6 +4,8 @@
 
 {% block meta_tags %}<meta name="robots" content="noindex" />{% endblock %}
 
+{% block extra_head %}{% if turnstile_site_key %}<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>{% endif %}{% endblock %}
+
 {% block extra_styles %}
 .resend-form { display: flex; flex-direction: column; gap: 1rem; text-align: left; }
 .resend-form .btn-primary { width: 100%; }
@@ -25,6 +27,12 @@
           <label for="resend-email">Email</label>
           <input id="resend-email" type="email" name="email" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false" required />
         </div>
+        <div class="wl-trap" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;">
+          <label for="resend-website">Leave this empty</label>
+          <input id="resend-website" type="text" name="website" tabindex="-1" autocomplete="off" />
+        </div>
+        {% include 'core/_turnstile.html' with action='resend' %}
+        {% if form_error %}<p role="alert" style="font-weight:600;color:var(--danger);">{{ form_error }}</p>{% endif %}
         <button type="submit" class="btn-primary">Send the link</button>
       </form>
     {% endif %}

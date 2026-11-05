@@ -1,0 +1,123 @@
+{% extends "admin/base.html" %}
+
+{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | FDQ admin{% endblock %}
+
+{# The site is light only, and so is its admin: no dark-mode stylesheet or theme switcher. #}
+{% block dark-mode-vars %}{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  /* FDQ's tokens from templates/base.html, mapped onto Django admin's variables. */
+  :root {
+    --primary: #4c5156;
+    --secondary: #17191b;
+    --accent: #f78331;
+    --primary-fg: #fbfaf7;
+
+    --body-fg: #17191b;
+    --body-bg: #fbfaf7;
+    --body-quiet-color: #6a6f74;
+    --body-medium-color: #4c5156;
+    --body-loud-color: #17191b;
+
+    --header-color: #fbfaf7;
+    --header-branding-color: #f78331;
+    --header-bg: #17191b;
+    --header-link-color: #fbfaf7;
+
+    --breadcrumbs-fg: #4c5156;
+    --breadcrumbs-link-fg: #17191b;
+    --breadcrumbs-bg: #f1efe9;
+
+    --link-fg: #a8490b;
+    --link-hover-color: #8a3c09;
+    --link-selected-fg: #17191b;
+
+    --hairline-color: #e7e3da;
+    --border-color: #c4bfb3;
+
+    --error-fg: #b3261e;
+    --message-success-bg: #eef6ef;
+    --message-warning-bg: #fbf1e4;
+    --message-error-bg: #fdecea;
+
+    --darkened-bg: #f1efe9;
+    --selected-bg: #f6e6d8;
+    --selected-row: #fdf1e6;
+
+    --button-fg: #17191b;
+    --button-bg: #e7e3da;
+    --button-hover-bg: #dcd8ce;
+    --default-button-bg: #f78331;
+    --default-button-hover-bg: #ea7322;
+    --close-button-bg: #dcd8ce;
+    --close-button-hover-bg: #c4bfb3;
+    --delete-button-bg: #b3261e;
+    --delete-button-hover-bg: #8f1d17;
+
+    --object-tools-fg: #fbfaf7;
+    --object-tools-bg: #4c5156;
+    --object-tools-hover-bg: #17191b;
+
+    --font-family-primary: 'Public Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --font-family-monospace: 'IBM Plex Mono', ui-monospace, Menlo, monospace;
+  }
+
+  .theme-toggle { display: none; }
+  #header { padding-top: 12px; padding-bottom: 12px; }
+  #site-name a { font-weight: 800; letter-spacing: -0.01em; }
+  #site-name a b { color: var(--accent); }
+  #site-name a span { color: var(--header-color); font-weight: 600; font-size: 0.8em; margin-left: 0.35em; }
+  #content h1 { font-weight: 800; letter-spacing: -0.015em; }
+  .module h2, .module caption, .inline-group h2 { background: var(--darkened-bg); color: var(--body-fg); font-weight: 700; }
+  .module caption a.section, .module h2 a { color: var(--body-fg); }
+  .submit-row a.deletelink, .delete-confirmation form input[type="submit"] { color: #fff; }
+  #changelist-filter h2 { background: var(--darkened-bg); color: var(--body-fg); }
+  #changelist-filter li.selected a { color: var(--accent-ink, #a8490b); }
+  .button, input[type=submit], input[type=button], .submit-row input, a.button { border-radius: 6px; font-weight: 600; }
+  .login .submit-row input { background: var(--default-button-bg); color: var(--button-fg); padding: 0.6rem 1.4rem; }
+  .login .submit-row input:hover { background: var(--default-button-hover-bg); }
+
+  /* Numbers above the waitlist list and on the admin home page. */
+  .fdq-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr)); gap: 0.75rem; margin: 0 0 1.25rem; }
+  .fdq-card { background: #fff; border: 1px solid var(--hairline-color); border-radius: 8px; padding: 0.8rem 1rem; }
+  .fdq-card b { display: block; font: 600 1.6rem/1.2 var(--font-family-monospace); color: var(--body-fg); }
+  .fdq-card span { font-size: 0.8rem; color: var(--body-quiet-color); }
+  .fdq-lists { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 0.75rem; margin: 0 0 1.5rem; }
+  .fdq-lists div { background: #fff; border: 1px solid var(--hairline-color); border-radius: 8px; padding: 0.8rem 1rem; }
+  .fdq-lists h3 { margin: 0 0 0.4rem; font-size: 0.8rem; font-weight: 700; color: var(--body-quiet-color); text-transform: none; }
+  .fdq-lists ul { margin: 0; padding: 0; list-style: none; }
+  .fdq-lists li { display: flex; justify-content: space-between; gap: 1rem; padding: 0.2rem 0; font-size: 0.85rem; border-bottom: 1px solid var(--hairline-color); list-style: none; }
+  .fdq-lists li:last-child { border-bottom: none; }
+  .fdq-lists li b { font-family: var(--font-family-monospace); font-weight: 500; }
+  .fdq-links { margin: 0 0 1.25rem; font-size: 0.9rem; }
+  .fdq-links a { margin-right: 1.25rem; font-weight: 600; }
+  .fdq-trail { border-collapse: collapse; font-size: 0.82rem; min-width: 32rem; }
+  .fdq-trail th, .fdq-trail td { text-align: left; padding: 0.3rem 0.8rem 0.3rem 0; border-bottom: 1px solid var(--hairline-color); }
+  .fdq-trail td:first-child { white-space: nowrap; font-family: var(--font-family-monospace); }
+</style>
+{% endblock %}
+
+{% block branding %}
+<div id="site-name"><a href="{% url 'admin:index' %}"><b>FDQ</b><span>admin</span></a></div>
+{% endblock %}
+
+{% block nav-global %}{% endblock %}
+
+{% block userlinks %}
+  <a href="{% url 'home' %}">View site</a> /
+  <a href="{% url 'staff_funnel' %}">Funnel</a> /
+  {% if user.is_active and user.is_staff %}
+    {% url 'django-admindocs-docroot' as docsroot %}
+    {% if docsroot %}<a href="{{ docsroot }}">Documentation</a> /{% endif %}
+  {% endif %}
+  {% if user.has_usable_password %}<a href="{% url 'admin:password_change' %}">Change password</a> /{% endif %}
+  <form id="logout-form" method="post" action="{% url 'admin:logout' %}">
+    {% csrf_token %}
+    <button type="submit">Log out</button>
+  </form>
+{% endblock %}
