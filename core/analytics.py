@@ -6,7 +6,7 @@ import re
 import uuid
 from urllib.parse import urlparse
 
-from .models import SiteEvent
+from .models import InternalVisitor, SiteEvent
 
 logger = logging.getLogger(__name__)
 
@@ -14,7 +14,7 @@ VISITOR_COOKIE = 'fdq_vid'
 VISITOR_COOKIE_AGE = 365 * 24 * 60 * 60
 
 # Paths that aren't pages a visitor reads.
-SKIP_PREFIXES = ('/admin/', '/static/', '/media/', '/e/', '/staff/', '/ckeditor', '/certifications/webhooks/')
+SKIP_PREFIXES = ('/admin/', '/static/', '/media/', '/e/', '/staff/', '/not-me/', '/ckeditor', '/certifications/webhooks/')
 BOT_UA = re.compile(
     r'bot|crawl|spider|slurp|preview|facebookexternalhit|embedly|curl|wget|python|headless|monitor'
     r'|render/|health|uptime|kube-probe|go-http-client|okhttp|axios|node-fetch|libwww|httpclient|java/',
@@ -25,6 +25,11 @@ PREFETCH_HEADERS = ('Sec-Purpose', 'Purpose', 'X-Purpose', 'X-Moz')
 UTM_KEYS = ('utm_source', 'utm_medium', 'utm_campaign', 'utm_content')
 # The visit's first tagged or referred landing, kept so a signup a few pages later still has it.
 LANDING_SOURCE_KEY = 'landing_source'
+
+
+def internal_visitor_ids():
+    """Our own browsers, for the staff reports to leave out."""
+    return InternalVisitor.objects.values('visitor_id')
 
 
 def classify(user_agent):
@@ -116,6 +121,13 @@ class VisitorMiddleware:
                 _record_page_view(request)
             except Exception:
                 logger.exception('Could not record a page view')
+        # A browser signed in as staff is one of ours.
+        user = getattr(request, 'user', None)
+        if user is not None and user.is_authenticated and user.is_staff:
+            try:
+                InternalVisitor.objects.get_or_create(visitor_id=visitor_id)
+            except Exception:
+                logger.exception('Could not mark a staff browser')
         if new_visitor:
             response.set_cookie(
                 VISITOR_COOKIE, visitor_id, max_age=VISITOR_COOKIE_AGE,

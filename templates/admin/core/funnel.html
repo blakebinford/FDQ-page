@@ -37,7 +37,7 @@
       </tbody>
     </table>
   </div>
-  <p class="vz-note">Each bar is a share of everyone who visited in the range. Bots, link previews and prefetches aren't counted, and nothing before analytics went live on Nov 5, 2026 is.</p>
+  <p class="vz-note">Each bar is a share of everyone who visited in the range. Bots, link previews and prefetches aren't counted, and nothing before analytics went live on Nov 5, 2026 is. {{ own_browsers }} of your own browser{{ own_browsers|pluralize }} {{ own_browsers|pluralize:"is,are" }} left out (any browser signed in here, and any that opened <a href="{% url 'not_me' %}">/not-me/</a>).</p>
 </div>
 
 <div class="vz-grid">

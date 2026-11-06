@@ -55,7 +55,7 @@
       </tbody>
     </table>
   </div>
-  <p class="vz-note">A visitor is one browser, counted once a day. Bots, link previews and Facebook's own prefetching aren't counted. Facebook and Instagram include visits from their in-app browsers even when no link tag says so.</p>
+  <p class="vz-note">A visitor is one browser, counted once a day. Bots, link previews and Facebook's own prefetching aren't counted. Facebook and Instagram include visits from their in-app browsers even when no link tag says so. {{ own_browsers }} of your own browser{{ own_browsers|pluralize }} {{ own_browsers|pluralize:"is,are" }} left out (any browser signed in here, and any that opened <a href="{% url 'not_me' %}">/not-me/</a>).</p>
 </div>
 
 <div class="vz-grid">

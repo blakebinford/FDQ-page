@@ -13,7 +13,7 @@ from django.utils import timezone
 from lms.models import Certificate, Tier
 
 from .analytics import VISITOR_COOKIE
-from .models import SiteEvent, WaitlistSignup
+from .models import InternalVisitor, SiteEvent, WaitlistSignup
 from .views import LESSON_1_VIDEO
 
 
@@ -298,8 +298,10 @@ class AnalyticsTests(TestCase):
         staff = get_user_model().objects.create_user(email='staff@example.com', password='pw-for-tests-only',
                                                      first_name='S', last_name='T', is_staff=True)
         self.client.force_login(staff)
-        self.client.get(reverse('waitlist') + '?utm_campaign=cm03&utm_source=facebook')
-        self.client.post(reverse('waitlist'), {'email': 'hand@example.com', 'website': ''})
+        # A visitor on their own browser; the staff browser's visits are left out.
+        visitor = Client()
+        visitor.get(reverse('waitlist') + '?utm_campaign=cm03&utm_source=facebook')
+        visitor.post(reverse('waitlist'), {'email': 'hand@example.com', 'website': ''})
         response = self.client.get(reverse('staff_funnel') + '?days=7')
         self.assertContains(response, 'Visitor funnel')
         # It sits inside the admin, with its header and breadcrumbs.
@@ -515,7 +517,7 @@ class VisitorsPageTests(TestCase):
         self.assertEqual(self.client.get(reverse('staff_visitors')).status_code, 302)
 
     def test_counts_visitors_by_source_and_hour(self):
-        self.client.get(reverse('waitlist') + '?utm_source=facebook&utm_campaign=reel-12', HTTP_USER_AGENT=FACEBOOK_PHONE)
+        Client().get(reverse('waitlist') + '?utm_source=facebook&utm_campaign=reel-12', HTTP_USER_AGENT=FACEBOOK_PHONE)
         Client().get(reverse('home'), HTTP_REFERER='https://provenhand.com/feed/')
         Client().get(reverse('home'), HTTP_USER_AGENT='Render/1.0')
         Client().get(reverse('home'), HTTP_SEC_PURPOSE='prefetch')
@@ -531,6 +533,50 @@ class VisitorsPageTests(TestCase):
     def test_admin_home_links_the_visitors_page(self):
         self.client.force_login(self.staff)
         self.assertContains(self.client.get(reverse('admin:index')), reverse('staff_visitors'))
+
+
+class OwnVisitsTests(TestCase):
+    """Our own browsers drop out of the visitor reports, past visits included."""
+
+    def setUp(self):
+        super().setUp()
+        self.staff = get_user_model().objects.create_superuser(email='boss@example.com', password='pw-for-tests-only',
+                                                               first_name='B', last_name='B')
+        self.boss = Client()
+        self.boss.force_login(self.staff)
+
+    def visitors_today(self):
+        return self.boss.get(reverse('staff_visitors') + '?days=7').context['today_visitors']
+
+    def test_not_me_leaves_out_past_and_future_visits_until_undone(self):
+        phone = Client()
+        phone.get(reverse('home'))
+        Client().get(reverse('home'))
+        self.assertEqual(self.visitors_today(), 2)
+
+        self.assertContains(phone.get(reverse('not_me')), "Don't count this browser")
+        response = phone.post(reverse('not_me'))
+        self.assertContains(response, "This browser isn't counted.")
+        phone.get(reverse('about'))
+        self.assertEqual(self.visitors_today(), 1)
+        # The page itself isn't a visit.
+        self.assertFalse(SiteEvent.objects.filter(path='/not-me/').exists())
+
+        phone.post(reverse('not_me'), {'count_again': '1'})
+        self.assertFalse(InternalVisitor.objects.filter(visitor_id=phone.cookies[VISITOR_COOKIE].value).exists())
+        self.assertEqual(self.visitors_today(), 2)
+
+    def test_a_browser_signed_in_as_staff_is_left_out(self):
+        self.boss.get(reverse('home'))
+        Client().get(reverse('home'))
+        self.assertTrue(InternalVisitor.objects.filter(visitor_id=self.boss.cookies[VISITOR_COOKIE].value).exists())
+        self.assertEqual(self.visitors_today(), 1)
+        funnel = self.boss.get(reverse('staff_funnel') + '?days=7')
+        self.assertEqual(funnel.context['steps'][0][1], 1)
+        self.assertContains(funnel, '1 of your own browser is left out')
+
+    def test_robots_keeps_it_out_of_search(self):
+        self.assertContains(self.client.get(reverse('robots')), 'Disallow: /not-me/')
 
 
 class SourceLabelTests(TestCase):

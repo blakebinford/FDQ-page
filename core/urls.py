@@ -1,7 +1,7 @@
 from django.urls import path
 from .insights import beacon, funnel, test_alert, visitors
 from .views import (
-    home, about, contact_view, contact_thanks, privacy,
+    home, about, contact_view, contact_thanks, privacy, not_me,
     waitlist, waitlist_thanks, waitlist_trade, waitlist_resend, lesson_link, unsubscribe,
     field_sheet, field_sheet_preview,
     lesson_1_video, lesson_1_captions, lesson_1_poster, lesson_1_player_poster,
@@ -14,6 +14,7 @@ urlpatterns = [
     path('contact/', contact_view, name='contact'),
     path('contact/thanks/', contact_thanks, name='contact_thanks'),
     path('privacy/', privacy, name='privacy'),
+    path('not-me/', not_me, name='not_me'),
     path('tier-1/', waitlist, name='waitlist'),
     path('tier-1/thanks/', waitlist_thanks, name='waitlist_thanks'),
     path('tier-1/thanks/trade/', waitlist_trade, name='waitlist_trade'),

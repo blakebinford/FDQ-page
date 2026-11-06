@@ -14,8 +14,8 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
 from .alerts import alerts_enabled, send_alert
-from .analytics import record, source_label
-from .models import SiteEvent, WaitlistSignup
+from .analytics import internal_visitor_ids, record, source_label
+from .models import InternalVisitor, SiteEvent, WaitlistSignup
 
 # What the page may report. Anything else is dropped.
 CLIENT_EVENTS = {
@@ -62,7 +62,7 @@ def funnel(request):
     days = request.GET.get('days', '30')
     days = int(days) if days in ('7', '30', '90') else 30
     since = timezone.now() - timedelta(days=days)
-    events = SiteEvent.objects.filter(created_at__gte=since)
+    events = SiteEvent.objects.filter(created_at__gte=since).exclude(visitor_id__in=internal_visitor_ids())
 
     steps = [
         ('Visited the site', _visitors(events, 'page_view')),
@@ -115,6 +115,7 @@ def funnel(request):
         'confirmed_in_range': signups.exclude(confirmed_at=None).count(),
         'unsubscribed_total': WaitlistSignup.objects.exclude(unsubscribed_at=None).count(),
         'latest': WaitlistSignup.objects.all()[:25],
+        'own_browsers': InternalVisitor.objects.count(),
     })
 
 
@@ -131,6 +132,7 @@ def visitors(request):
 
     views = list(
         SiteEvent.objects.filter(name='page_view', created_at__gte=since).exclude(visitor_id='')
+        .exclude(visitor_id__in=internal_visitor_ids())
         .order_by('created_at')
         .values_list('created_at', 'visitor_id', 'path', 'utm_source', 'utm_campaign', 'referrer_host', 'device', 'in_app')
     )
@@ -208,6 +210,7 @@ def visitors(request):
         'by_campaign': table('campaign'),
         'by_landing': table('path'),
         'recent': [entry for _, entry in recent],
+        'own_browsers': InternalVisitor.objects.count(),
     })
 
 

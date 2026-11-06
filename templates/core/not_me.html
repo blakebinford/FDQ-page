@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block title %}Don't count me | Field Driven Quality{% endblock %}
+
+{% block meta_tags %}<meta name="robots" content="noindex" />{% endblock %}
+
+{% block content %}
+<div class="center-wrap">
+  <div class="center-box">
+    {% if hidden %}
+      <h1>This browser isn't counted.</h1>
+      <p class="center-sub">Its visits, past and future, are left out of the visitor reports. Your phone, your laptop and the Facebook app's browser each count on their own, so open this page in each one.</p>
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="count_again" value="1">
+        <div class="btn-row"><button type="submit" class="btn-secondary">Count this browser again</button></div>
+      </form>
+    {% else %}
+      <h1>Leave this browser out of the visitor counts?</h1>
+      <p class="center-sub">For the people who run the site, so their own visits don't count as traffic. Its past visits drop out too.</p>
+      <form method="post">
+        {% csrf_token %}
+        <div class="btn-row"><button type="submit" class="btn-primary">Don't count this browser</button></div>
+      </form>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

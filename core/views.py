@@ -18,7 +18,7 @@ from .analytics import LANDING_SOURCE_KEY, classify, record
 from .emails import (
     LESSON_SALT, UNSUBSCRIBE_SALT, send_lesson_email, signup_from_token, waitlist_email_ready,
 )
-from .models import WaitlistSignup
+from .models import InternalVisitor, WaitlistSignup
 from .spam import passes_turnstile, rate_limited
 from .alerts import signup_alert
 
@@ -259,6 +259,18 @@ def unsubscribe(request, token):
     return render(request, 'core/unsubscribe.html', {'done': bool(signup.unsubscribed_at), 'email': signup.email})
 
 
+def not_me(request):
+    """Leave this browser out of the staff visit reports, or count it again. One
+    browser at a time: the phone, the laptop and each app's own browser have their own."""
+    marked = InternalVisitor.objects.filter(visitor_id=request.visitor_id)
+    if request.method == 'POST' and not rate_limited(request, 'not_me', 20, 3600):
+        if request.POST.get('count_again'):
+            marked.delete()
+        else:
+            InternalVisitor.objects.get_or_create(visitor_id=request.visitor_id)
+    return render(request, 'core/not_me.html', {'hidden': marked.exists()})
+
+
 def privacy(request):
     return render(request, 'core/privacy.html')
 
@@ -338,6 +350,7 @@ def robots_txt(request):
         'Disallow: /accounts/',
         'Disallow: /apply/',
         'Disallow: /staff/',
+        'Disallow: /not-me/',
         'Disallow: /tier-1/thanks/',
         'Disallow: /tier-1/lesson/',
         'Disallow: /tier-1/leave/',

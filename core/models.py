@@ -70,3 +70,16 @@ class SiteEvent(models.Model):
 
     def __str__(self):
         return f'{self.name} {self.path}'
+
+
+class InternalVisitor(models.Model):
+    """A browser of our own, left out of the staff visit reports, its past visits included.
+
+    Marked from /not-me/, or by signing in as staff. Removing the row counts it again.
+    """
+
+    visitor_id = models.CharField(max_length=32, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.visitor_id
