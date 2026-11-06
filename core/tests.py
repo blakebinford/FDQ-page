@@ -692,6 +692,9 @@ class ClarityTests(TestCase):
         boss.force_login(staff)
         self.assertNotContains(boss.get(reverse('home')), 'clarity.ms')
 
+    def test_key_steps_go_to_clarity_as_events(self):
+        self.assertContains(self.client.get(reverse('home')), "window.clarity('event', name)")
+
     def test_forms_and_emails_are_masked(self):
         self.assertContains(self.client.get(reverse('waitlist')), 'id="wl-form" data-clarity-mask="true"')
 

@@ -373,8 +373,19 @@
 </footer>
 
 <script>
+  // The key steps also go to Microsoft Clarity as events, when it's on, so its
+  // funnels and recording filters can use them.
+  const fdqClarity = (name, props = {}) => {
+    try {
+      if (!window.clarity) return;
+      if (name === 'cta_click') name = `cta_${props.cta_id}`;
+      if (name === 'lesson_progress') name = `lesson_${props.percent}`;
+      window.clarity('event', name);
+    } catch (e) {}
+  };
   // First-party events: see core/analytics.py. Never throws.
   const fdqTrack = (name, props = {}) => {
+    fdqClarity(name, props);
     try {
       const body = JSON.stringify({ name, props: { ...props, page: location.pathname } });
       if (!(navigator.sendBeacon && navigator.sendBeacon('/e/', new Blob([body], { type: 'application/json' })))) {
@@ -418,6 +429,7 @@
     }
   };
   function fdqLater(name, props = {}) {
+    if (['form_send', 'form_abandon', 'turnstile_shown'].includes(name)) fdqClarity(name, props);
     fdqQueue.push({ name, props: { ...props, page: location.pathname } });
     if (fdqQueue.length >= 20) fdqFlush();
   }
