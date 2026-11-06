@@ -1,4 +1,4 @@
-{% autoescape off %}Here's lesson 1 of FDQ Tier 1, "Why weld maps exist" (4:35). This link opens it on any phone or computer:
+{% autoescape off %}Here's lesson 1 of FDQ Tier 1, "Why weld maps exist" (4:47). This link opens it on any phone or computer:
 
 {{ lesson_url }}
 
