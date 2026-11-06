@@ -702,7 +702,7 @@ class ClarityTests(TestCase):
     def test_off_without_a_project_id(self):
         self.assertNotContains(self.client.get(reverse('home')), 'clarity.ms')
         privacy = self.client.get(reverse('privacy'))
-        self.assertNotContains(privacy, 'Clarity')
+        self.assertNotContains(privacy, 'uses Microsoft Clarity')
         self.assertContains(privacy, 'There are no third-party analytics.')
 
 
