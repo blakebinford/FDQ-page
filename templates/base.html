@@ -13,6 +13,18 @@
   <link rel="apple-touch-icon" href="{% static 'images/apple-touch-icon.png' %}" />
   {% block meta_tags %}{% endblock %}
   {% block extra_head %}{% endblock %}
+  {% if clarity_id %}
+  <script>
+    // Microsoft Clarity: replays and heatmaps (see the privacy notice). Tagged with
+    // the site's own visitor ID so a visitor's timeline in the admin can be found there.
+    (function(c,l,a,r,i,t,y){
+      c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+      t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+      y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+    })(window, document, "clarity", "script", "{{ clarity_id|escapejs }}");
+    clarity("set", "fdq_vid", "{{ request.visitor_id|escapejs }}");
+  </script>
+  {% endif %}
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -389,6 +401,181 @@
     const timer = setTimeout(() => form.submit(), 8000);
     document.addEventListener('fdq:turnstile', go, { once: true });
   });
+  window.fdqTurnstileShown = () => fdqLater('turnstile_shown');
+
+  // Detail for the staff Pages and Forms reports: how far a page is read, every
+  // tap, the form fields people use, errors and load speed. These wait in a
+  // queue and go a batch at a time, every few seconds and when the page is left.
+  const fdqQueue = [];
+  const fdqFlush = () => {
+    while (fdqQueue.length) {
+      try {
+        const body = JSON.stringify({ events: fdqQueue.splice(0, 20) });
+        if (!(navigator.sendBeacon && navigator.sendBeacon('/e/', new Blob([body], { type: 'application/json' })))) {
+          fetch('/e/', { method: 'POST', body, headers: { 'Content-Type': 'application/json' }, keepalive: true });
+        }
+      } catch (e) {}
+    }
+  };
+  function fdqLater(name, props = {}) {
+    fdqQueue.push({ name, props: { ...props, page: location.pathname } });
+    if (fdqQueue.length >= 20) fdqFlush();
+  }
+  setInterval(fdqFlush, 5000);
+  const fdqText = (node) => (node.getAttribute('aria-label') || node.textContent || '')
+    .trim().replace(/\s+/g, ' ').replace(/\S+@\S+/g, '[email]').slice(0, 60);
+  const pageView = Math.random().toString(36).slice(2, 10);
+
+  // Sections: a section counts as reached once its top is in the upper 60% of the screen.
+  const sections = [...document.querySelectorAll('section')];
+  const sectionName = (section) => {
+    if (!section) return '';
+    const heading = section.querySelector('h1, h2, h3');
+    return section.dataset.section || section.id || (heading ? fdqText(heading).slice(0, 40) : '') || `section-${sections.indexOf(section) + 1}`;
+  };
+  const placeOf = (el) => sectionName(el.closest('section')) || (el.closest('nav') ? 'nav' : el.closest('footer') ? 'footer' : '');
+  if ('IntersectionObserver' in window && sections.length) {
+    const watch = new IntersectionObserver((entries) => entries.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+      watch.unobserve(entry.target);
+      fdqLater('section_view', { section: sectionName(entry.target), order: sections.indexOf(entry.target) + 1 });
+    }), { rootMargin: '0px 0px -40% 0px' });
+    sections.forEach((section) => watch.observe(section));
+  }
+
+  // Taps on links and buttons, and on things that aren't either ("dead" taps).
+  // Form fields are left to the form tracking below.
+  let deadTaps = 0;
+  document.addEventListener('click', (event) => {
+    const el = event.target.closest('a, button, summary, [role="button"], label, input, select, textarea');
+    if (el && el.matches('label, input, select, textarea')) return;
+    if (el) {
+      let to = '';
+      const href = el.getAttribute('href');
+      if (href) {
+        try {
+          const url = new URL(href, location.href);
+          to = url.host === location.host ? url.pathname + url.hash : url.host;
+        } catch (e) {}
+      }
+      const image = el.querySelector('img');
+      fdqLater('tap', {
+        kind: el.matches('a') ? 'link' : el.matches('summary') ? 'toggle' : 'button',
+        label: fdqText(el) || (image ? image.alt.slice(0, 60) : ''),
+        to: to.slice(0, 100),
+        section: placeOf(el),
+      });
+    } else if (deadTaps < 15) {
+      deadTaps += 1;
+      const target = event.target;
+      const what = target.tagName === 'IMG' ? target.alt.slice(0, 50) : fdqText(target).slice(0, 50);
+      fdqLater('tap', { kind: 'dead', label: `${target.tagName.toLowerCase()}: ${what}`, section: placeOf(target) });
+    }
+  }, true);
+
+  // Forms: the fields people click into, how long sending takes, and where
+  // they stop if they leave without sending. What they type is never sent here.
+  const formName = (form) => form.dataset.form || form.id || new URL(form.getAttribute('action') || location.href, location.href).pathname;
+  const formState = new Map();
+  document.addEventListener('focusin', (event) => {
+    const field = event.target;
+    if (!field.form || !field.matches('input, select, textarea') || ['hidden', 'submit', 'button'].includes(field.type) || field.name === 'website') return;
+    if (!formState.has(field.form)) formState.set(field.form, { first: Date.now(), fields: new Set(), sent: false });
+    const state = formState.get(field.form);
+    const name = (field.name || field.id || field.type).slice(0, 40);
+    state.last = name;
+    if (!state.fields.has(name)) {
+      state.fields.add(name);
+      fdqLater('field_focus', { form: formName(field.form), field: name });
+    }
+  });
+  // After the Turnstile wait above, so a form that's held back isn't counted until it goes.
+  document.addEventListener('submit', (event) => {
+    const state = formState.get(event.target);
+    if (!state || state.sent || event.defaultPrevented) return;
+    state.sent = true;
+    fdqLater('form_send', { form: formName(event.target), seconds: Math.round((Date.now() - state.first) / 1000), fields: state.fields.size });
+  });
+
+  // Errors on the page and files that didn't load.
+  let errors = 0;
+  const fdqError = (message, source, line) => {
+    if (errors >= 5) return;
+    errors += 1;
+    let file = '';
+    try {
+      const url = new URL(source || '', location.href);
+      file = url.host === location.host ? url.pathname : url.host;
+    } catch (e) {}
+    fdqLater('js_error', { message: String(message || 'Unknown error').slice(0, 100), file: file.slice(0, 100), line: line || 0 });
+  };
+  window.addEventListener('error', (event) => {
+    const target = event.target;
+    if (target && target !== window && (target.src || target.href)) fdqError(`Didn't load: ${target.tagName.toLowerCase()}`, target.src || target.href, 0);
+    else if (event.message) fdqError(event.message, event.filename, event.lineno);
+  }, true);
+  window.addEventListener('unhandledrejection', (event) => {
+    const reason = event.reason;
+    fdqError(reason && (reason.message || String(reason)), '', 0);
+  });
+
+  // Load speed, a few seconds after load (or on leaving, if that comes first).
+  let lcp = 0;
+  let speedSent = false;
+  try {
+    new PerformanceObserver((list) => {
+      const last = list.getEntries().pop();
+      if (last) lcp = last.startTime;
+    }).observe({ type: 'largest-contentful-paint', buffered: true });
+  } catch (e) {}
+  const sendSpeed = () => {
+    if (speedSent) return;
+    speedSent = true;
+    try {
+      const nav = performance.getEntriesByType('navigation')[0];
+      if (!nav) return;
+      fdqLater('page_speed', {
+        view: pageView,
+        first_byte: Math.round(nav.responseStart),
+        ready: Math.round(nav.domContentLoadedEventEnd),
+        loaded: Math.round(nav.loadEventEnd),
+        biggest_paint: Math.round(lcp),
+      });
+    } catch (e) {}
+  };
+  window.addEventListener('load', () => setTimeout(sendSpeed, 4000));
+
+  // Time on screen and how far down the page they got, sent each time the page is hidden.
+  let shownSince = document.visibilityState === 'visible' ? performance.now() : null;
+  let shownMs = 0;
+  let deepest = 0;
+  const scrolled = () => {
+    const room = document.documentElement.scrollHeight - window.innerHeight;
+    deepest = Math.max(deepest, room > 0 ? Math.round((100 * window.scrollY) / room) : 100);
+  };
+  window.addEventListener('scroll', scrolled, { passive: true });
+  scrolled();
+  const leaving = () => {
+    if (shownSince !== null) {
+      shownMs += performance.now() - shownSince;
+      shownSince = null;
+    }
+    fdqLater('page_leave', { view: pageView, seconds: Math.min(1800, Math.round(shownMs / 1000)), scroll: Math.min(100, deepest) });
+    sendSpeed();
+    formState.forEach((state, form) => {
+      if (state.sent || state.reported) return;
+      state.reported = true;
+      const filled = [...form.elements].filter((f) => f.name && f.name !== 'website' && !['hidden', 'submit', 'button'].includes(f.type)
+        && (['checkbox', 'radio'].includes(f.type) ? f.checked : f.value)).length;
+      fdqLater('form_abandon', { form: formName(form), last_field: state.last, fields: state.fields.size, filled });
+    });
+    fdqFlush();
+  };
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') leaving();
+    else shownSince = performance.now();
+  });
+  window.addEventListener('pagehide', () => { if (document.visibilityState !== 'hidden') leaving(); });
 
   const hamburger = document.getElementById('hamburger');
   const navLinks = document.getElementById('navLinks');

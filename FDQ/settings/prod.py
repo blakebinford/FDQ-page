@@ -6,6 +6,9 @@ DEBUG = config("DEBUG", cast=bool, default=False)
 # Render ends TLS in front of gunicorn, so links built from a request need this to come out https.
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
+# The live site's Microsoft Clarity project. Local runs and tests use the empty default in base.py.
+CLARITY_PROJECT_ID = config('CLARITY_PROJECT_ID', default='z986n2ikfi')
+
 OPENAI_API_KEY = config("OPENAI_API_KEY", default="")
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 

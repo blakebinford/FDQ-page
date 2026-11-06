@@ -90,6 +90,9 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 TURNSTILE_SITE_KEY = config('TURNSTILE_SITE_KEY', default='')
 TURNSTILE_SECRET_KEY = config('TURNSTILE_SECRET_KEY', default='')
 
+# Microsoft Clarity's project ID (public: it's in every page's source). Empty keeps Clarity off.
+CLARITY_PROJECT_ID = config('CLARITY_PROJECT_ID', default='')
+
 
 CKEDITOR_5_CONFIGS = {
     'default': {

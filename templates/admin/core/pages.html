@@ -1,0 +1,113 @@
+{% extends "admin/base_site.html" %}
+
+{% block extrastyle %}
+{{ block.super }}
+{% include 'admin/core/_report_styles.html' %}
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs"><a href="{% url 'admin:index' %}">Home</a> &rsaquo; <a href="{% url 'staff_visitors' %}">Visitors</a> &rsaquo; Pages</div>
+{% endblock %}
+
+{% block content %}
+<nav class="vz-range" aria-label="Date range">
+  <a href="?days=7&page={{ page|urlencode }}"{% if days == 7 %} aria-current="page"{% endif %}>7 days</a>
+  <a href="?days=14&page={{ page|urlencode }}"{% if days == 14 %} aria-current="page"{% endif %}>14 days</a>
+  <a href="?days=30&page={{ page|urlencode }}"{% if days == 30 %} aria-current="page"{% endif %}>30 days</a>
+  <a href="?days=90&page={{ page|urlencode }}"{% if days == 90 %} aria-current="page"{% endif %}>90 days</a>
+</nav>
+{% include 'admin/core/_report_links.html' %}
+
+<div class="vz-section">
+  <h2>Pages</h2>
+  <div class="vz-scroll">
+    <table class="vz-table">
+      <thead><tr><th>Page</th><th>Visitors</th><th>Typical time on screen</th><th>Typical scroll</th><th>Read to the end</th></tr></thead>
+      <tbody>
+        {% for row in table %}
+          <tr>
+            <td>{% if row.path == page %}<b>{{ row.path }}</b>{% else %}<a href="?days={{ days }}&page={{ row.path|urlencode }}">{{ row.path }}</a>{% endif %}</td>
+            <td class="n">{{ row.visitors }}</td>
+            <td class="n">{% if row.median_seconds is not None %}{{ row.median_seconds|floatformat:0 }} s{% else %}&ndash;{% endif %}</td>
+            <td class="n">{% if row.median_scroll is not None %}{{ row.median_scroll|floatformat:0 }}%{% else %}&ndash;{% endif %}</td>
+            <td class="n">{% if row.measured %}{{ row.to_the_end }}%{% else %}&ndash;{% endif %}</td>
+          </tr>
+        {% empty %}
+          <tr><td colspan="5">No visits in this range yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p class="vz-note">Typical means the middle page load: half took longer, half less. Time counts only while the page is on screen. Pick a page to see its sections and taps below.</p>
+</div>
+
+<h2 style="font-size: 1.15rem; margin: 0 0 1rem;">{{ page }} <span style="font-weight: 400; color: var(--body-quiet-color);">&middot; {{ page_visitors }} visitor{{ page_visitors|pluralize }}</span></h2>
+
+<div class="vz-section">
+  <h2>How far down they got, section by section</h2>
+  <div class="vz-scroll">
+    <table class="vz-table">
+      <thead><tr><th>Section, top to bottom</th><th>Reached it</th><th class="vz-bar"></th><th>Share of the page's visitors</th></tr></thead>
+      <tbody>
+        {% for s in sections %}
+          <tr class="vz-step"><td>{{ s.name }}</td><td class="n">{{ s.visitors }}</td><td class="vz-bar"><i style="width: {{ s.share }}%"></i></td><td class="n">{{ s.share }}%</td></tr>
+        {% empty %}
+          <tr><td colspan="4">No section records for this page yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p class="vz-note">A section counts as reached once its top comes into the upper part of the screen.</p>
+</div>
+
+<div class="vz-grid">
+  <div class="vz-section">
+    <h2>Time on screen</h2>
+    <table class="vz-table">
+      <thead><tr><th>Page loads</th><th>Count</th><th>Share</th></tr></thead>
+      <tbody>{% for b in times %}<tr><td>{{ b.label }}</td><td class="n">{{ b.count }}</td><td class="n">{{ b.share }}%</td></tr>{% endfor %}</tbody>
+    </table>
+  </div>
+  <div class="vz-section">
+    <h2>How far they scrolled</h2>
+    <table class="vz-table">
+      <thead><tr><th>Page loads</th><th>Count</th><th>Share</th></tr></thead>
+      <tbody>{% for b in scrolls %}<tr><td>{{ b.label }}</td><td class="n">{{ b.count }}</td><td class="n">{{ b.share }}%</td></tr>{% endfor %}</tbody>
+    </table>
+  </div>
+</div>
+<p class="vz-note" style="margin: -1rem 0 1.75rem;">{{ measured }} page load{{ measured|pluralize }} reported time and scroll. Some phones close a page without saying so, so this can be lower than the visits.</p>
+
+<div class="vz-section">
+  <h2>What they tapped</h2>
+  <div class="vz-scroll">
+    <table class="vz-table">
+      <thead><tr><th>Tapped</th><th>Kind</th><th>Goes to</th><th>Section</th><th>Visitors</th><th>Taps</th></tr></thead>
+      <tbody>
+        {% for t in taps %}
+          <tr><td>{{ t.label }}</td><td>{{ t.kind }}</td><td>{{ t.to }}</td><td>{{ t.section }}</td><td class="n">{{ t.visitors }}</td><td class="n">{{ t.taps }}</td></tr>
+        {% empty %}
+          <tr><td colspan="6">No taps recorded on this page yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="vz-section">
+  <h2>Taps on things that aren't links</h2>
+  <div class="vz-scroll">
+    <table class="vz-table">
+      <thead><tr><th>Tapped</th><th>Section</th><th>Visitors</th><th>Taps</th></tr></thead>
+      <tbody>
+        {% for t in dead %}
+          <tr><td>{{ t.label }}</td><td>{{ t.section }}</td><td class="n">{{ t.visitors }}</td><td class="n">{{ t.taps }}</td></tr>
+        {% empty %}
+          <tr><td colspan="4">None on this page yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p class="vz-note">A picture or a line of text that several people tap is something they expected to open. {{ own_browsers }} of your own browsers {{ own_browsers|pluralize:"is,are" }} left out of every number here.</p>
+</div>
+{% endblock %}

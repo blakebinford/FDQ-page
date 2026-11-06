@@ -9,11 +9,11 @@
   <div class="center-box">
     {% if done %}
       <h1>You're off the list.</h1>
-      <p class="center-sub">{{ email }} won't get any more Tier 1 emails. If you change your mind, sign up again on the Tier 1 page.</p>
+      <p class="center-sub" data-clarity-mask="true">{{ email }} won't get any more Tier 1 emails. If you change your mind, sign up again on the Tier 1 page.</p>
       <div class="btn-row"><a href="{% url 'home' %}" class="btn-secondary">Back to the home page</a></div>
     {% else %}
       <h1>Leave the Tier 1 list?</h1>
-      <p class="center-sub">{{ email }} will stop getting Tier 1 emails.</p>
+      <p class="center-sub" data-clarity-mask="true">{{ email }} will stop getting Tier 1 emails.</p>
       <form method="post">
         <div class="btn-row"><button type="submit" class="btn-primary">Take me off the list</button></div>
       </form>

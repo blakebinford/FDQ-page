@@ -51,7 +51,7 @@
 <section class="wl-lesson" id="lesson">
   <p class="page-label">FDQ Tier 1 &middot; Weld mapping &middot; Lesson 01</p>
   <h1>You're on the list.</h1>
-  <p class="page-sub">Here's lesson 1: why weld maps exist. Turn your sound on.{% if lesson_emailed and signup %} We sent the link to {{ signup.email }} so you can watch it later.{% endif %}</p>
+  <p class="page-sub">Here's lesson 1: why weld maps exist. Turn your sound on.{% if lesson_emailed and signup %} We sent the link to <span data-clarity-mask="true">{{ signup.email }}</span> so you can watch it later.{% endif %}</p>
 
   <video id="lesson-1" controls playsinline preload="metadata" poster="{% url 'lesson_1_player_poster' %}">
     <source src="{% url 'lesson_1_video' %}" type="video/mp4" />

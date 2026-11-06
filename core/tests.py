@@ -175,7 +175,7 @@ class LessonEmailTests(TestCase):
         self.assertIn('/tier-1/leave/', message.extra_headers['List-Unsubscribe'])
         self.assertEqual(message.extra_headers['List-Unsubscribe-Post'], 'List-Unsubscribe=One-Click')
         self.assertIsNotNone(WaitlistSignup.objects.get().lesson_email_sent_at)
-        self.assertContains(self.client.get(reverse('waitlist_thanks')), 'We sent the link to hand@example.com')
+        self.assertContains(self.client.get(reverse('waitlist_thanks')), 'We sent the link to <span data-clarity-mask="true">hand@example.com</span>')
 
     def test_signing_up_again_soon_after_does_not_send_again(self):
         self.sign_up()
@@ -291,7 +291,7 @@ class AnalyticsTests(TestCase):
         self.assertEqual((event.path, event.props), ('/', {'cta_id': 'home_hero'}))
         bad = self.client.post(reverse('beacon'), {'name': 'drop_table'}, content_type='application/json')
         self.assertEqual(bad.status_code, 400)
-        self.assertEqual(self.client.post(reverse('beacon'), 'x' * 3000, content_type='application/json').status_code, 413)
+        self.assertEqual(self.client.post(reverse('beacon'), 'x' * 9000, content_type='application/json').status_code, 413)
 
     def test_funnel_is_staff_only(self):
         self.assertEqual(self.client.get(reverse('staff_funnel')).status_code, 302)
@@ -573,7 +573,7 @@ class OwnVisitsTests(TestCase):
         self.assertEqual(self.visitors_today(), 1)
         funnel = self.boss.get(reverse('staff_funnel') + '?days=7')
         self.assertEqual(funnel.context['steps'][0][1], 1)
-        self.assertContains(funnel, '1 of your own browser is left out')
+        self.assertContains(funnel, '1 of your own browsers is left out')
 
     def test_admin_home_panel_leaves_them_out_too(self):
         self.boss.get(reverse('home'))
@@ -584,6 +584,123 @@ class OwnVisitsTests(TestCase):
 
     def test_robots_keeps_it_out_of_search(self):
         self.assertContains(self.client.get(reverse('robots')), 'Disallow: /not-me/')
+
+
+class PageDetailTests(TestCase):
+    """The page script's batched events and the Pages, Forms and visitor reports built on them."""
+
+    def setUp(self):
+        super().setUp()
+        staff = get_user_model().objects.create_superuser(email='boss@example.com', password='pw-for-tests-only',
+                                                          first_name='B', last_name='B')
+        self.boss = Client()
+        self.boss.force_login(staff)
+
+    def send(self, client, *events):
+        return client.post(reverse('beacon'), {'events': [{'name': n, 'props': p} for n, p in events]},
+                           content_type='application/json')
+
+    def visitor(self, path='/', **headers):
+        client = Client()
+        client.get(path, **headers)
+        return client
+
+    def test_beacon_takes_a_batch_and_drops_unknown_events(self):
+        hand = self.visitor()
+        response = self.send(hand, ('tap', {'kind': 'link', 'label': 'Get lesson 1 free', 'to': '/tier-1/#sign-up', 'page': '/'}),
+                             ('section_view', {'section': 'hero', 'order': 1, 'page': '/'}), ('drop_table', {}))
+        self.assertEqual(response.status_code, 204)
+        self.assertEqual(sorted(SiteEvent.objects.exclude(name='page_view').values_list('name', flat=True)), ['section_view', 'tap'])
+        tap = SiteEvent.objects.get(name='tap')
+        self.assertEqual((tap.path, tap.props['label'], tap.visitor_id), ('/', 'Get lesson 1 free', hand.cookies[VISITOR_COOKIE].value))
+        too_many = self.send(hand, *[('tap', {'kind': 'link'})] * 21)
+        self.assertEqual(too_many.status_code, 400)
+        self.assertEqual(self.send(hand, ('drop_table', {})).status_code, 400)
+
+    def test_pages_report_reading_and_taps(self):
+        for seconds, scroll in ((45, 80), (5, 10)):
+            hand = self.visitor()
+            self.send(hand, ('section_view', {'section': 'hero', 'order': 1, 'page': '/'}),
+                      ('page_leave', {'view': 'a1', 'seconds': seconds // 2, 'scroll': scroll // 2, 'page': '/'}),
+                      ('page_leave', {'view': 'a1', 'seconds': seconds, 'scroll': scroll, 'page': '/'}),
+                      ('tap', {'kind': 'link', 'label': 'See all 12 modules', 'to': '/tier-1/#modules', 'section': 'tier-1', 'page': '/'}))
+            if seconds == 45:
+                self.send(hand, ('section_view', {'section': 'tier-1', 'order': 3, 'page': '/'}),
+                          ('tap', {'kind': 'dead', 'label': 'img: weld log', 'section': 'weld-log', 'page': '/'}))
+        response = self.boss.get(reverse('staff_pages') + '?days=7&page=/')
+        self.assertEqual(response.status_code, 200)
+        context = response.context
+        self.assertEqual([(s['name'], s['visitors'], s['share']) for s in context['sections']], [('hero', 2, 100), ('tier-1', 1, 50)])
+        self.assertEqual(context['measured'], 2)
+        self.assertEqual({b['label']: b['count'] for b in context['times']}['30 seconds to a minute'], 1)
+        self.assertEqual(context['taps'][0]['label'], 'See all 12 modules')
+        self.assertEqual(context['taps'][0]['visitors'], 2)
+        self.assertEqual(context['dead'][0]['label'], 'img: weld log')
+        row = context['table'][0]
+        self.assertEqual((row['path'], row['visitors'], row['median_seconds']), ('/', 2, 25.0))
+
+    def test_forms_report_steps_stops_errors_and_speed(self):
+        sender, quitter = self.visitor('/tier-1/'), self.visitor('/tier-1/')
+        self.send(sender, ('field_focus', {'form': 'wl-form', 'field': 'email', 'page': '/tier-1/'}),
+                  ('form_send', {'form': 'wl-form', 'seconds': 12, 'fields': 1, 'page': '/tier-1/'}),
+                  ('page_speed', {'view': 'b', 'first_byte': 300, 'ready': 900, 'biggest_paint': 1800, 'page': '/tier-1/'}))
+        self.send(quitter, ('field_focus', {'form': 'wl-form', 'field': 'email', 'page': '/tier-1/'}),
+                  ('field_focus', {'form': 'wl-form', 'field': 'trade', 'page': '/tier-1/'}),
+                  ('form_abandon', {'form': 'wl-form', 'last_field': 'trade', 'fields': 2, 'filled': 1, 'page': '/tier-1/'}),
+                  ('js_error', {'message': 'x is not defined', 'file': '/tier-1/', 'line': 12, 'page': '/tier-1/'}),
+                  ('turnstile_shown', {'page': '/tier-1/'}))
+        context = self.boss.get(reverse('staff_forms') + '?days=7').context
+        form = context['forms'][0]
+        self.assertEqual((form['form'], form['started'], form['sent'], form['left'], form['median_seconds']), ('Tier 1 sign-up', 2, 1, 1, 12))
+        self.assertEqual(form['last_fields'], [('trade', 1)])
+        self.assertEqual(form['left_with_something_filled'], 1)
+        self.assertEqual(context['errors'][0]['message'], 'x is not defined')
+        self.assertEqual(context['shown'], [('/tier-1/', 1)])
+        self.assertEqual(context['speed'][0]['values'][:3], [0.3, 0.9, 1.8])
+
+    def test_visitor_timeline(self):
+        hand = self.visitor('/?utm_source=facebook&utm_campaign=fdq-fb1', HTTP_USER_AGENT=FACEBOOK_PHONE)
+        self.send(hand, ('tap', {'kind': 'link', 'label': 'Tier 1', 'to': '/tier-1/', 'section': 'nav', 'page': '/'}),
+                  ('page_leave', {'view': 'c', 'seconds': 31, 'scroll': 64, 'page': '/'}))
+        visitor_id = hand.cookies[VISITOR_COOKIE].value
+        response = self.boss.get(reverse('staff_visitor', args=[visitor_id]))
+        self.assertContains(response, 'from Facebook (fdq-fb1)')
+        self.assertContains(response, 'Tier 1 → /tier-1/')
+        self.assertContains(response, '31 s on screen, scrolled 64%')
+        self.assertEqual(self.boss.get(reverse('staff_visitor', args=['nope'])).status_code, 404)
+        visitors = self.boss.get(reverse('staff_visitors') + '?days=7')
+        self.assertContains(visitors, reverse('staff_visitor', args=[visitor_id]))
+        self.assertEqual(Client().get(reverse('staff_visitor', args=[visitor_id])).status_code, 302)
+
+
+@override_settings(CLARITY_PROJECT_ID='abc123xyz')
+class ClarityTests(TestCase):
+    def test_loads_for_visitors_with_their_id(self):
+        response = self.client.get(reverse('home'))
+        self.assertContains(response, 'https://www.clarity.ms/tag/')
+        self.assertContains(response, '"abc123xyz"')
+        self.assertContains(response, f'"fdq_vid", "{response.cookies[VISITOR_COOKIE].value}"')
+        self.assertContains(self.client.get(reverse('privacy')), 'Microsoft Clarity')
+
+    def test_not_on_private_pages_for_staff_or_our_own_browsers(self):
+        self.assertNotContains(self.client.get(reverse('not_me')), 'clarity.ms')
+        self.client.post(reverse('not_me'))
+        self.assertNotContains(self.client.get(reverse('home')), 'clarity.ms')
+        staff = get_user_model().objects.create_superuser(email='boss@example.com', password='pw-for-tests-only',
+                                                          first_name='B', last_name='B')
+        boss = Client()
+        boss.force_login(staff)
+        self.assertNotContains(boss.get(reverse('home')), 'clarity.ms')
+
+    def test_forms_and_emails_are_masked(self):
+        self.assertContains(self.client.get(reverse('waitlist')), 'id="wl-form" data-clarity-mask="true"')
+
+    @override_settings(CLARITY_PROJECT_ID='')
+    def test_off_without_a_project_id(self):
+        self.assertNotContains(self.client.get(reverse('home')), 'clarity.ms')
+        privacy = self.client.get(reverse('privacy'))
+        self.assertNotContains(privacy, 'Clarity')
+        self.assertContains(privacy, 'There are no third-party analytics.')
 
 
 class SourceLabelTests(TestCase):

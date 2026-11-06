@@ -32,7 +32,7 @@
           <div class="form-message">{{ message }}</div>
         {% endfor %}
       {% endif %}
-      <form class="contact-form" action="{% url 'contact' %}" method="POST">
+      <form class="contact-form" data-clarity-mask="true" action="{% url 'contact' %}" method="POST">
         {% csrf_token %}
         <div class="form-group">
           <label for="c-name">Name</label>

@@ -1,1 +1,1 @@
-{% if turnstile_site_key %}<div class="cf-turnstile" data-sitekey="{{ turnstile_site_key }}" data-action="{{ action }}" data-size="flexible" data-appearance="interaction-only" data-callback="fdqTurnstileReady"></div>{% endif %}
+{% if turnstile_site_key %}<div class="cf-turnstile" data-sitekey="{{ turnstile_site_key }}" data-action="{{ action }}" data-size="flexible" data-appearance="interaction-only" data-callback="fdqTurnstileReady" data-before-interactive-callback="fdqTurnstileShown"></div>{% endif %}

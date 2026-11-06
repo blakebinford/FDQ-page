@@ -1,0 +1,43 @@
+{% extends "admin/base_site.html" %}
+
+{% block extrastyle %}
+{{ block.super }}
+{% include 'admin/core/_report_styles.html' %}
+<style>
+  .vz-visit td { background: var(--darkened-bg); font-weight: 600; font-size: 0.8rem; color: var(--body-medium-color); }
+  .vz-quiet td { color: var(--body-quiet-color); }
+</style>
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs"><a href="{% url 'admin:index' %}">Home</a> &rsaquo; <a href="{% url 'staff_visitors' %}">Visitors</a> &rsaquo; One visitor</div>
+{% endblock %}
+
+{% block content %}
+{% include 'admin/core/_report_links.html' %}
+
+<div class="fdq-summary">
+  <div class="fdq-card"><b>{{ first.created_at|date:"M j" }}</b><span>First seen, {{ first.created_at|date:"g:i a" }}</span></div>
+  <div class="fdq-card"><b>{{ source }}</b><span>Came from{% if first.utm_campaign %} ({{ first.utm_campaign }}){% endif %}</span></div>
+  <div class="fdq-card"><b>{{ first.device|default:"?" }}</b><span>{% if first.in_app %}In the {{ first.in_app|capfirst }} app{% else %}Device{% endif %}</span></div>
+  <div class="fdq-card"><b>{{ visits }}</b><span>Visit{{ visits|pluralize }}</span></div>
+  <div class="fdq-card"><b>{% if signup %}Yes{% else %}No{% endif %}</b><span>{% if signup %}Signed up: <a href="{% url 'admin:core_waitlistsignup_change' signup.pk %}">{{ signup.email }}</a>{% else %}Signed up{% endif %}</span></div>
+</div>
+{% if ours %}<p class="vz-note">This is one of your own browsers, so it's left out of the reports.</p>{% endif %}
+{% if clarity_on %}<p class="vz-note">To watch this visitor in Clarity, filter recordings by the custom tag <b>fdq_vid</b> = <code>{{ visitor_id }}</code>.</p>{% endif %}
+
+<div class="vz-section" style="margin-top: 1.25rem;">
+  <div class="vz-scroll">
+    <table class="vz-table">
+      <thead><tr><th>When</th><th>What</th><th>Page</th><th>Detail</th></tr></thead>
+      <tbody>
+        {% for r in rows %}
+          {% if r.new_visit %}<tr class="vz-visit"><td colspan="4">Visit starting {{ r.at|date:"D M j, g:i a" }}</td></tr>{% endif %}
+          <tr{% if r.quiet %} class="vz-quiet"{% endif %}><td class="n">{{ r.at|date:"g:i:s a" }}</td><td>{{ r.what }}</td><td>{{ r.path }}</td><td>{{ r.detail }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p class="vz-note">Times are Central. A gap of more than half an hour starts a new visit.{% if capped %} Only the first 500 records are shown.{% endif %}</p>
+</div>
+{% endblock %}

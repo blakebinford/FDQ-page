@@ -1,0 +1,100 @@
+{% extends "admin/base_site.html" %}
+
+{% block extrastyle %}
+{{ block.super }}
+{% include 'admin/core/_report_styles.html' %}
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs"><a href="{% url 'admin:index' %}">Home</a> &rsaquo; <a href="{% url 'staff_visitors' %}">Visitors</a> &rsaquo; Forms and errors</div>
+{% endblock %}
+
+{% block content %}
+<nav class="vz-range" aria-label="Date range">
+  <a href="?days=7"{% if days == 7 %} aria-current="page"{% endif %}>7 days</a>
+  <a href="?days=14"{% if days == 14 %} aria-current="page"{% endif %}>14 days</a>
+  <a href="?days=30"{% if days == 30 %} aria-current="page"{% endif %}>30 days</a>
+  <a href="?days=90"{% if days == 90 %} aria-current="page"{% endif %}>90 days</a>
+</nav>
+{% include 'admin/core/_report_links.html' %}
+
+{% for f in forms %}
+  <div class="vz-section">
+    <h2>Form: {{ f.form }}</h2>
+    <div class="fdq-summary">
+      <div class="fdq-card"><b>{{ f.started }}</b><span>Clicked into a field</span></div>
+      <div class="fdq-card"><b>{{ f.sent }}</b><span>Sent it ({{ f.share_sent }}%)</span></div>
+      <div class="fdq-card"><b>{{ f.left }}</b><span>Left without sending{% if f.left %}, {{ f.left_with_something_filled }} with something filled in{% endif %}</span></div>
+      <div class="fdq-card"><b>{% if f.median_seconds is not None %}{{ f.median_seconds|floatformat:0 }} s{% else %}&ndash;{% endif %}</b><span>Typical time from clicking in to sending</span></div>
+    </div>
+    <div class="vz-grid">
+      <div>
+        <table class="vz-table">
+          <thead><tr><th>Field they clicked into</th><th>Visitors</th></tr></thead>
+          <tbody>{% for name, n in f.fields %}<tr><td>{{ name }}</td><td class="n">{{ n }}</td></tr>{% endfor %}</tbody>
+        </table>
+      </div>
+      <div>
+        <table class="vz-table">
+          <thead><tr><th>Last field before they left</th><th>Visitors</th></tr></thead>
+          <tbody>{% for name, n in f.last_fields %}<tr><td>{{ name }}</td><td class="n">{{ n }}</td></tr>{% empty %}<tr><td colspan="2">Nobody left this form part way.</td></tr>{% endfor %}</tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+{% empty %}
+  <div class="vz-section"><h2>Forms</h2><p>Nobody has clicked into a form in this range yet.</p></div>
+{% endfor %}
+
+<div class="vz-grid">
+  <div class="vz-section">
+    <h2>Bot check showed itself</h2>
+    <table class="vz-table">
+      <thead><tr><th>Page</th><th>Times</th></tr></thead>
+      <tbody>{% for path, n in shown %}<tr><td>{{ path }}</td><td class="n">{{ n }}</td></tr>{% empty %}<tr><td colspan="2">It stayed hidden for everyone.</td></tr>{% endfor %}</tbody>
+    </table>
+    <p class="vz-note">Cloudflare's check is normally invisible. It shows itself only when it isn't sure the visitor is a person.</p>
+  </div>
+  <div class="vz-section">
+    <h2>Stopped by the bot checks</h2>
+    <table class="vz-table">
+      <thead><tr><th>Form</th><th>Why</th><th>Times</th></tr></thead>
+      <tbody>{% for form, reason, n in blocked %}<tr><td>{{ form }}</td><td>{{ reason }}</td><td class="n">{{ n }}</td></tr>{% empty %}<tr><td colspan="3">None in this range.</td></tr>{% endfor %}</tbody>
+    </table>
+  </div>
+</div>
+
+<div class="vz-section">
+  <h2>Page errors</h2>
+  <div class="vz-scroll">
+    <table class="vz-table">
+      <thead><tr><th>Error</th><th>Where</th><th>Pages</th><th>Browsers</th><th>Visitors</th><th>Times</th><th>Last seen</th></tr></thead>
+      <tbody>
+        {% for e in errors %}
+          <tr><td>{{ e.message }}</td><td>{{ e.file }}{% if e.line %}:{{ e.line }}{% endif %}</td><td>{{ e.pages }}</td><td>{{ e.browsers }}</td><td class="n">{{ e.visitors }}</td><td class="n">{{ e.times }}</td><td>{{ e.last|date:"M j, g:i a" }}</td></tr>
+        {% empty %}
+          <tr><td colspan="7">No page errors in this range.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p class="vz-note">Errors from the page's code, and pictures or files that didn't load. At most five per page load are kept.</p>
+</div>
+
+<div class="vz-section">
+  <h2>Load speed</h2>
+  <div class="vz-scroll">
+    <table class="vz-table">
+      <thead><tr><th>Browser</th><th>Page loads</th><th>First byte</th><th>Page ready</th><th>Main content shown</th><th>Slowest tenth, main content</th></tr></thead>
+      <tbody>
+        {% for s in speed %}
+          <tr><td>{{ s.browser }}</td><td class="n">{{ s.loads }}</td>{% for v in s.values %}<td class="n">{% if v is not None %}{{ v }} s{% else %}&ndash;{% endif %}</td>{% endfor %}</tr>
+        {% empty %}
+          <tr><td colspan="6">No speed records in this range yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <p class="vz-note">Typical seconds from tapping the link. Google counts under 2.5 seconds to the main content as good and over 4 as poor. A dash means those browsers don't report it. {{ own_browsers }} of your own browsers {{ own_browsers|pluralize:"is,are" }} left out of every number here.</p>
+</div>
+{% endblock %}

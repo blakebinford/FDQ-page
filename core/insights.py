@@ -14,32 +14,27 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
 from .alerts import alerts_enabled, send_alert
-from .analytics import internal_visitor_ids, record, source_label
+from .analytics import internal_visitor_ids, record_many, source_label
 from .models import InternalVisitor, SiteEvent, WaitlistSignup
 
 # What the page may report. Anything else is dropped.
 CLIENT_EVENTS = {
     'cta_click', 'signup_view', 'form_start', 'form_submit',
     'lesson_play', 'lesson_progress', 'lesson_complete', 'share_copy',
+    # Sent in batches by the page script in base.html.
+    'section_view', 'page_leave', 'tap', 'field_focus', 'form_send', 'form_abandon',
+    'turnstile_shown', 'js_error', 'page_speed',
 }
 MAX_PROPS = 8
+MAX_BATCH = 20
 
 
-@csrf_exempt
-@require_POST
-def beacon(request):
-    """sendBeacon can't carry a CSRF header, so this only accepts known event
-    names with a few short string or number props, and only ever writes one row."""
-    if len(request.body) > 2048:
-        return HttpResponse(status=413)
-    try:
-        payload = json.loads(request.body)
-    except ValueError:
-        return HttpResponse(status=400)
-    name = payload.get('name') if isinstance(payload, dict) else None
+def _clean(request, item):
+    """One event from the page as (name, path, props), or None when it isn't one we take."""
+    name = item.get('name') if isinstance(item, dict) else None
     if name not in CLIENT_EVENTS:
-        return HttpResponse(status=400)
-    raw = payload.get('props') if isinstance(payload.get('props'), dict) else {}
+        return None
+    raw = item.get('props') if isinstance(item.get('props'), dict) else {}
     props = {
         str(key)[:40]: value[:100] if isinstance(value, str) else value
         for key, value in list(raw.items())[:MAX_PROPS]
@@ -48,7 +43,28 @@ def beacon(request):
     page = str(props.pop('page', '') or '')
     if not page.startswith('/'):
         page = urlparse(request.META.get('HTTP_REFERER', '')).path or '/'
-    record(request, name, path=page, **props)
+    return name, page[:255], props
+
+
+@csrf_exempt
+@require_POST
+def beacon(request):
+    """sendBeacon can't carry a CSRF header, so this only accepts known event
+    names with a few short string or number props: one event, or a batch of up
+    to MAX_BATCH as {"events": [...]}."""
+    if len(request.body) > 8192:
+        return HttpResponse(status=413)
+    try:
+        payload = json.loads(request.body)
+    except ValueError:
+        return HttpResponse(status=400)
+    items = payload.get('events') if isinstance(payload, dict) and 'events' in payload else [payload]
+    if not isinstance(items, list) or not 0 < len(items) <= MAX_BATCH:
+        return HttpResponse(status=400)
+    events = [event for event in (_clean(request, item) for item in items) if event]
+    if not events:
+        return HttpResponse(status=400)
+    record_many(request, events)
     return HttpResponse(status=204)
 
 
@@ -145,7 +161,7 @@ def visitors(request):
     first = {}
     for at, visitor, path, source, campaign, referrer, device, in_app in views:
         first.setdefault(visitor, {
-            'at': timezone.localtime(at), 'path': path, 'campaign': campaign or '',
+            'visitor': visitor, 'at': timezone.localtime(at), 'path': path, 'campaign': campaign or '',
             'source': source_label(source, referrer, in_app), 'device': device, 'in_app': in_app,
         })
 
@@ -192,7 +208,7 @@ def visitors(request):
     last7 = [d['visitors'] for d in daily[1:8]]
     average = sum(last7) / len(last7) if last7 else 0
     today_visitors = daily[0]['visitors'] if daily else 0
-    recent = sorted(first.items(), key=lambda item: item[1]['at'], reverse=True)[:25]
+    recent = sorted(first.items(), key=lambda item: item[1]['at'], reverse=True)[:100]
     return render(request, 'admin/core/visitors.html', {
         **admin.site.each_context(request),
         'title': 'Visitors',

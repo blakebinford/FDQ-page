@@ -10,6 +10,7 @@ from django.utils import timezone
 from django.utils.html import format_html, format_html_join
 
 from .models import SiteEvent, WaitlistSignup
+from .reports import EVENT_LABELS, describe
 
 admin.site.site_header = 'Field Driven Quality'
 admin.site.site_title = 'FDQ admin'
@@ -108,18 +109,14 @@ class WaitlistSignupAdmin(admin.ModelAdmin):
         if not events:
             return 'No visits recorded.'
 
-        def detail(event):
-            what = event.props.get('cta_id') or event.props.get('percent') or event.props.get('reason') or ''
-            came_from = ' '.join(filter(None, [event.utm_source, event.utm_campaign, event.referrer_host]))
-            return ' · '.join(str(part) for part in (what, came_from) if part)
-
         rows = format_html_join(
             '', '<tr><td>{}</td><td>{}</td><td>{}</td><td>{}</td></tr>',
-            ((timezone.localtime(e.created_at).strftime('%b %-d, %-I:%M %p'), e.name, e.path, detail(e))
+            ((timezone.localtime(e.created_at).strftime('%b %-d, %-I:%M %p'), EVENT_LABELS.get(e.name, e.name), e.path, describe(e))
              for e in events),
         )
-        return format_html('<table class="fdq-trail"><thead><tr><th>When</th><th>What</th><th>Page</th>'
-                           '<th>Detail</th></tr></thead><tbody>{}</tbody></table>', rows)
+        return format_html('<p><a href="{}">Their whole timeline</a></p><table class="fdq-trail"><thead><tr><th>When</th>'
+                           '<th>What</th><th>Page</th><th>Detail</th></tr></thead><tbody>{}</tbody></table>',
+                           reverse('staff_visitor', args=[signup.visitor_id]), rows)
 
     def changelist_view(self, request, extra_context=None):
         now = timezone.now()

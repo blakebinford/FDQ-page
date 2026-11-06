@@ -1,5 +1,6 @@
 from django.urls import path
 from .insights import beacon, funnel, test_alert, visitors
+from .reports import forms as forms_report, pages as pages_report, visitor as visitor_timeline
 from .views import (
     home, about, contact_view, contact_thanks, privacy, not_me,
     waitlist, waitlist_thanks, waitlist_trade, waitlist_resend, lesson_link, unsubscribe,
@@ -30,6 +31,9 @@ urlpatterns = [
     path('e/', beacon, name='beacon'),
     path('staff/funnel/', funnel, name='staff_funnel'),
     path('staff/visitors/', visitors, name='staff_visitors'),
+    path('staff/visitors/<str:visitor_id>/', visitor_timeline, name='staff_visitor'),
+    path('staff/pages/', pages_report, name='staff_pages'),
+    path('staff/forms/', forms_report, name='staff_forms'),
     path('staff/test-alert/', test_alert, name='staff_test_alert'),
     path('favicon.ico', favicon, name='favicon'),
     path('robots.txt', robots_txt, name='robots'),

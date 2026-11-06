@@ -21,7 +21,7 @@
     {% else %}
       <h1>Get the lesson link again.</h1>
       <p class="center-sub">Enter the email you signed up with and we'll send the link to lesson 1 again.</p>
-      <form class="resend-form" method="post">
+      <form class="resend-form" data-clarity-mask="true" method="post">
         {% csrf_token %}
         <div class="form-group">
           <label for="resend-email">Email</label>

@@ -68,6 +68,19 @@ def record(request, name, path=None, **props):
         logger.exception('Could not record %s', name)
 
 
+def record_many(request, events):
+    """Write a batch of (name, path, props) events from the page in one query."""
+    try:
+        device, in_app = classify(request.META.get('HTTP_USER_AGENT', ''))
+        visitor_id = getattr(request, 'visitor_id', '')
+        SiteEvent.objects.bulk_create([
+            SiteEvent(name=name, visitor_id=visitor_id, path=path, device=device, in_app=in_app, props=props)
+            for name, path, props in events
+        ])
+    except Exception:
+        logger.exception('Could not record %d events', len(events))
+
+
 def _record_page_view(request):
     referrer = urlparse(request.META.get('HTTP_REFERER', '')).netloc[:255]
     if referrer == request.get_host():

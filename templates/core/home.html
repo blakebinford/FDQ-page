@@ -91,7 +91,7 @@
 {% endblock %}
 
 {% block content %}
-<section class="wrap home-hero">
+<section class="wrap home-hero" data-section="hero">
   <div>
     <p class="page-label">FDQ Tier 1 &middot; {% if tier1_opens %}Opens {{ tier1_opens }}{% else %}Opening soon{% endif %}</p>
     <h1>Quality starts in the field.</h1>
@@ -108,7 +108,7 @@
   </figure>
 </section>
 
-<section class="band">
+<section class="band" data-section="weld-log">
   <div class="wrap block">
     <h2>Every weld on the job ends up as one line like this.</h2>
     <p class="intro">Years after the pipe is buried, someone will ask where a weld is, what went into it, and whether you can prove it. A quality hand keeps the record that answers all three. Tier 1 teaches you to read it, fill it in and keep it straight.</p>
@@ -126,7 +126,7 @@
   </div>
 </section>
 
-<section class="wrap block">
+<section class="wrap block" data-section="tier-1">
   <h2>Tier 1 is the quality side of the job, taught by someone who's done it.</h2>
   <div class="two">
     <div>
@@ -149,7 +149,7 @@
   <p class="more"><a href="{% url 'waitlist' %}#modules" class="btn-secondary" data-cta="home_all_modules">See all 12 modules</a></p>
 </section>
 
-<section class="band">
+<section class="band" data-section="lesson-1">
   <div class="wrap block lesson">
     <a href="{% url 'waitlist' %}#sign-up"><img src="{% url 'lesson_1_player_poster' %}" alt="A frame from lesson 1: a finished girth weld marked up with Where? What? Proof?" width="1280" height="720" loading="lazy" /></a>
     <div>
@@ -161,7 +161,7 @@
   </div>
 </section>
 
-<section class="wrap block">
+<section class="wrap block" data-section="tiers">
   <h2>Three tiers. Tier 1 opens first.</h2>
   <ul class="tiers">
     <li><b>Tier 1</b><p>Pipeline and station QC, from how a job runs to running a QC day: the work of a contractor QC tech or owner-side junior inspector.</p><span class="when open">{% if tier1_opens %}Opens {{ tier1_opens }}{% else %}Opening soon{% endif %}</span></li>
@@ -170,7 +170,7 @@
   </ul>
 </section>
 
-<section class="band">
+<section class="band" data-section="who">
   <div class="wrap block">
     <h2>Who's behind FDQ</h2>
     <div class="founder">

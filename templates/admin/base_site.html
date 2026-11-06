@@ -112,6 +112,8 @@
 {% block userlinks %}
   <a href="{% url 'home' %}">View site</a> /
   <a href="{% url 'staff_visitors' %}">Visitors</a> /
+  <a href="{% url 'staff_pages' %}">Pages</a> /
+  <a href="{% url 'staff_forms' %}">Forms</a> /
   <a href="{% url 'staff_funnel' %}">Funnel</a> /
   {% if user.is_active and user.is_staff %}
     {% url 'django-admindocs-docroot' as docsroot %}

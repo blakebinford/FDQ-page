@@ -13,6 +13,6 @@
       <span>Phone alert for each new signup: <b>{% if alerts_on %}on{% else %}off{% endif %}</b></span>
       {% if alerts_on %}<button type="submit" class="button">Send a test alert</button>{% endif %}
     </form>
-    <p class="fdq-links"><a href="{{ visitors_url }}">Visitors</a><a href="{{ signups_url }}">Signups</a><a href="{{ funnel_url }}">Visitor funnel</a></p>
+    {% include 'admin/core/_report_links.html' %}
   </div>
 </div>

@@ -16,7 +16,7 @@
   <a href="?days=30"{% if days == 30 %} aria-current="page"{% endif %}>30 days</a>
   <a href="?days=90"{% if days == 90 %} aria-current="page"{% endif %}>90 days</a>
 </nav>
-<p class="fdq-links"><a href="{% url 'staff_funnel' %}">Visitor funnel</a><a href="{% url 'admin:core_waitlistsignup_changelist' %}">Signups</a></p>
+{% include 'admin/core/_report_links.html' %}
 
 <div class="fdq-summary">
   <div class="fdq-card"><b>{{ today_visitors }}</b><span>Visitors today{% if uptick is not None %}, <strong class="{% if uptick > 0 %}vz-up{% else %}vz-down{% endif %}">{% if uptick > 0 %}+{% endif %}{{ uptick }}%</strong> against the 7-day average ({{ average_7 }}){% endif %}</span></div>
@@ -55,7 +55,7 @@
       </tbody>
     </table>
   </div>
-  <p class="vz-note">A visitor is one browser, counted once a day. Bots, link previews and Facebook's own prefetching aren't counted. Facebook and Instagram include visits from their in-app browsers even when no link tag says so. {{ own_browsers }} of your own browser{{ own_browsers|pluralize }} {{ own_browsers|pluralize:"is,are" }} left out (any browser signed in here, and any that opened <a href="{% url 'not_me' %}">/not-me/</a>).</p>
+  <p class="vz-note">A visitor is one browser, counted once a day. Bots, link previews and Facebook's own prefetching aren't counted. Facebook and Instagram include visits from their in-app browsers even when no link tag says so. {{ own_browsers }} of your own browsers {{ own_browsers|pluralize:"is,are" }} left out (any browser signed in here, and any that opened <a href="{% url 'not_me' %}">/not-me/</a>).</p>
 </div>
 
 <div class="vz-grid">
@@ -84,12 +84,13 @@
 
 <div class="vz-section">
   <h2>Latest visitors</h2>
+  <p class="vz-note" style="margin: 0 0 0.5rem;">Tap a time to see everything that visitor did.</p>
   <div class="vz-scroll">
     <table class="vz-table">
       <thead><tr><th>First seen</th><th>Landed on</th><th>Source</th><th>Campaign</th><th>Device</th></tr></thead>
       <tbody>
         {% for v in recent %}
-          <tr><td>{{ v.at|date:"M j, g:i a" }}</td><td>{{ v.path }}</td><td>{{ v.source }}</td><td>{{ v.campaign }}</td><td>{{ v.device }}{% if v.in_app %} ({{ v.in_app|capfirst }} app){% endif %}</td></tr>
+          <tr><td><a href="{% url 'staff_visitor' v.visitor %}">{{ v.at|date:"M j, g:i a" }}</a></td><td>{{ v.path }}</td><td>{{ v.source }}</td><td>{{ v.campaign }}</td><td>{{ v.device }}{% if v.in_app %} ({{ v.in_app|capfirst }} app){% endif %}</td></tr>
         {% empty %}
           <tr><td colspan="5">No visits yet.</td></tr>
         {% endfor %}
