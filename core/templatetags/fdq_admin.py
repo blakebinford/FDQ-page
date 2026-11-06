@@ -5,6 +5,7 @@ from django.urls import reverse
 from django.utils import timezone
 
 from ..alerts import alerts_enabled
+from ..analytics import internal_visitor_ids
 from ..models import SiteEvent, WaitlistSignup
 
 register = template.Library()
@@ -15,7 +16,7 @@ def waitlist_panel(context):
     """The waitlist numbers at the top of the admin home page."""
     week_ago = timezone.now() - timedelta(days=7)
     start_of_today = timezone.localtime().replace(hour=0, minute=0, second=0, microsecond=0)
-    views = SiteEvent.objects.filter(name='page_view').exclude(visitor_id='')
+    views = SiteEvent.objects.filter(name='page_view').exclude(visitor_id='').exclude(visitor_id__in=internal_visitor_ids())
     return {
         'visitors_today': views.filter(created_at__gte=start_of_today).values('visitor_id').distinct().count(),
         'on_list': WaitlistSignup.objects.filter(unsubscribed_at=None).count(),

@@ -575,6 +575,13 @@ class OwnVisitsTests(TestCase):
         self.assertEqual(funnel.context['steps'][0][1], 1)
         self.assertContains(funnel, '1 of your own browser is left out')
 
+    def test_admin_home_panel_leaves_them_out_too(self):
+        self.boss.get(reverse('home'))
+        Client().get(reverse('home'))
+        home = self.boss.get(reverse('admin:index'))
+        self.assertContains(home, '<b>1</b><span>Visitors today</span>', html=False)
+        self.assertContains(home, '<b>1</b><span>Visitors in 7 days</span>', html=False)
+
     def test_robots_keeps_it_out_of_search(self):
         self.assertContains(self.client.get(reverse('robots')), 'Disallow: /not-me/')
 
