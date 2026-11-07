@@ -350,6 +350,14 @@ def indexnow_key(request, key):
     return HttpResponse(key, content_type='text/plain')
 
 
+def bing_site_auth(request):
+    """Bing Webmaster's file check, the other way it verifies the site besides the meta tag."""
+    if not settings.BING_SITE_VERIFICATION:
+        raise Http404
+    return HttpResponse(f'<?xml version="1.0"?>\n<users>\n\t<user>{settings.BING_SITE_VERIFICATION}</user>\n</users>',
+                        content_type='application/xml')
+
+
 def robots_txt(request):
     lines = [
         'User-agent: *',

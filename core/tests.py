@@ -368,6 +368,11 @@ class SearchTagsTests(TestCase):
         self.assertEqual(self.client.get('/other.txt').status_code, 404)
         self.assertEqual(self.client.get('/robots.txt').status_code, 200)
 
+    @override_settings(BING_SITE_VERIFICATION='ABC123')
+    def test_bing_site_auth_file(self):
+        response = self.client.get('/BingSiteAuth.xml')
+        self.assertContains(response, '<user>ABC123</user>')
+
     def test_home_names_the_organization(self):
         graph = self.ld_json(self.client.get(reverse('home')))
         self.assertEqual(graph['Organization']['alternateName'], 'FDQ')
