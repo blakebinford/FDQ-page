@@ -14,6 +14,7 @@ CANONICAL_ORIGIN = config('CANONICAL_ORIGIN', default='https://www.fielddrivenqu
 
 # Search Console (Blake's Google account) and IndexNow. Both are public by design.
 GOOGLE_SITE_VERIFICATION = config('GOOGLE_SITE_VERIFICATION', default='kbSjEHjCMMOfs9c6wxg62gUrVuL3i6HHUkUjhB72Q0w')
+BING_SITE_VERIFICATION = config('BING_SITE_VERIFICATION', default='D531EE6781C85FCECD00BB96B2F5305D')
 INDEXNOW_KEY = config('INDEXNOW_KEY', default='d5252dbd0e862285295060841b9186d0')
 
 OPENAI_API_KEY = config("OPENAI_API_KEY", default="")
