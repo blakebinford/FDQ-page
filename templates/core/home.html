@@ -1,14 +1,15 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static seo %}
 
-{% block title %}Field Driven Quality | Quality starts in the field{% endblock %}
+{% block title %}Field Driven Quality (FDQ) | Pipeline and Facilities QC Training{% endblock %}
 
 {% block meta_tags %}
-<meta name="description" content="FDQ Tier 1 is an online course for pipeline hands with no quality background. It teaches the work of a contractor QC tech or owner-side junior inspector." />
+<meta name="description" content="FDQ is online QC training and certification for pipeline and facilities construction hands. Tier 1 teaches the work of a contractor QC tech, no quality background needed." />
 <meta property="og:title" content="Field Driven Quality" />
 <meta property="og:description" content="Quality starts in the field. Watch lesson 1 of FDQ Tier 1 free." />
-<meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{% url 'lesson_1_poster' %}" />
 {% endblock %}
+
+{% block structured_data %}{% structured_data 'home' %}{% endblock %}
 
 {% block extra_styles %}
 .btns-note { font-size: 0.9rem; color: var(--ink-3); margin-top: 0.75rem; }

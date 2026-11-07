@@ -1,4 +1,4 @@
-{% load static %}
+{% load static seo %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -11,7 +11,16 @@
   <link rel="icon" href="{% url 'favicon' %}" sizes="any" />
   <link rel="icon" type="image/png" href="{% static 'images/favicon-32.png' %}" />
   <link rel="apple-touch-icon" href="{% static 'images/apple-touch-icon.png' %}" />
+  <link rel="canonical" href="{% canonical_url %}" />
+  <meta property="og:site_name" content="Field Driven Quality" />
+  <meta property="og:url" content="{% canonical_url %}" />
+  {% block og_type %}<meta property="og:type" content="website" />{% endblock %}
+  {% url 'lesson_1_poster' as lesson_1_poster %}<meta property="og:image" content="{% absolute lesson_1_poster %}" />
+  <meta name="twitter:card" content="summary_large_image" />
+  {% if google_site_verification %}<meta name="google-site-verification" content="{{ google_site_verification }}" />{% endif %}
+  {% if bing_site_verification %}<meta name="msvalidate.01" content="{{ bing_site_verification }}" />{% endif %}
   {% block meta_tags %}{% endblock %}
+  {% block structured_data %}{% endblock %}
   {% block extra_head %}{% endblock %}
   {% if clarity_id %}
   <script>

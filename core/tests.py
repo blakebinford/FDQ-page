@@ -326,6 +326,68 @@ class SiteFilesTests(TestCase):
         self.assertContains(self.client.get(reverse('home')), f'href="{reverse("privacy")}"')
 
 
+class SearchTagsTests(TestCase):
+    """What search engines read: one canonical address, the social tags, and JSON-LD."""
+
+    def ld_json(self, response):
+        import json
+        blocks = re.findall(r'<script type="application/ld\+json">(.*?)</script>', response.content.decode(), re.S)
+        self.assertEqual(len(blocks), 1)
+        return {item['@type']: item for item in json.loads(blocks[0])['@graph']}
+
+    def test_canonical_drops_the_query_string(self):
+        response = self.client.get(reverse('waitlist') + '?utm_source=facebook&utm_campaign=x')
+        self.assertContains(response, '<link rel="canonical" href="http://testserver/tier-1/" />')
+        self.assertContains(response, '<meta property="og:url" content="http://testserver/tier-1/" />')
+
+    @override_settings(CANONICAL_ORIGIN='https://www.fielddrivenquality.com')
+    def test_production_host_everywhere(self):
+        response = self.client.get(reverse('home'))
+        self.assertContains(response, '<link rel="canonical" href="https://www.fielddrivenquality.com/" />')
+        self.assertContains(response, 'content="https://www.fielddrivenquality.com/tier-1/lesson-1.jpg"')
+        self.assertContains(self.client.get(reverse('sitemap')), '<loc>https://www.fielddrivenquality.com/tier-1/</loc>')
+        self.assertContains(self.client.get(reverse('robots')), 'Sitemap: https://www.fielddrivenquality.com/sitemap.xml')
+
+    def test_one_og_image_and_a_description_on_public_pages(self):
+        for name in ('home', 'waitlist', 'about', 'contact', 'lms:tier_list', 'blog_list'):
+            html = self.client.get(reverse(name)).content.decode()
+            self.assertEqual(html.count('property="og:image"'), 1, name)
+            self.assertEqual(html.count('name="description"'), 1, name)
+
+    @override_settings(GOOGLE_SITE_VERIFICATION='abc123')
+    def test_search_console_token_only_when_set(self):
+        self.assertContains(self.client.get(reverse('home')), '<meta name="google-site-verification" content="abc123" />')
+
+    def test_no_search_console_token_by_default(self):
+        self.assertNotContains(self.client.get(reverse('home')), 'google-site-verification')
+
+    @override_settings(INDEXNOW_KEY='0123abcd')
+    def test_indexnow_key_file(self):
+        response = self.client.get('/0123abcd.txt')
+        self.assertEqual(response.content, b'0123abcd')
+        self.assertEqual(self.client.get('/other.txt').status_code, 404)
+        self.assertEqual(self.client.get('/robots.txt').status_code, 200)
+
+    def test_home_names_the_organization(self):
+        graph = self.ld_json(self.client.get(reverse('home')))
+        self.assertEqual(graph['Organization']['alternateName'], 'FDQ')
+        self.assertEqual(graph['WebSite']['url'], 'http://testserver/')
+
+    def test_tier_1_is_a_course(self):
+        course = self.ld_json(self.client.get(reverse('waitlist')))['Course']
+        self.assertEqual(course['url'], 'http://testserver/tier-1/')
+        self.assertEqual(course['offers']['price'], '495')
+
+    def test_blog_post_is_an_article(self):
+        from blog.models import BlogPost
+        post = BlogPost.objects.create(title='Weld maps </script>', summary='<p>Why they exist.</p>', content='<p>Body</p>')
+        response = self.client.get(reverse('blog_detail', args=[post.slug]))
+        self.assertContains(response, '<meta property="og:type" content="article" />')
+        self.assertContains(response, '<meta name="description" content="Why they exist." />')
+        self.assertEqual(self.ld_json(response)['BlogPosting']['headline'], 'Weld maps </script>')
+        self.assertContains(self.client.get(reverse('sitemap')), f'<lastmod>{post.created_at.date():%Y-%m-%d}</lastmod>')
+
+
 class AccountSignupTests(TestCase):
     def test_account_signup_waits_for_launch(self):
         self.assertRedirects(self.client.get(reverse('accounts:register')), reverse('waitlist') + '#sign-up',

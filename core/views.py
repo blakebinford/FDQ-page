@@ -21,6 +21,7 @@ from .emails import (
 from .models import InternalVisitor, WaitlistSignup
 from .spam import passes_turnstile, rate_limited
 from .alerts import signup_alert
+from .templatetags.seo import site_origin
 
 logger = logging.getLogger(__name__)
 
@@ -343,6 +344,12 @@ def favicon(request):
     return response
 
 
+def indexnow_key(request, key):
+    if not settings.INDEXNOW_KEY or key != settings.INDEXNOW_KEY:
+        raise Http404
+    return HttpResponse(key, content_type='text/plain')
+
+
 def robots_txt(request):
     lines = [
         'User-agent: *',
@@ -354,7 +361,7 @@ def robots_txt(request):
         'Disallow: /tier-1/thanks/',
         'Disallow: /tier-1/lesson/',
         'Disallow: /tier-1/leave/',
-        f"Sitemap: {request.build_absolute_uri(reverse('sitemap'))}",
+        f"Sitemap: {site_origin(request)}{reverse('sitemap')}",
     ]
     return HttpResponse('\n'.join(lines) + '\n', content_type='text/plain')
 
@@ -362,8 +369,9 @@ def robots_txt(request):
 def sitemap_xml(request):
     from blog.models import BlogPost
 
+    origin = site_origin(request)
     pages = ['home', 'waitlist', 'about', 'contact', 'lms:tier_list', 'blog_list', 'privacy']
-    urls = [request.build_absolute_uri(reverse(name)) for name in pages]
-    urls += [request.build_absolute_uri(reverse('blog_detail', args=[post.slug]))
-             for post in BlogPost.objects.only('slug')]
+    urls = [(origin + reverse(name), None) for name in pages]
+    urls += [(origin + reverse('blog_detail', args=[post.slug]), post.created_at.date())
+             for post in BlogPost.objects.only('slug', 'created_at')]
     return render(request, 'sitemap.xml', {'urls': urls}, content_type='application/xml')

@@ -23,6 +23,8 @@ def site_facts(request):
         'turnstile_site_key': settings.TURNSTILE_SITE_KEY if turnstile_enabled() else '',
         'clarity_on': bool(settings.CLARITY_PROJECT_ID),
         'clarity_id': _clarity_id(request),
+        'google_site_verification': settings.GOOGLE_SITE_VERIFICATION,
+        'bing_site_verification': settings.BING_SITE_VERIFICATION,
     }
 
 

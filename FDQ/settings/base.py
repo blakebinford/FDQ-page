@@ -93,6 +93,17 @@ TURNSTILE_SECRET_KEY = config('TURNSTILE_SECRET_KEY', default='')
 # Microsoft Clarity's project ID (public: it's in every page's source). Empty keeps Clarity off.
 CLARITY_PROJECT_ID = config('CLARITY_PROJECT_ID', default='')
 
+# The one host search engines should index (canonical links, structured data). Empty uses
+# whatever host served the page, which is what local runs and tests want.
+CANONICAL_ORIGIN = config('CANONICAL_ORIGIN', default='')
+# Ownership tokens from Google Search Console and Bing Webmaster Tools (public: they sit in
+# the page source). Empty leaves the tag out.
+GOOGLE_SITE_VERIFICATION = config('GOOGLE_SITE_VERIFICATION', default='')
+BING_SITE_VERIFICATION = config('BING_SITE_VERIFICATION', default='')
+# IndexNow tells Bing (and through it Yahoo and DuckDuckGo) about new pages. The key is
+# public: it's served at /<key>.txt so Bing can check a ping came from the site's owner.
+INDEXNOW_KEY = config('INDEXNOW_KEY', default='')
+
 
 CKEDITOR_5_CONFIGS = {
     'default': {

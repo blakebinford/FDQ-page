@@ -1,13 +1,17 @@
 {% extends 'base.html' %}
+{% load seo %}
 
 {% block title %}{{ post.title }} | FDQ Blog{% endblock %}
 
+{% block og_type %}<meta property="og:type" content="article" />{% endblock %}
+
 {% block meta_tags %}
-<meta property="og:type" content="article">
-<meta property="og:title" content="{{ post.title }}">
-<meta property="og:description" content="{{ post.summary|striptags|truncatewords:30 }}">
-<meta property="og:url" content="{{ request.build_absolute_uri }}">
+<meta name="description" content="{{ post.summary|striptags|truncatewords:30 }}" />
+<meta property="og:title" content="{{ post.title }}" />
+<meta property="og:description" content="{{ post.summary|striptags|truncatewords:30 }}" />
 {% endblock %}
+
+{% block structured_data %}{% structured_data 'post' %}{% endblock %}
 
 {% block extra_styles %}
 /* ── BACK LINK ── */

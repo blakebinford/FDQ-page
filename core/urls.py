@@ -6,7 +6,7 @@ from .views import (
     waitlist, waitlist_thanks, waitlist_trade, waitlist_resend, lesson_link, unsubscribe,
     field_sheet, field_sheet_preview,
     lesson_1_video, lesson_1_captions, lesson_1_poster, lesson_1_player_poster,
-    favicon, robots_txt, sitemap_xml,
+    favicon, robots_txt, sitemap_xml, indexnow_key,
 )
 
 urlpatterns = [
@@ -38,4 +38,5 @@ urlpatterns = [
     path('favicon.ico', favicon, name='favicon'),
     path('robots.txt', robots_txt, name='robots'),
     path('sitemap.xml', sitemap_xml, name='sitemap'),
+    path('<str:key>.txt', indexnow_key, name='indexnow_key'),
 ]

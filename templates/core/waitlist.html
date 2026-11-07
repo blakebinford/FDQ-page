@@ -1,13 +1,15 @@
 {% extends 'base.html' %}
+{% load seo %}
 
-{% block title %}FDQ Tier 1 | Field Driven Quality{% endblock %}
+{% block title %}FDQ Tier 1: Pipeline and Facilities QC Course | Field Driven Quality{% endblock %}
 
 {% block meta_tags %}
-<meta name="description" content="FDQ Tier 1 is an online course and certification for pipeline hands with no quality background: 12 modules, from how a job runs to running a QC day. Get lesson 1 and the Weld Field Sheet free." />
+<meta name="description" content="FDQ Tier 1 is an online course and certification for pipeline and facilities hands with no quality background: 12 modules, from how a job runs to running a QC day. Get lesson 1 and the Weld Field Sheet free." />
 <meta property="og:title" content="FDQ Tier 1: Quality starts in the field" />
 <meta property="og:description" content="Get lesson 1 of weld mapping, why weld maps exist, and the Weld Field Sheet, free." />
-<meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{% url 'lesson_1_poster' %}" />
 {% endblock %}
+
+{% block structured_data %}{% structured_data 'tier1' %}{% endblock %}
 
 {% block extra_head %}{% if turnstile_site_key %}<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>{% endif %}{% endblock %}
 

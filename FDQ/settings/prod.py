@@ -9,6 +9,13 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 # The live site's Microsoft Clarity project. Local runs and tests use the empty default in base.py.
 CLARITY_PROJECT_ID = config('CLARITY_PROJECT_ID', default='z986n2ikfi')
 
+# Search engines index only www; the bare domain and Render's own host redirect or duplicate it.
+CANONICAL_ORIGIN = config('CANONICAL_ORIGIN', default='https://www.fielddrivenquality.com')
+
+# Search Console (Blake's Google account) and IndexNow. Both are public by design.
+GOOGLE_SITE_VERIFICATION = config('GOOGLE_SITE_VERIFICATION', default='kbSjEHjCMMOfs9c6wxg62gUrVuL3i6HHUkUjhB72Q0w')
+INDEXNOW_KEY = config('INDEXNOW_KEY', default='d5252dbd0e862285295060841b9186d0')
+
 OPENAI_API_KEY = config("OPENAI_API_KEY", default="")
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
